@@ -1,0 +1,29 @@
+Package: SharePointR
+Title: Simple Interface to 'SharePoint 365' and 'OneDrive'
+Version: 0.0.1
+Authors@R: c(
+    person("Hong", "Ooi", , "hongooi73@gmail.com", role = c("aut", "cre"))
+    )
+Description: An interface to Microsoft 'SharePoint 365' and 'OneDrive'.
+URL: https://github.com/hongooi73/SharePointR https://github.com/AzureRSDK/AzureR
+BugReports: https://github.com/hongooi73/SharePointR/issues
+License: MIT + file LICENSE
+VignetteBuilder: knitr
+Depends: 
+    R (>= 3.3)
+Imports: 
+    AzureGraph (>= 1.1.2.9000),
+    utils,
+    httr,
+    jsonlite,
+    openssl,
+    R6,
+    vctrs
+Suggests:
+    knitr,
+    rmarkdown,
+    testthat
+Roxygen: list(markdown=TRUE, r6=FALSE, old_usage=TRUE)
+RoxygenNote: 7.1.1
+Remotes:
+    hongooi73/AzureGraph

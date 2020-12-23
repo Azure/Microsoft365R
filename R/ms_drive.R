@@ -101,12 +101,8 @@ public=list(
 
         children <- if(path != "/")
         {
-            # get the item corresponding to this path, then list its children
-            if(substr(path, 1, 1) != "/")
-                path <- paste0("/", path)
-            op <- file.path("root:", utils::URLencode(path, reserved=TRUE))
-            item <- self$do_operation(op)
-            self$do_operation(file.path("items", item$id, "children"), options=opts, simplify=TRUE)
+            path <- gsub("^/|/$", "", path) # remove any leading and trailing slashes
+            self$do_operation(file.path("root:/", path, ":/children"), options=opts, simplify=TRUE)
         }
         else self$do_operation("root/children", options=opts, simplify=TRUE)
 
@@ -129,9 +125,8 @@ public=list(
             name=df$name,
             all=
             {
-                nms <- names(df)
-                firstcols <- match(c("name", "size", "isdir"), nms)
-                df[c(firstcols, setdiff(seq_along(nms), firstcols))]
+                firstcols <- c("name", "size", "isdir")
+                df[c(firstcols, setdiff(names(df), firstcols))]
             }
         )
     },

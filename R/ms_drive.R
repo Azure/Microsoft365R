@@ -197,7 +197,7 @@ public=list(
 
     delete_item=function(path, confirm=TRUE)
     {
-        self$get_file_properties(path)$delete(confirm=confirm)
+        self$get_item_properties(path)$delete(confirm=confirm)
     },
 
     get_item_properties=function(path)

@@ -18,7 +18,7 @@
 #' odb <- business_onedrive("myaadtenant")
 #' odb$list_items()
 #'
-#' site <- sharepoint_site("https://myaadtenant.sharepoint.com/sites/my-site-id")
+#' site <- sharepoint_site("https://myaadtenant.sharepoint.com/sites/my-site-name")
 #' site$get_drive()$list_items()
 #'
 #' }

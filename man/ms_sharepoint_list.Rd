@@ -44,6 +44,8 @@ Creating new objects of this class should be done via the \code{get_list} method
 \itemize{
 \item \code{filter}: A string giving a logical expression to filter the rows to return. Note that column names used in the expression must be prefixed with \verb{fields/} to distinguish them from item metadata.
 \item \code{select}: A string containing comma-separated column names to filter the columns to return.
+\item \code{include_metadata}: By default, the returned data frame contains only the data fields (columns) in the list. If \code{include_metadata} is TRUE, the data frame will contain the list metadata as separate columns, while the data fields will be in a nested data frame named \code{fields}.
+\item \code{pagesize}: The number of results to return for each call to the REST endpoint. You can try reducing this argument below the default of 5000 if you are experiencing timeouts.
 }
 
 For more information, see \href{https://docs.microsoft.com/en-us/graph/query-parameters?view=graph-rest-1.0}{Use query parameters} on the Graph API reference.

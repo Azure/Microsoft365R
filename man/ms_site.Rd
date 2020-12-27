@@ -5,7 +5,7 @@
 \alias{ms_site}
 \title{Office 365 SharePoint site}
 \format{
-An R6 object of class \code{ms_site}, inheriting from \code{az_object}.
+An R6 object of class \code{ms_site}, inheriting from \code{ms_object}.
 }
 \description{
 Class representing a SharePoint site.
@@ -31,6 +31,8 @@ Class representing a SharePoint site.
 \item \code{list_drives()}: List the shared document libraries associated with this site.
 \item \code{get_drive(drive_id)}: Retrieve a shared document library for this site. If the ID is not specified, this returns the default document library.
 \item \code{list_subsites()}: List the subsites of this site.
+\item \code{get_lists()}: Returns the lists that are part of this site.
+\item \code{get_list(list_name, list_id)}: Returns a specific list, either by name or ID.
 }
 }
 
@@ -42,10 +44,7 @@ Creating new objects of this class should be done via the \code{get_sharepoint_s
 \examples{
 \dontrun{
 
-gr <- get_graph_login()
-
-# a sample site
-site <- gr$get_sharepoint_site("https://contoso.sharepoint.com/sites/O365-UG-123456")
+site <- sharepoint_site("https://mycompany.sharepoint.com/sites/my-site-name")
 site$list_drives()
 site$get_drive()
 

@@ -17,6 +17,8 @@
 #' - `list_drives()`: List the shared document libraries associated with this site.
 #' - `get_drive(drive_id)`: Retrieve a shared document library for this site. If the ID is not specified, this returns the default document library.
 #' - `list_subsites()`: List the subsites of this site.
+#' - `get_lists()`: Returns the lists that are part of this site.
+#' - `get_list(list_name, list_id)`: Returns a specific list, either by name or ID.
 #'
 #' @section Initialization:
 #' Creating new objects of this class should be done via the `get_sharepoint_site` method of the [ms_graph] or [az_group] classes. Calling the `new()` method for this class only constructs the R object; it does not call the Microsoft Graph API to retrieve or create the actual site.
@@ -30,15 +32,12 @@
 #' @examples
 #' \dontrun{
 #'
-#' gr <- get_graph_login()
-#'
-#' # a sample site
-#' site <- gr$get_sharepoint_site("https://contoso.sharepoint.com/sites/O365-UG-123456")
+#' site <- sharepoint_site("https://mycompany.sharepoint.com/sites/my-site-name")
 #' site$list_drives()
 #' site$get_drive()
 #'
 #' }
-#' @format An R6 object of class `ms_site`, inheriting from `az_object`.
+#' @format An R6 object of class `ms_site`, inheriting from `ms_object`.
 #' @export
 ms_site <- R6::R6Class("ms_site", inherit=ms_object,
 
@@ -83,7 +82,7 @@ public=list(
             file.path("lists", list_id)
         else if(!is.null(list_name) && is.null(list_id))
             file.path("lists", curl::curl_escape(list_name))
-        else stop("Must supply either site ID or URL")
+        else stop("Must supply either list name or ID")
 
         res <- self$do_operation(op)
         ms_sharepoint_list$new(self$token, self$tenant, res)

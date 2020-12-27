@@ -42,7 +42,7 @@
 #' myfile$delete()
 #'
 #' }
-#' @format An R6 object of class `ms_drive_item`, inheriting from `az_object`.
+#' @format An R6 object of class `ms_drive_item`, inheriting from `ms_object`.
 #' @export
 ms_drive_item <- R6::R6Class("ms_drive_item", inherit=ms_object,
 

@@ -28,7 +28,7 @@ Class representing a personal OneDrive or SharePoint document library.
 \item \code{update(...)}: Update the drive metadata in Microsoft Graph.
 \item \code{do_operation(...)}: Carry out an arbitrary operation on the drive.
 \item \code{sync_fields()}: Synchronise the R object with the drive metadata in Microsoft Graph.
-\item \code{list_items(path, info, full.names)}: List the files and folders under the specified path. See 'File and folder operations' below.
+\item \code{list_items(path, info, full_names, pagesize)}: List the files and folders under the specified path. See 'File and folder operations' below.
 \item \code{download_file(src, dest, overwrite)}: Download a file.
 \item \code{upload_file(src, dest, blocksize)}: Upload a file.
 \item \code{create_folder(path)}: Create a folder.
@@ -51,7 +51,8 @@ This class exposes methods for carrying out common operations on files and folde
 \itemize{
 \item \code{path}: The path.
 \item \code{info}: The information to return: either "partial", "name" or "all". If "partial", a data frame is returned containing the name, size and whether the item is a file or folder. If "name", a vector of file/folder names is returned. If "all", a data frame is returned containing \emph{all} the properties for each item (this can be large).
-\item \code{full.names}: Whether to prefix the full path to the names of the items.
+\item \code{full_names}: Whether to prefix the full path to the names of the items.
+\item \code{pagesize}: The number of results to return for each call to the REST endpoint. You can try reducing this argument below the default of 1000 if you are experiencing timeouts.
 }
 
 \code{download_file} and \code{upload_file} download and upload files from the local machine to the drive. For \code{upload_file}, the uploading is done in blocks of 32MB by default; you can change this by setting the \code{blocksize} argument. For technical reasons, the block size \href{https://docs.microsoft.com/en-us/graph/api/driveitem-createuploadsession?view=graph-rest-1.0#upload-bytes-to-the-upload-session}{must be a multiple of 320KB}.
@@ -68,20 +69,19 @@ This class exposes methods for carrying out common operations on files and folde
 \examples{
 \dontrun{
 
-gr <- get_graph_login()
+# personal OneDrive
+mydrv <- personal_onedrive()
+
+# OneDrive for Business
+busdrv <- business_onedrive("mycompany")
 
 # shared document library for a SharePoint site
-site <- gr$get_sharepoint_site("https://contoso.sharepoint.com/sites/O365-UG-123456")
+site <- sharepoint_site("https://mycompany.sharepoint.com/sites/my-site-name")
 drv <- site$get_drive()
-
-# personal OneDrive
-gr2 <- get_graph_login("consumers")
-me <- gr2$get_user()
-mydrv <- me$get_drive()
 
 ## file/folder operationss
 drv$list_items()
-drv$list_items("path/to/folder", full.names=TRUE)
+drv$list_items("path/to/folder", full_names=TRUE)
 
 # download a file -- default destination filename is taken from the source
 drv$download_file("path/to/folder/data.csv")
@@ -95,7 +95,7 @@ drv$set_item_properties("myfile", name="newname")
 }
 }
 \seealso{
-\link{ms_graph}, \link{ms_site}, \link{ms_drive_item}
+\link{personal_onedrive}, \link{business_onedrive}, \link{ms_site}, \link{ms_drive_item}
 
 \href{https://docs.microsoft.com/en-us/graph/overview}{Microsoft Graph overview},
 \href{https://docs.microsoft.com/en-us/graph/api/overview?view=graph-rest-1.0}{REST API reference}

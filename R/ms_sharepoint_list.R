@@ -1,3 +1,51 @@
+#' Sharepoint list
+#'
+#' Class representing a list in a SharePoint site.
+#'
+#' @docType class
+#' @section Fields:
+#' - `token`: The token used to authenticate with the Graph host.
+#' - `tenant`: The Azure Active Directory tenant for the parent drive.
+#' - `type`: always "list" for a SharePoint list object.
+#' - `properties`: The item properties (metadata).
+#' @section Methods:
+#' - `new(...)`: Initialize a new object. Do not call this directly; see 'Initialization' below.
+#' - `delete(confirm=TRUE)`: Delete this item. By default, ask for confirmation first.
+#' - `update(...)`: Update the item's properties in Microsoft Graph.
+#' - `do_operation(...)`: Carry out an arbitrary operation on the item.
+#' - `sync_fields()`: Synchronise the R object with the item metadata in Microsoft Graph.
+#' - `list_items(filter, select, include_metadata, pagesize)`: Queries the list and returns items as a data frame. See 'List querying below'.
+#' - `get_column_info()`: Return a data frame containing metadata on the columns (fields) in the list.
+#'
+#' @section Initialization:
+#' Creating new objects of this class should be done via the `get_list` method of the [ms_site] class. Calling the `new()` method for this class only constructs the R object; it does not call the Microsoft Graph API to retrieve or create the actual item.
+#'
+#' @section List querying:
+#' `list_items` supports the following arguments to limit the number of results returned by the query.
+#' - `filter`: A string giving a logical expression to filter the rows to return. Note that column names used in the expression must be prefixed with `fields/` to distinguish them from item metadata.
+#' - `select`: A string containing comma-separated column names to filter the columns to return.
+#'
+#' For more information, see [Use query parameters](https://docs.microsoft.com/en-us/graph/query-parameters?view=graph-rest-1.0) on the Graph API reference.
+#'
+#' @seealso
+#' [sharepoint_site], [ms_site]
+#'
+#' [Microsoft Graph overview](https://docs.microsoft.com/en-us/graph/overview),
+#' [REST API reference](https://docs.microsoft.com/en-us/graph/api/overview?view=graph-rest-1.0)
+#'
+#' @examples
+#' \dontrun{
+#'
+#' site <- sharepoint_site("https://mycompany.sharepoint.com/sites/my-site-name")
+#' lst <- site$get_list("mylist")
+#'
+#' lst$get_column_info()
+#'
+#' lst$list_items()
+#' lst$list_items(filter="startswith(fields/firstname, 'John')", select="firstname,lastname")
+#'
+#' }
+#' @format An R6 object of class `ms_sharepoint_list`, inheriting from `ms_object`.
 #' @export
 ms_sharepoint_list <- R6::R6Class("ms_sharepoint_list", inherit=ms_object,
 

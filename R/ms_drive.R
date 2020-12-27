@@ -14,7 +14,7 @@
 #' - `update(...)`: Update the drive metadata in Microsoft Graph.
 #' - `do_operation(...)`: Carry out an arbitrary operation on the drive.
 #' - `sync_fields()`: Synchronise the R object with the drive metadata in Microsoft Graph.
-#' - `list_items(path, info, full.names)`: List the files and folders under the specified path. See 'File and folder operations' below.
+#' - `list_items(path, info, full_names, pagesize)`: List the files and folders under the specified path. See 'File and folder operations' below.
 #' - `download_file(src, dest, overwrite)`: Download a file.
 #' - `upload_file(src, dest, blocksize)`: Upload a file.
 #' - `create_folder(path)`: Create a folder.
@@ -31,7 +31,8 @@
 #' `list_items` lists the items under the specified path. It is the analogue of base R's `dir`/`list.files`. The arguments are
 #' - `path`: The path.
 #' - `info`: The information to return: either "partial", "name" or "all". If "partial", a data frame is returned containing the name, size and whether the item is a file or folder. If "name", a vector of file/folder names is returned. If "all", a data frame is returned containing _all_ the properties for each item (this can be large).
-#' - `full.names`: Whether to prefix the full path to the names of the items.
+#' - `full_names`: Whether to prefix the full path to the names of the items.
+#' - `pagesize`: The number of results to return for each call to the REST endpoint. You can try reducing this argument below the default of 1000 if you are experiencing timeouts.
 #'
 #' `download_file` and `upload_file` download and upload files from the local machine to the drive. For `upload_file`, the uploading is done in blocks of 32MB by default; you can change this by setting the `blocksize` argument. For technical reasons, the block size [must be a multiple of 320KB](https://docs.microsoft.com/en-us/graph/api/driveitem-createuploadsession?view=graph-rest-1.0#upload-bytes-to-the-upload-session).
 #'
@@ -44,7 +45,7 @@
 #' `set_item_properties` sets the properties (metadata) of a file or folder. The new properties should be specified as individual named arguments to the method. Any existing properties that aren't listed as arguments will retain their previous values or be recalculated based on changes to other properties, as appropriate.
 #'
 #' @seealso
-#' [ms_graph], [ms_site], [ms_drive_item]
+#' [personal_onedrive], [business_onedrive], [ms_site], [ms_drive_item]
 #'
 #' [Microsoft Graph overview](https://docs.microsoft.com/en-us/graph/overview),
 #' [REST API reference](https://docs.microsoft.com/en-us/graph/api/overview?view=graph-rest-1.0)
@@ -52,20 +53,19 @@
 #' @examples
 #' \dontrun{
 #'
-#' gr <- get_graph_login()
+#' # personal OneDrive
+#' mydrv <- personal_onedrive()
+#'
+#' # OneDrive for Business
+#' busdrv <- business_onedrive("mycompany")
 #'
 #' # shared document library for a SharePoint site
-#' site <- gr$get_sharepoint_site("https://contoso.sharepoint.com/sites/O365-UG-123456")
+#' site <- sharepoint_site("https://mycompany.sharepoint.com/sites/my-site-name")
 #' drv <- site$get_drive()
-#'
-#' # personal OneDrive
-#' gr2 <- get_graph_login("consumers")
-#' me <- gr2$get_user()
-#' mydrv <- me$get_drive()
 #'
 #' ## file/folder operationss
 #' drv$list_items()
-#' drv$list_items("path/to/folder", full.names=TRUE)
+#' drv$list_items("path/to/folder", full_names=TRUE)
 #'
 #' # download a file -- default destination filename is taken from the source
 #' drv$download_file("path/to/folder/data.csv")
@@ -90,7 +90,7 @@ public=list(
         super$initialize(token, tenant, properties)
     },
 
-    list_items=function(path="/", info=c("partial", "name", "all"), full.names=FALSE, pagesize=1000)
+    list_items=function(path="/", info=c("partial", "name", "all"), full_names=FALSE, pagesize=1000)
     {
         info <- match.arg(info)
         opts <- switch(info,
@@ -118,7 +118,7 @@ public=list(
             else rep(FALSE, nrow(df))
         }
 
-        if(full.names)
+        if(full_names)
             df$name <- file.path(sub("^/", "", path), df$name)
         switch(info,
             partial=df[c("name", "size", "isdir")],

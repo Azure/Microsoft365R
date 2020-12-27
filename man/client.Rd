@@ -6,13 +6,15 @@
 \alias{sharepoint_site}
 \title{OneDrive and Sharepoint Online clients}
 \usage{
-personal_onedrive()
+personal_onedrive(...)
 
-business_onedrive(tenant = "common")
+business_onedrive(tenant = "common", ...)
 
-sharepoint_site(site_url = NULL, site_id = NULL, tenant = "common")
+sharepoint_site(site_url = NULL, site_id = NULL, tenant = "common", ...)
 }
 \arguments{
+\item{...}{Optional arguments to be passed to \code{AzureGraph::create_graph_login}.}
+
 \item{tenant}{For \code{business_onedrive} and \code{sharepoint_site}, the name of your Azure Active Directory (AAD) tenant. If not supplied, use the default tenant for your currently logged-in account.}
 
 \item{site_url, site_id}{For \code{sharepoint_site}, the web URL and ID of the SharePoint site to retrieve. Supply one or the other, but not both.}
@@ -24,7 +26,9 @@ An object of class \code{ms_drive}.
 OneDrive and Sharepoint Online clients
 }
 \details{
-These functions provide easy access to OneDrive and SharePoint in the cloud. Use \code{personal_onedrive} to access the drive for your personal account, and \code{business_onedrive} to access the drive for your work or school account. For \code{business_onedrive} and \code{sharepoint_site} to work, your organisation must have an appropriate Microsoft 365 license.
+These functions provide easy access to OneDrive and SharePoint in the cloud. They work by loading your existing Microsoft Graph login, and if that isn't found, creating a new one using any arguments passed in \code{...}.
+
+Use \code{personal_onedrive} to access the drive for your personal account, and \code{business_onedrive} to access your OneDrive for Business. For \code{business_onedrive} and \code{sharepoint_site} to work, your organisation must have an appropriate Microsoft 365 license.
 
 The default "common" tenant for \code{business_onedrive} and \code{sharepoint_site} attempts to detect your actual tenant from your currently logged-in account. This may not always succeed, for example if you have a personal account that is also a guest account in a tenant. In this case, supply the actual tenant name.
 }
@@ -33,14 +37,14 @@ The default "common" tenant for \code{business_onedrive} and \code{sharepoint_si
 
 personal_onedrive()
 
-odb <- business_onedrive("myaadtenant")
+odb <- business_onedrive("mycompany")
 odb$list_items()
 
-site <- sharepoint_site("https://myaadtenant.sharepoint.com/sites/my-site-name")
+site <- sharepoint_site("https://mycompany.sharepoint.com/sites/my-site-name")
 site$get_drive()$list_items()
 
 }
 }
 \seealso{
-\link{ms_drive}
+\link{ms_drive}, \link[AzureGraph:graph_login]{AzureGraph::create_graph_login}
 }

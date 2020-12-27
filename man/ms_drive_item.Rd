@@ -5,7 +5,7 @@
 \alias{ms_drive_item}
 \title{File or folder in a drive}
 \format{
-An R6 object of class \code{ms_drive_item}, inheriting from \code{az_object}.
+An R6 object of class \code{ms_drive_item}, inheriting from \code{ms_object}.
 }
 \description{
 Class representing an item in a personal OneDrive or SharePoint document library.

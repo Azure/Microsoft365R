@@ -8,7 +8,7 @@
 An R6 object of class \code{ms_drive_item}, inheriting from \code{ms_object}.
 }
 \description{
-Class representing an item in a personal OneDrive or SharePoint document library.
+Class representing an item (file or folder) in a OneDrive or SharePoint document library.
 }
 \section{Fields}{
 
@@ -25,9 +25,10 @@ Class representing an item in a personal OneDrive or SharePoint document library
 \itemize{
 \item \code{new(...)}: Initialize a new object. Do not call this directly; see 'Initialization' below.
 \item \code{delete(confirm=TRUE)}: Delete this item. By default, ask for confirmation first.
-\item \code{update(...)}: Update the item's properties in Microsoft Graph.
+\item \code{update(...)}: Update the item's properties (metadata) in Microsoft Graph.
 \item \code{do_operation(...)}: Carry out an arbitrary operation on the item.
 \item \code{sync_fields()}: Synchronise the R object with the item metadata in Microsoft Graph.
+\item \code{open()}: Opens the item in your browser.
 }
 }
 
@@ -44,14 +45,18 @@ gr2 <- get_graph_login("consumers")
 me <- gr2$get_user()
 mydrv <- me$get_drive()
 
-myfile <- drv$get_item_properties("myfile")
+myfile <- drv$get_item_properties("myfile.docx")
 myfile$properties
 
 # rename a file
-myfile$update(name="newname")
+myfile$update(name="newname.docx")
+
+# open the file in the browser
+myfile$open()
 
 # delete the file (will ask for confirmation first)
 myfile$delete()
+
 
 }
 }

@@ -32,6 +32,7 @@ Class representing a personal OneDrive or SharePoint document library.
 \item \code{download_file(src, dest, overwrite)}: Download a file.
 \item \code{upload_file(src, dest, blocksize)}: Upload a file.
 \item \code{create_folder(path)}: Create a folder.
+\item \code{open_item(path)}: Open a file or folder.
 \item \code{delete_item(path, confirm)}: Delete a file or folder.
 \item \code{get_item_properties(path)}: Get the properties (metadata) for a file or folder.
 \item \code{set_item_properties(path, ...)}: Set the properties for a file or folder.
@@ -58,6 +59,8 @@ This class exposes methods for carrying out common operations on files and folde
 \code{download_file} and \code{upload_file} download and upload files from the local machine to the drive. For \code{upload_file}, the uploading is done in blocks of 32MB by default; you can change this by setting the \code{blocksize} argument. For technical reasons, the block size \href{https://docs.microsoft.com/en-us/graph/api/driveitem-createuploadsession?view=graph-rest-1.0#upload-bytes-to-the-upload-session}{must be a multiple of 320KB}.
 
 \code{create_folder} creates a folder with the specified path. Trying to create an already existing folder is an error.
+
+\code{open_item} opens the given file or folder in your browser.
 
 \code{delete_item} deletes a file or folder. By default, it will ask for confirmation first.
 

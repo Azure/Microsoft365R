@@ -11,7 +11,12 @@ od <- personal_onedrive()
 # list files and folders
 od$list_items()
 od$list_items("Documents")
-od$download_file("Documents/myfile.doc")
+
+# open a file in the browser
+od$open_item("Documents/myfile.docx")
+
+# download the file
+od$download_file("Documents/myfile.docx")
 
 
 ## OneDrive for Business
@@ -19,7 +24,7 @@ odb <- business_onedrive("mycompany")
 
 # same methods as for personal OneDrive
 odb$list_items()
-odb$upload_file("somedata.txt", "data/somedata.txt")
+odb$open_item("myproject/plan.xlsx")
 
 
 ## SharePoint Online site

@@ -18,6 +18,7 @@
 #' - `download_file(src, dest, overwrite)`: Download a file.
 #' - `upload_file(src, dest, blocksize)`: Upload a file.
 #' - `create_folder(path)`: Create a folder.
+#' - `open_item(path)`: Open a file or folder.
 #' - `delete_item(path, confirm)`: Delete a file or folder.
 #' - `get_item_properties(path)`: Get the properties (metadata) for a file or folder.
 #' - `set_item_properties(path, ...)`: Set the properties for a file or folder.
@@ -37,6 +38,8 @@
 #' `download_file` and `upload_file` download and upload files from the local machine to the drive. For `upload_file`, the uploading is done in blocks of 32MB by default; you can change this by setting the `blocksize` argument. For technical reasons, the block size [must be a multiple of 320KB](https://docs.microsoft.com/en-us/graph/api/driveitem-createuploadsession?view=graph-rest-1.0#upload-bytes-to-the-upload-session).
 #'
 #' `create_folder` creates a folder with the specified path. Trying to create an already existing folder is an error.
+#'
+#' `open_item` opens the given file or folder in your browser.
 #'
 #' `delete_item` deletes a file or folder. By default, it will ask for confirmation first.
 #'
@@ -193,6 +196,11 @@ public=list(
         )
         res <- self$do_operation(op, body=body, http_verb="POST")
         ms_drive_item$new(self$token, self$tenant, res)
+    },
+
+    open_item=function(path)
+    {
+        self$get_item_properties(path)$open()
     },
 
     delete_item=function(path, confirm=TRUE)

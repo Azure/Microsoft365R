@@ -29,9 +29,9 @@
 #' @export
 personal_onedrive <- function(...)
 {
-    login <- try(get_graph_login("consumers", refresh=FALSE), silent=TRUE)
+    login <- try(get_graph_login("9188040d-6c67-4c5b-b112-36a304b66dad", refresh=FALSE), silent=TRUE)
     if(inherits(login, "try-error"))
-        login <- create_graph_login("consumers", app=.azurer_graph_app_id, ...)
+        login <- create_graph_login("9188040d-6c67-4c5b-b112-36a304b66dad", app=.azurer_graph_app_id, ...)
 
     login$get_user()$get_drive()
 }

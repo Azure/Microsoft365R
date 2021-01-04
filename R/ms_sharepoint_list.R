@@ -14,17 +14,17 @@
 #' - `update(...)`: Update the item's properties in Microsoft Graph.
 #' - `do_operation(...)`: Carry out an arbitrary operation on the item.
 #' - `sync_fields()`: Synchronise the R object with the item metadata in Microsoft Graph.
-#' - `list_items(filter, select, include_metadata, pagesize)`: Queries the list and returns items as a data frame. See 'List querying below'.
+#' - `list_items(filter, select, all_metadata, pagesize)`: Queries the list and returns items as a data frame. See 'List querying below'.
 #' - `get_column_info()`: Return a data frame containing metadata on the columns (fields) in the list.
 #'
 #' @section Initialization:
 #' Creating new objects of this class should be done via the `get_list` method of the [ms_site] class. Calling the `new()` method for this class only constructs the R object; it does not call the Microsoft Graph API to retrieve or create the actual item.
 #'
 #' @section List querying:
-#' `list_items` supports the following arguments to limit the number of results returned by the query.
+#' `list_items` supports the following arguments to customise results returned by the query.
 #' - `filter`: A string giving a logical expression to filter the rows to return. Note that column names used in the expression must be prefixed with `fields/` to distinguish them from item metadata.
-#' - `select`: A string containing comma-separated column names to filter the columns to return.
-#' - `include_metadata`: By default, the returned data frame contains only the data fields (columns) in the list. If `include_metadata` is TRUE, the data frame will contain the list metadata as separate columns, while the data fields will be in a nested data frame named `fields`.
+#' - `select`: A string containing comma-separated column names to include in the returned data frame. If not supplied, includes all columns.
+#' - `all_metadata`: If TRUE, the returned data frame will contain extended metadata as separate columns, while the data fields will be in a nested data frame named `fields`.
 #' - `pagesize`: The number of results to return for each call to the REST endpoint. You can try reducing this argument below the default of 5000 if you are experiencing timeouts.
 #'
 #' For more information, see [Use query parameters](https://docs.microsoft.com/en-us/graph/query-parameters?view=graph-rest-1.0) on the Graph API reference.
@@ -60,17 +60,17 @@ public=list(
         super$initialize(token, tenant, properties)
     },
 
-    list_items=function(filter=NULL, select=NULL, include_metadata=FALSE, pagesize=5000)
+    list_items=function(filter=NULL, select=NULL, all_metadata=FALSE, pagesize=5000)
     {
         select <- if(is.null(select))
             "fields"
         else paste0("fields(select=", paste0(select, collapse=","), ")")
-        options <- list(expand=select, filter=filter, `$top`=pagesize)
+        options <- list(expand=select, `$filter`=filter, `$top`=pagesize)
         headers <- httr::add_headers(Prefer="HonorNonIndexedQueriesWarningMayFailRandomly")
 
         items <- self$do_operation("items", options=options, headers, simplify=TRUE)
         df <- private$get_paged_list(items, simplify=TRUE)
-        if(!include_metadata)
+        if(!all_metadata)
             df$fields
         else df
     },
@@ -83,11 +83,11 @@ public=list(
 
     do_operation=function(op="", ...)
     {
-        op <- construct_path(
+        op <- sub("/$", "", file.path(
             "sites", self$properties$parentReference$siteId,
             "lists", self$properties$id,
             op
-        )
+        ))
         call_graph_endpoint(self$token, op, ...)
     },
 

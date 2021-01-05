@@ -48,7 +48,7 @@ Creating new objects of this class should be done via the \code{get_list} method
 \item \code{pagesize}: The number of results to return for each call to the REST endpoint. You can try reducing this argument below the default of 5000 if you are experiencing timeouts.
 }
 
-For more information, see \href{https://docs.microsoft.com/en-us/graph/query-parameters?view=graph-rest-1.0}{Use query parameters} on the Graph API reference.
+For more information, see \href{https://docs.microsoft.com/en-us/graph/query-parameters?view=graph-rest-1.0}{Use query parameters} at the Graph API reference. Due to current limitations in the Microsoft Graph REST API version 1.0, you can only read data from lists, not write to them.
 }
 
 \examples{
@@ -68,5 +68,5 @@ lst$list_items(filter="startswith(fields/firstname, 'John')", select="firstname,
 \link{sharepoint_site}, \link{ms_site}
 
 \href{https://docs.microsoft.com/en-us/graph/overview}{Microsoft Graph overview},
-\href{https://docs.microsoft.com/en-us/graph/api/overview?view=graph-rest-1.0}{REST API reference}
+\href{https://docs.microsoft.com/en-us/graph/api/resources/sharepoint?view=graph-rest-1.0}{SharePoint sites API reference}
 }

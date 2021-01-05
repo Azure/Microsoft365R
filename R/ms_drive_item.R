@@ -23,7 +23,7 @@
 #' [ms_graph], [ms_site], [ms_drive]
 #'
 #' [Microsoft Graph overview](https://docs.microsoft.com/en-us/graph/overview),
-#' [REST API reference](https://docs.microsoft.com/en-us/graph/api/overview?view=graph-rest-1.0)
+#' [OneDrive API reference](https://docs.microsoft.com/en-us/graph/api/resources/onedrive?view=graph-rest-1.0)
 #'
 #' @examples
 #' \dontrun{

@@ -64,5 +64,5 @@ myfile$delete()
 \link{ms_graph}, \link{ms_site}, \link{ms_drive}
 
 \href{https://docs.microsoft.com/en-us/graph/overview}{Microsoft Graph overview},
-\href{https://docs.microsoft.com/en-us/graph/api/overview?view=graph-rest-1.0}{REST API reference}
+\href{https://docs.microsoft.com/en-us/graph/api/resources/onedrive?view=graph-rest-1.0}{OneDrive API reference}
 }

@@ -14,12 +14,13 @@ Depends:
 Imports: 
     AzureGraph (>= 1.1.2.9000),
     utils,
+    curl,
     httr,
     jsonlite,
-    openssl,
     R6,
     vctrs
 Suggests:
+    openssl,
     knitr,
     rmarkdown,
     testthat

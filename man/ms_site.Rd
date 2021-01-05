@@ -54,5 +54,5 @@ site$get_drive()
 \link{ms_graph}, \link{ms_drive}, \link{az_user}
 
 \href{https://docs.microsoft.com/en-us/graph/overview}{Microsoft Graph overview},
-\href{https://docs.microsoft.com/en-us/graph/api/overview?view=graph-rest-1.0}{REST API reference}
+\href{https://docs.microsoft.com/en-us/graph/api/resources/sharepoint?view=graph-rest-1.0}{SharePoint sites API reference}
 }

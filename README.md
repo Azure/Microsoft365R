@@ -1,4 +1,4 @@
-# SharePointR
+# SharePointR <img src="man/figures/logo.png" align="right" width=150 />
 
 A simple yet powerful interface to [SharePoint Online](https://www.microsoft.com/en-au/microsoft-365/sharepoint/collaboration) sites and [OneDrive](https://www.microsoft.com/en-au/microsoft-365/onedrive/online-cloud-storage), leveraging the facilities provided by the [AzureGraph](https://cran.r-project.org/package=AzureGraph) package. Both personal OneDrive and OneDrive for Business are supported.
 

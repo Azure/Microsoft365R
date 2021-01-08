@@ -19,7 +19,7 @@ test_that("OneDrive personal works",
     newfolder <- make_name()
     expect_silent(od$create_folder(newfolder))
 
-    src <- write_file()
+    src <- "../resources/file.json"
     dest <- file.path(newfolder, basename(src))
     newsrc <- tempfile()
     expect_silent(od$upload_file(src, dest))

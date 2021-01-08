@@ -28,13 +28,27 @@ Class representing an item (file or folder) in a OneDrive or SharePoint document
 \item \code{update(...)}: Update the item's properties (metadata) in Microsoft Graph.
 \item \code{do_operation(...)}: Carry out an arbitrary operation on the item.
 \item \code{sync_fields()}: Synchronise the R object with the item metadata in Microsoft Graph.
-\item \code{open()}: Opens the item in your browser.
+\item \code{open()}: Open the item in your browser.
+\item \code{download(dest, overwrite)}: Download the file. Not applicable for a folder.
+\item \code{create_share_link(type, expiry, password, scope)}: Create a shareable link to the file or folder. See 'Sharing' below.
 }
 }
 
 \section{Initialization}{
 
 Creating new objects of this class should be done via the \code{get_item_properties} method of the \link{ms_drive} class. Calling the \code{new()} method for this class only constructs the R object; it does not call the Microsoft Graph API to retrieve or create the actual item.
+}
+
+\section{Sharing}{
+
+\code{create_share_link(path, type, expiry, password, scope)} returns a shareable link to the item. Its arguments are
+\itemize{
+\item \code{type}: Either "view" for a read-only link, "edit" for a read-write link, or "embed" for a link that can be embedded in a web page. The last one is only available for personal OneDrive.
+\item \code{expiry}: How long the link is valid for. The default is 7 days; you can set an alternative like "15 minutes", "24 hours", "2 weeks", "3 months", etc. To leave out the expiry date, set this to NULL.
+\item \code{scope}: Optionally the scope of the link, either "anonymous" or "organization". The latter allows only users in your AAD tenant to access the link, and is only available for OneDrive for Business or SharePoint.
+}
+
+This function returns a URL to access the item, for \code{type="view"} or "\verb{type=edit"}. For \code{type="embed"}, it returns a list with components \code{webUrl} containing the URL, and \code{webHtml} containing a HTML fragment to embed the link in an IFRAME.
 }
 
 \examples{
@@ -53,6 +67,9 @@ myfile$update(name="newname.docx")
 
 # open the file in the browser
 myfile$open()
+
+# download the file to the working directory
+myfile$download()
 
 # delete the file (will ask for confirmation first)
 myfile$delete()

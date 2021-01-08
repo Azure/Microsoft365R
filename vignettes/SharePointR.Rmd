@@ -37,6 +37,19 @@ You can open a file or folder in your browser with the `open_item()` method. For
 od$open_item("Documents/myfile.docx")
 ```
 
+To obtain a shareable link for a file or folder, use `create_share_link()`:
+
+```r
+# default: viewable link, expires in 7 days
+od$create_share_link("Documents/myfile.docx", type="view")
+
+# editable link, expires in 24 hours
+od$create_share_link("Documents/myfile.docx", type="edit", expiry="24 hours")
+
+# setting a password
+od$create_share_link("Documents/myfile.docx", password="Use-strong-passwords!")
+```
+
 You can look at the metadata properties for a file or folder with `get_item_properties()`. This returns an R6 object of class `ms_drive_item`; the properties themselves can be found under the `properties` field. One notable file property is `@microsoft.graph.downloadUrl`, which is an Internet URL from which to download the file. Be careful though: this URL is accessible by _anyone_, so don't share a link for a file you want to remain private!
 
 ```r

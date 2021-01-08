@@ -14,11 +14,12 @@
 #' - `update(...)`: Update the drive metadata in Microsoft Graph.
 #' - `do_operation(...)`: Carry out an arbitrary operation on the drive.
 #' - `sync_fields()`: Synchronise the R object with the drive metadata in Microsoft Graph.
-#' - `list_items(path, info, full_names, pagesize)`: List the files and folders under the specified path. See 'File and folder operations' below.
+#' - `list_items(...), list_files(...)`: List the files and folders under the specified path. See 'File and folder operations' below.
 #' - `download_file(src, dest, overwrite)`: Download a file.
 #' - `upload_file(src, dest, blocksize)`: Upload a file.
 #' - `create_folder(path)`: Create a folder.
 #' - `open_item(path)`: Open a file or folder.
+#' - `create_share_link(...)`: Create a shareable link for a file or folder.
 #' - `delete_item(path, confirm)`: Delete a file or folder.
 #' - `get_item_properties(path)`: Get the properties (metadata) for a file or folder.
 #' - `set_item_properties(path, ...)`: Set the properties for a file or folder.
@@ -29,17 +30,27 @@
 #' @section File and folder operations:
 #' This class exposes methods for carrying out common operations on files and folders.
 #'
-#' `list_items` lists the items under the specified path. It is the analogue of base R's `dir`/`list.files`. The arguments are
+#' `list_items(path, info, full_names, pagesize)` lists the items under the specified path. It is the analogue of base R's `dir`/`list.files`. Its arguments are
 #' - `path`: The path.
 #' - `info`: The information to return: either "partial", "name" or "all". If "partial", a data frame is returned containing the name, size and whether the item is a file or folder. If "name", a vector of file/folder names is returned. If "all", a data frame is returned containing _all_ the properties for each item (this can be large).
 #' - `full_names`: Whether to prefix the full path to the names of the items.
 #' - `pagesize`: The number of results to return for each call to the REST endpoint. You can try reducing this argument below the default of 1000 if you are experiencing timeouts.
+#'
+#' `list_files` is a synonym for `list_items`.
 #'
 #' `download_file` and `upload_file` download and upload files from the local machine to the drive. For `upload_file`, the uploading is done in blocks of 32MB by default; you can change this by setting the `blocksize` argument. For technical reasons, the block size [must be a multiple of 320KB](https://docs.microsoft.com/en-us/graph/api/driveitem-createuploadsession?view=graph-rest-1.0#upload-bytes-to-the-upload-session).
 #'
 #' `create_folder` creates a folder with the specified path. Trying to create an already existing folder is an error.
 #'
 #' `open_item` opens the given file or folder in your browser.
+#'
+#' `create_share_link(path, type, expiry, password, scope)` returns a shareable link to the item. Its arguments are
+#' - `path`: The path.
+#' - `type`: Either "view" for a read-only link, "edit" for a read-write link, or "embed" for a link that can be embedded in a web page. The last one is only available for personal OneDrive.
+#' - `expiry`: How long the link is valid for. The default is 7 days; you can set an alternative like "15 minutes", "24 hours", "2 weeks", "3 months", etc. To leave out the expiry date, set this to NULL.
+#' - `scope`: Optionally the scope of the link, either "anonymous" or "organization". The latter allows only users in your AAD tenant to access the link, and is only available for OneDrive for Business or SharePoint.
+#'
+#' This function returns a URL to access the item, for `type="view"` or "`type=edit"`. For `type="embed"`, it returns a list with components `webUrl` containing the URL, and `webHtml` containing a HTML fragment to embed the link in an IFRAME. The default is a viewable link, expiring in 7 days.
 #'
 #' `delete_item` deletes a file or folder. By default, it will ask for confirmation first.
 #'
@@ -72,6 +83,11 @@
 #'
 #' # download a file -- default destination filename is taken from the source
 #' drv$download_file("path/to/folder/data.csv")
+#'
+#' # shareable links
+#' drv$create_share_link("myfile")
+#' drv$create_share_link("myfile", type="edit", expiry="24 hours")
+#' drv$create_share_link("myfile", password="Use-strong-passwords!")
 #'
 #' myfile <- drv$get_item_properties("myfile")
 #' myfile$properties
@@ -134,15 +150,6 @@ public=list(
         )
     },
 
-    download_file=function(src, dest=basename(src), overwrite=FALSE)
-    {
-        force(dest)
-        src <- curl::curl_escape(sub("^/", "", src))
-        path <- paste0("root:/", src, ":/content")
-        res <- self$do_operation(path, config=httr::write_disk(dest, overwrite=overwrite))
-        invisible(res)
-    },
-
     upload_file=function(src, dest, blocksize=32768000)
     {
         dest <- curl::curl_escape(sub("^/", "", dest))
@@ -198,6 +205,17 @@ public=list(
         ms_drive_item$new(self$token, self$tenant, res)
     },
 
+    download_file=function(src, dest=basename(src), overwrite=FALSE)
+    {
+        self$get_item_properties(src)$download(dest, overwrite=overwrite)
+    },
+
+    create_share_link=function(path, type=c("view", "edit", "embed"), expiry="7 days", password=NULL, scope=NULL)
+    {
+        type <- match.arg(type)
+        self$get_item_properties(path)$get_share_link(type, expiry, password, scope)
+    },
+
     open_item=function(path)
     {
         self$get_item_properties(path)$open()
@@ -239,6 +257,10 @@ public=list(
         invisible(self)
     }
 ))
+
+
+# alias for convenience
+ms_drive$set("public", "list_files", overwrite=TRUE, ms_drive$public_methods$list_items)
 
 
 parse_upload_range <- function(response, blocksize)

@@ -26,3 +26,5 @@ utils::globalVariables(c("self", "private"))
 # authentication app ID for personal accounts
 .azurer_graph_app_id <- "5bb21e8a-06bf-4ac4-b613-110ac0e582c1"
 
+# helper function
+error_message <- get("error_message", getNamespace("AzureGraph"))

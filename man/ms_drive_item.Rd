@@ -41,7 +41,7 @@ Creating new objects of this class should be done via the \code{get_item_propert
 
 \section{Sharing}{
 
-\code{create_share_link(path, type, expiry, password, scope)} returns a shareable link to the item. Its arguments are
+\code{create_share_link(type, expiry, password, scope)} returns a shareable link to the item. Its arguments are
 \itemize{
 \item \code{type}: Either "view" for a read-only link, "edit" for a read-write link, or "embed" for a link that can be embedded in a web page. The last one is only available for personal OneDrive.
 \item \code{expiry}: How long the link is valid for. The default is 7 days; you can set an alternative like "15 minutes", "24 hours", "2 weeks", "3 months", etc. To leave out the expiry date, set this to NULL.

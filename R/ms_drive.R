@@ -121,7 +121,7 @@ public=list(
         children <- if(path != "/")
         {
             path <- curl::curl_escape(gsub("^/|/$", "", path)) # remove any leading and trailing slashes
-            self$do_operation(file.path("root:/", path, ":/children"), options=opts, simplify=TRUE)
+            self$do_operation(paste0("root:/", path, ":/children"), options=opts, simplify=TRUE)
         }
         else self$do_operation("root/children", options=opts, simplify=TRUE)
 
@@ -195,7 +195,6 @@ public=list(
         op <- if(parent %in% c(".", "/"))  # assume root
             "root/children"
         else paste0("root:/", sub("^/", "", parent), ":/children")
-        parent <- curl::curl_escape(sub("^/", "", dirname(path)))
         body <- list(
             name=name,
             folder=named_list(),
@@ -228,13 +227,23 @@ public=list(
 
     get_item_properties=function(path)
     {
-        op <- if(path == "/") "root" else file.path("root:", utils::URLencode(path))
+        op <- if(path != "/")
+        {
+            path <- curl::curl_escape(gsub("^/|/$", "", path)) # remove any leading and trailing slashes
+            file.path("root:", path)
+        }
+        else "root"
         ms_drive_item$new(self$token, self$tenant, self$do_operation(op))
     },
 
     set_item_properties=function(path, ...)
     {
-        op <- if(path == "/") "root" else file.path("root:", utils::URLencode(path))
+        op <- if(path != "/")
+        {
+            path <- curl::curl_escape(gsub("^/|/$", "", path)) # remove any leading and trailing slashes
+            file.path("root:", path)
+        }
+        else "root"
         res <- self$do_operation(op, body=list(...), http_verb="PATCH")
         invisible(ms_drive_item$new(self$token, self$tenant, res))
     },

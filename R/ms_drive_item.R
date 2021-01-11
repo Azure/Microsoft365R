@@ -84,7 +84,8 @@ public=list(
 
     create_share_link=function(type=c("view", "edit", "embed"), expiry="7 days", password=NULL, scope=NULL)
     {
-        body <- list(type=match.arg(type))
+        type <- match.arg(type)
+        body <- list(type=type)
         if(!is.null(expiry))
         {
             expdate <- seq(Sys.time(), by=expiry, len=2)[2]

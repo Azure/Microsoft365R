@@ -27,6 +27,15 @@ test_that("OneDrive personal works",
 
     expect_true(files_identical(src, newsrc))
 
+    item <- od$get_item_properties(dest)
+    expect_is(item, "ms_drive_item")
+
+    expect_silent(od$set_item_properties(dest, name="newname"))
+    expect_silent(item$sync_fields())
+    expect_identical(item$properties$name, "newname")
+    expect_silent(item$update(name=basename(dest)))
+    expect_identical(item$properties$name, basename(dest))
+
     expect_silent(od$delete_item(newfolder, confirm=FALSE))
 })
 

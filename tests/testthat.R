@@ -1,4 +1,4 @@
 library(testthat)
-library(SharePointR)
+library(Microsoft365R)
 
-test_check("SharePointR")
+test_check("Microsoft365R")

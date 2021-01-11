@@ -83,7 +83,7 @@ odb$open_item("myproject/demo.pptx")
 
 ## SharePoint
 
-To access a SharePoint site, use the `sharepoint_site()` function and provide the site URL or ID. For SharePoint Online, the URL will typically be of the form "https://myaadtenant.sharepoint.com/sites/my-site-name".
+To access a SharePoint site, use the `sharepoint_site()` function and provide the site URL or ID.
 
 ```r
 site <- sharepoint_site("https://myaadtenant.sharepoint.com/sites/my-site-name")

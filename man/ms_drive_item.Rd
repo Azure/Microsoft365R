@@ -71,6 +71,11 @@ myfile$open()
 # download the file to the working directory
 myfile$download()
 
+# shareable links
+myfile$create_share_link()
+myfile$create_share_link(type="edit", expiry="24 hours")
+myfile$create_share_link(password="Use-strong-passwords!")
+
 # delete the file (will ask for confirmation first)
 myfile$delete()
 

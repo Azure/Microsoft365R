@@ -8,3 +8,4 @@ CONTRIBUTING.md
 ^LICENSE\.md$
 ^SECURITY\.md$
 azure-pipelines.yml
+^\.github$

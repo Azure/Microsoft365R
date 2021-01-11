@@ -1,0 +1,111 @@
+# For help debugging build failures open an issue on the RStudio community with the 'github-actions' tag.
+# https://community.rstudio.com/new-topic?category=Package%20development&tags=github-actions
+on: [push, pull_request]
+  
+name: R-CMD-check
+          
+jobs:
+  R-CMD-check:
+    if: github.repository_owner != 'cloudyr'
+    runs-on: ${{ matrix.config.os }}
+
+    name: ${{ matrix.config.os }} (${{ matrix.config.r }})
+
+    strategy:
+      fail-fast: false
+      matrix:
+        config:
+          - {os: windows-latest, r: 'release'}
+          - {os: macOS-latest, r: 'release'}
+          - {os: ubuntu-20.04, r: 'release', rspm: "https://packagemanager.rstudio.com/cran/__linux__/focal/latest"}
+
+    env:
+      R_REMOTES_NO_ERRORS_FROM_WARNINGS: true
+      RSPM: ${{ matrix.config.rspm }}
+
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0  # required for mirroring, see https://stackoverflow.com/a/64272409/474349
+
+      - name: Copy to Cloudyr
+        if: github.repository_owner == 'Azure' && runner.os == 'Linux' && github.ref == 'refs/heads/master'
+        env:
+          token: "${{ secrets.ghPat }}"
+        # git config hack required, see https://stackoverflow.com/q/64270867/474349
+        run: |
+          export CLOUDYR_REPO=$(echo $GITHUB_REPOSITORY | sed "s/Azure/cloudyr/")
+          git config -l | grep 'http\..*\.extraheader' | cut -d= -f1 | \
+            xargs -L1 git config --unset-all
+          git push --prune https://token:$token@github.com/${CLOUDYR_REPO}.git +refs/remotes/origin/*:refs/heads/* +refs/tags/*:refs/tags/*
+
+      - uses: r-lib/actions/setup-r@master
+        with:
+          r-version: ${{ matrix.config.r }}
+
+      - uses: r-lib/actions/setup-pandoc@master
+
+      - name: Query dependencies
+        run: |
+          install.packages('remotes')
+          saveRDS(remotes::dev_package_deps(dependencies = TRUE), ".github/depends.Rds", version = 2)
+          writeLines(sprintf("R-%i.%i", getRversion()$major, getRversion()$minor), ".github/R-version")
+        shell: Rscript {0}
+
+      - name: Cache R packages
+        if: runner.os != 'Windows'
+        uses: actions/cache@v2
+        with:
+          path: ${{ env.R_LIBS_USER }}
+          key: ${{ runner.os }}-${{ hashFiles('.github/R-version') }}-1-${{ hashFiles('.github/depends.Rds') }}
+          restore-keys: ${{ runner.os }}-${{ hashFiles('.github/R-version') }}-1-
+
+      - name: Install system dependencies
+        if: runner.os == 'Linux'
+        run: |
+          while read -r cmd
+          do
+            eval sudo $cmd
+          done < <(Rscript -e 'writeLines(remotes::system_requirements("ubuntu", "20.04"))')
+
+      - name: Install dependencies
+        run: |
+          remotes::install_deps(dependencies = TRUE)
+          remotes::install_cran(c("pkgbuild", "rcmdcheck", "drat"))
+        shell: Rscript {0}
+
+      - name: Check
+        env:
+          _R_CHECK_CRAN_INCOMING_REMOTE_: false
+          _R_CHECK_FORCE_SUGGESTS_: false
+        run: |
+          pkg <- pkgbuild::build()
+          rcmdcheck::rcmdcheck(pkg, args = c("--no-manual", "--as-cran"), error_on = "warning", check_dir = "check")
+        shell: Rscript {0}
+
+      - name: Upload check results
+        if: failure()
+        uses: actions/upload-artifact@main
+        with:
+          name: ${{ runner.os }}-r${{ matrix.config.r }}-results
+          path: check
+
+      - name: Update Cloudyr drat
+        if: success() && github.repository_owner == 'Azure' && runner.os == 'Linux' && github.ref == 'refs/heads/master' 
+        env:
+          token: "${{ secrets.ghPat }}"
+        run: |
+          cd ..
+          export PKGBUILD_GZ=$(ls *.gz)
+          mkdir drat
+          cd drat
+          git init
+          git config user.email "dummy@example.com"
+          git config user.name "Github Actions"
+          git remote add upstream "https://token:$token@github.com/cloudyr/cloudyr.github.io.git"
+          git fetch upstream
+          git checkout master
+          Rscript -e "drat::insertPackage('../$PKGBUILD_GZ', repodir='./drat')"
+          git add --all
+          git commit -m "add $PKGBUILD_GZ (build $GITHUB_RUN_NUMBER)"
+          git push

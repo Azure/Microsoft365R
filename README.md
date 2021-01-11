@@ -1,6 +1,6 @@
-# SharePointR <img src="man/figures/logo.png" align="right" width=150 />
+# Microsoft365R <img src="man/figures/logo.png" align="right" width=150 />
 
-A simple yet powerful interface to [SharePoint Online](https://www.microsoft.com/en-au/microsoft-365/sharepoint/collaboration) sites and [OneDrive](https://www.microsoft.com/en-au/microsoft-365/onedrive/online-cloud-storage), leveraging the facilities provided by the [AzureGraph](https://cran.r-project.org/package=AzureGraph) package. Both personal OneDrive and OneDrive for Business are supported.
+Microsoft365R is intended to be a simple yet powerful R interface to [Microsoft 365](https://www.microsoft.com/en-us/microsoft-365) (formerly known as Office 365), leveraging the facilities provided by the [AzureGraph](https://cran.r-project.org/package=AzureGraph) package. Currently it enables access to data stored in [SharePoint Online](https://www.microsoft.com/en-au/microsoft-365/sharepoint/collaboration) sites and [OneDrive](https://www.microsoft.com/en-au/microsoft-365/onedrive/online-cloud-storage). Both personal OneDrive and OneDrive for Business are supported. Future versions may add support for Teams, Outlook and other Microsoft 365 services.
 
 ## OneDrive
 
@@ -23,7 +23,7 @@ od$upload_file("somedata.xlsx")
 od$create_folder("Documents/newfolder")
 ```
 
-You can open a file or folder in your browser with the `open_item()` method. For example, assuming you have a Microsoft 365 (formerly known as Office 365) license, a Word document or Excel spreadsheet will open in Word or Excel Online, and a folder will be shown in OneDrive.
+You can open a file or folder in your browser with the `open_item()` method. For example, a Word document or Excel spreadsheet will open in Word or Excel Online, and a folder will be shown in OneDrive.
 
 ```r
 od$open_item("Documents/myfile.docx")
@@ -42,7 +42,7 @@ Similarly, you can change the metadata for a file with `set_item_properties()`. 
 
 ```r
 # rename a file -- version control via filename is bad, mmkay
-od$set_item_properties("Document/myfile.docx", name="myfile version 2.docx")
+od$set_item_properties("Documents/myfile.docx", name="myfile version 2.docx")
 
 # alternatively, you can call the file object's update() method
 file_props$update(name="myfile version 2.docx")
@@ -76,7 +76,7 @@ drv <- site$get_drive()
 
 # same methods as for OneDrive
 drv$list_items()
-drv$open_item("Documents/myfile.docx")
+drv$open_item("myproject/demo.pptx")
 ```
 
 To show all lists in a site, use the `get_lists()` method, and to retrieve a specific list, use `get_list()` and supply either the list name or ID.

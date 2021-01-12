@@ -6,6 +6,8 @@
 
 Microsoft365R is intended to be a simple yet powerful R interface to [Microsoft 365](https://www.microsoft.com/en-us/microsoft-365) (formerly known as Office 365), leveraging the facilities provided by the [AzureGraph](https://cran.r-project.org/package=AzureGraph) package. Currently it enables access to data stored in [SharePoint Online](https://www.microsoft.com/en-au/microsoft-365/sharepoint/collaboration) sites and [OneDrive](https://www.microsoft.com/en-au/microsoft-365/onedrive/online-cloud-storage). Both personal OneDrive and OneDrive for Business are supported. Future versions may add support for Teams, Outlook and other Microsoft 365 services.
 
+The primary repo for this package is at https://github.com/Azure/Microsoft365R; please submit issues and PRs there. It is also mirrored at the Cloudyr org at https://github.com/cloudyr/Microsoft365R. You can install the development version of the package with `devtools::install_github("Azure/Microsoft365R")`.
+
 ## OneDrive
 
 To access your personal OneDrive, call the `personal_onedrive()` function. This uses your Internet browser to authenticate with OneDrive, in a similar manner to other web apps. You will see a screen asking you to grant permission for the AzureR Graph app to access your information.

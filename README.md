@@ -1,5 +1,9 @@
 # Microsoft365R <img src="man/figures/logo.png" align="right" width=150 />
 
+[![CRAN](https://www.r-pkg.org/badges/version/Microsoft365R)](https://cran.r-project.org/package=Microsoft365R)
+![Downloads](https://cranlogs.r-pkg.org/badges/Microsoft365R)
+![R-CMD-check](https://github.com/Azure/Microsoft365R/workflows/R-CMD-check/badge.svg)
+
 Microsoft365R is intended to be a simple yet powerful R interface to [Microsoft 365](https://www.microsoft.com/en-us/microsoft-365) (formerly known as Office 365), leveraging the facilities provided by the [AzureGraph](https://cran.r-project.org/package=AzureGraph) package. Currently it enables access to data stored in [SharePoint Online](https://www.microsoft.com/en-au/microsoft-365/sharepoint/collaboration) sites and [OneDrive](https://www.microsoft.com/en-au/microsoft-365/onedrive/online-cloud-storage). Both personal OneDrive and OneDrive for Business are supported. Future versions may add support for Teams, Outlook and other Microsoft 365 services.
 
 ## OneDrive
@@ -111,3 +115,7 @@ In addition to the client functions given above, SharePointR enhances the `az_us
 `az_user` gains `list_drives()` and `get_drive()` methods. The first shows all the drives that the user has access to, including those that are shared from other users. The second retrieves a specific drive, by default the user's OneDrive. Whether these are personal or business drives depends on the tenant that was specified in `AzureGraph::get_graph_login()`/`create_graph_login()`: if the tenant was "consumers", it will be the personal OneDrive.
 
 `az_group` gains `list_drives()`, `get_drive()` and `get_sharepoint_site()` methods. The first two do the same as for `az_user`: they retrieve the drive(s) for the group. The third method retrieves the SharePoint site associated with the group, if one exists.
+
+----
+<p align="center"><a href="https://github.com/Azure/AzureR"><img src="https://github.com/Azure/AzureR/raw/master/images/logo2.png" width=800 /></a></p>
+

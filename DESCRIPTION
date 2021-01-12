@@ -6,8 +6,8 @@ Authors@R: c(
     person("Microsoft", role="cph")
     )
 Description: An interface to the 'Microsoft 365' (formerly known as 'Office 365') suite of cloud services, building on the framework supplied by the 'AzureGraph' package. Enables access from R to data stored in 'SharePoint Online' and 'OneDrive', including the ability to list drive folder contents, upload and download files, and retrieve data lists. Both personal 'OneDrive' and 'OneDrive for Business' accounts are supported.
-URL: https://github.com/hongooi73/Microsoft365R https://github.com/AzureRSDK/AzureR
-BugReports: https://github.com/hongooi73/Microsoft365R/issues
+URL: https://github.com/Azure/Microsoft365R https://github.com/Azure/AzureR
+BugReports: https://github.com/Azure/Microsoft365R/issues
 License: MIT + file LICENSE
 VignetteBuilder: knitr
 Depends: 

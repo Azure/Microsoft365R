@@ -29,7 +29,8 @@
 #' @export
 personal_onedrive <- function(...)
 {
-    login <- try(get_graph_login("consumers", refresh=FALSE), silent=TRUE)
+    login <- try(get_graph_login("consumers", app=.azurer_graph_app_id, scopes="Files.ReadWrite.All", refresh=FALSE),
+                 silent=TRUE)
     if(inherits(login, "try-error"))
         login <- create_graph_login("consumers", app=.azurer_graph_app_id, scopes="Files.ReadWrite.All", ...)
 
@@ -40,9 +41,9 @@ personal_onedrive <- function(...)
 #' @export
 business_onedrive <- function(tenant="common", ...)
 {
-    login <- try(get_graph_login(tenant, refresh=FALSE), silent=TRUE)
+    login <- try(get_graph_login(tenant, app=.az_cli_app_id, scopes=".default", refresh=FALSE), silent=TRUE)
     if(inherits(login, "try-error"))
-        login <- create_graph_login(tenant, app=.az_cli_app_id, ...)
+        login <- create_graph_login(tenant, app=.az_cli_app_id, scopes=".default", ...)
 
     login$get_user()$get_drive()
 }
@@ -51,9 +52,9 @@ business_onedrive <- function(tenant="common", ...)
 #' @export
 sharepoint_site <- function(site_url=NULL, site_id=NULL, tenant="common", ...)
 {
-    login <- try(get_graph_login(tenant, refresh=FALSE), silent=TRUE)
+    login <- try(get_graph_login(tenant, app=.az_cli_app_id, scopes=".default", refresh=FALSE), silent=TRUE)
     if(inherits(login, "try-error"))
-        login <- create_graph_login(tenant, app=.az_cli_app_id, ...)
+        login <- create_graph_login(tenant, app=.az_cli_app_id, scopes=".default", ...)
 
     login$get_sharepoint_site(site_url, site_id)
 }

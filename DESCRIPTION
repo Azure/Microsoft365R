@@ -1,6 +1,6 @@
 Package: Microsoft365R
 Title: Interface to the 'Microsoft 365' Suite of Cloud Services
-Version: 0.0.2
+Version: 1.0.0
 Authors@R: c(
     person("Hong", "Ooi", , "hongooi73@gmail.com", role = c("aut", "cre")),
     person("Microsoft", role="cph")
@@ -13,7 +13,7 @@ VignetteBuilder: knitr
 Depends: 
     R (>= 3.3)
 Imports: 
-    AzureGraph (>= 1.1.2.9000),
+    AzureGraph (>= 1.2.0),
     utils,
     curl,
     httr,
@@ -27,5 +27,3 @@ Suggests:
     testthat
 Roxygen: list(markdown=TRUE, r6=FALSE, old_usage=TRUE)
 RoxygenNote: 7.1.1
-Remotes:
-    Azure/AzureGraph

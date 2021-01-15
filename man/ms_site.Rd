@@ -28,7 +28,7 @@ Class representing a SharePoint site.
 \item \code{update(...)}: Update the site metadata in Microsoft Graph.
 \item \code{do_operation(...)}: Carry out an arbitrary operation on the site.
 \item \code{sync_fields()}: Synchronise the R object with the site metadata in Microsoft Graph.
-\item \code{list_drives()}: List the shared document libraries associated with this site.
+\item \code{list_drives()}: List the drives (shared document libraries) associated with this site.
 \item \code{get_drive(drive_id)}: Retrieve a shared document library for this site. If the ID is not specified, this returns the default document library.
 \item \code{list_subsites()}: List the subsites of this site.
 \item \code{get_lists()}: Returns the lists that are part of this site.

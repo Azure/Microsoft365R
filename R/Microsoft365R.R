@@ -20,7 +20,7 @@ utils::globalVariables(c("self", "private"))
     add_methods()
 }
 
-# default authentication app ID: leverage the az CLI
+# authentication app ID for work & school accounts: leverage the az CLI
 .az_cli_app_id <- "04b07795-8ddb-461a-bbee-02f9e1bf7b46"
 
 # authentication app ID for personal accounts

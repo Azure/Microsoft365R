@@ -71,7 +71,7 @@ To access a SharePoint site, use the `sharepoint_site()` function and provide th
 site <- sharepoint_site("https://myaadtenant.sharepoint.com/sites/my-site-name")
 ```
 
-The client object has methods to retrieve drives and lists. To show all drives in a site, use the `list_drives()` method, and to retrieve a specific drive, use `get_drive()`. Each drive is an object of class `ms_drive`, just like the OneDrive clients above.
+The client object has methods to retrieve drives (document libraries) and lists. To show all drives in a site, use the `list_drives()` method, and to retrieve a specific drive, use `get_drive()`. Each drive is an object of class `ms_drive`, just like the OneDrive clients above.
 
 ```r
 # list of all document libraries under this site
@@ -82,7 +82,7 @@ drv <- site$get_drive()
 
 # same methods as for OneDrive
 drv$list_items()
-drv$open_item("myproject/demo.pptx")
+drv$open_item("teamproject/plan.xlsx")
 ```
 
 To show all lists in a site, use the `get_lists()` method, and to retrieve a specific list, use `get_list()` and supply either the list name or ID.

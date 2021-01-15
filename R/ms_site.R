@@ -14,7 +14,7 @@
 #' - `update(...)`: Update the site metadata in Microsoft Graph.
 #' - `do_operation(...)`: Carry out an arbitrary operation on the site.
 #' - `sync_fields()`: Synchronise the R object with the site metadata in Microsoft Graph.
-#' - `list_drives()`: List the shared document libraries associated with this site.
+#' - `list_drives()`: List the drives (shared document libraries) associated with this site.
 #' - `get_drive(drive_id)`: Retrieve a shared document library for this site. If the ID is not specified, this returns the default document library.
 #' - `list_subsites()`: List the subsites of this site.
 #' - `get_lists()`: Returns the lists that are part of this site.

@@ -8,14 +8,17 @@
 \usage{
 personal_onedrive(...)
 
-business_onedrive(tenant = "common", ...)
+business_onedrive(tenant = "common", app = NULL, ...)
 
-sharepoint_site(site_url = NULL, site_id = NULL, tenant = "common", ...)
+sharepoint_site(site_url = NULL, site_id = NULL, tenant = "common",
+  app = NULL, ...)
 }
 \arguments{
 \item{...}{Optional arguments to be passed to \code{AzureGraph::create_graph_login}.}
 
 \item{tenant}{For \code{business_onedrive} and \code{sharepoint_site}, the name of your Azure Active Directory (AAD) tenant. If not supplied, use the default tenant for your currently logged-in account.}
+
+\item{app}{For \code{business_onedrive} and \code{sharepoint_site}, the app registration ID to use for authentication.}
 
 \item{site_url, site_id}{For \code{sharepoint_site}, the web URL and ID of the SharePoint site to retrieve. Supply one or the other, but not both.}
 }

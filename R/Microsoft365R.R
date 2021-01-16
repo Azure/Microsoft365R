@@ -20,11 +20,11 @@ utils::globalVariables(c("self", "private"))
     add_methods()
 }
 
-# authentication app ID for work & school accounts: leverage the az CLI
+# authentication app ID for SharePoint: leverage the az CLI
 .az_cli_app_id <- "04b07795-8ddb-461a-bbee-02f9e1bf7b46"
 
 # authentication app ID for OneDrive
-.microsoft365r_app_id <- "5bb21e8a-06bf-4ac4-b613-110ac0e582c1"
+.microsoft365r_app_id <- "d44a05d5-c6a5-4bbb-82d2-443123722380"
 
 # helper function
 error_message <- get("error_message", getNamespace("AzureGraph"))

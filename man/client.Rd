@@ -31,9 +31,11 @@ OneDrive and Sharepoint Online clients
 \details{
 These functions provide easy access to OneDrive and SharePoint in the cloud. They work by loading your existing Microsoft Graph login, and if that isn't found, creating a new one using any arguments passed in \code{...}.
 
-Use \code{personal_onedrive} to access the drive for your personal account, and \code{business_onedrive} to access your OneDrive for Business. For \code{business_onedrive} and \code{sharepoint_site} to work, your organisation must have an appropriate Microsoft 365 license.
+Use \code{personal_onedrive} to access the drive for your personal account, and \code{business_onedrive} to access your OneDrive for Business. On first use, you will get a dialog box in your browser asking permission for the AzureR Graph app to access your information.
 
 The default "common" tenant for \code{business_onedrive} and \code{sharepoint_site} attempts to detect your actual tenant from your currently logged-in account. This may not always succeed, for example if you have a personal account that is also a guest account in a tenant. In this case, supply the actual tenant name.
+
+Note that OneDrive for Business and SharePoint are part of Microsoft 365 Business, so trying to access these services will fail if you don't have an appropriate license.
 }
 \examples{
 \dontrun{
@@ -43,7 +45,7 @@ personal_onedrive()
 odb <- business_onedrive("mycompany")
 odb$list_items()
 
-site <- sharepoint_site("https://mycompany.sharepoint.com/sites/my-site-name")
+site <- sharepoint_site("https://mycompany.sharepoint.com/sites/my-site-name", tenant="mycompany")
 site$get_drive()$list_items()
 
 }

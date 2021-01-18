@@ -6,7 +6,7 @@
 \alias{sharepoint_site}
 \title{OneDrive and Sharepoint Online clients}
 \usage{
-personal_onedrive(...)
+personal_onedrive(app = NULL, ...)
 
 business_onedrive(tenant = "common", app = NULL, ...)
 
@@ -14,11 +14,11 @@ sharepoint_site(site_url = NULL, site_id = NULL, tenant = "common",
   app = NULL, ...)
 }
 \arguments{
+\item{app}{Optionally, a custom app registration ID to use for authentication.}
+
 \item{...}{Optional arguments to be passed to \code{AzureGraph::create_graph_login}.}
 
 \item{tenant}{For \code{business_onedrive} and \code{sharepoint_site}, the name of your Azure Active Directory (AAD) tenant. If not supplied, use the default tenant for your currently logged-in account.}
-
-\item{app}{For \code{business_onedrive} and \code{sharepoint_site}, the app registration ID to use for authentication.}
 
 \item{site_url, site_id}{For \code{sharepoint_site}, the web URL and ID of the SharePoint site to retrieve. Supply one or the other, but not both.}
 }
@@ -29,7 +29,7 @@ An object of class \code{ms_drive}.
 OneDrive and Sharepoint Online clients
 }
 \details{
-These functions provide easy access to OneDrive and SharePoint in the cloud. They work by loading your existing Microsoft Graph login, and if that isn't found, creating a new one using any arguments passed in \code{...}.
+These functions provide easy access to OneDrive and SharePoint in the cloud. They work by loading your existing Microsoft Graph login, and if that isn't found, creating a new one using any arguments passed in \code{...}. In particular, if your machine doesn't have a web browser available to authenticate with (for example if you are in a remote RStudio Server session), pass \code{auth_type="device_code"} which is intended for such scenarios.
 
 Use \code{personal_onedrive} to access the drive for your personal account, and \code{business_onedrive} to access your OneDrive for Business. On first use, you will get a dialog box in your browser asking permission for Microsoft365R to access your information.
 
@@ -41,6 +41,9 @@ Note that OneDrive for Business and SharePoint are part of Microsoft 365 Busines
 \dontrun{
 
 personal_onedrive()
+
+# authenticating without a browser
+personal_onedrive(auth_type="device_code")
 
 odb <- business_onedrive("mycompany")
 odb$list_items()

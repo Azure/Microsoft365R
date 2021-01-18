@@ -1,11 +1,11 @@
 #' OneDrive and Sharepoint Online clients
 #'
 #' @param tenant For `business_onedrive` and `sharepoint_site`, the name of your Azure Active Directory (AAD) tenant. If not supplied, use the default tenant for your currently logged-in account.
-#' @param app For `business_onedrive` and `sharepoint_site`, the app registration ID to use for authentication.
+#' @param app Optionally, a custom app registration ID to use for authentication.
 #' @param site_url,site_id For `sharepoint_site`, the web URL and ID of the SharePoint site to retrieve. Supply one or the other, but not both.
 #' @param ... Optional arguments to be passed to `AzureGraph::create_graph_login`.
 #' @details
-#' These functions provide easy access to OneDrive and SharePoint in the cloud. They work by loading your existing Microsoft Graph login, and if that isn't found, creating a new one using any arguments passed in `...`.
+#' These functions provide easy access to OneDrive and SharePoint in the cloud. They work by loading your existing Microsoft Graph login, and if that isn't found, creating a new one using any arguments passed in `...`. In particular, if your machine doesn't have a web browser available to authenticate with (for example if you are in a remote RStudio Server session), pass `auth_type="device_code"` which is intended for such scenarios.
 #'
 #' Use `personal_onedrive` to access the drive for your personal account, and `business_onedrive` to access your OneDrive for Business. On first use, you will get a dialog box in your browser asking permission for Microsoft365R to access your information.
 #'
@@ -21,6 +21,9 @@
 #'
 #' personal_onedrive()
 #'
+#' # authenticating without a browser
+#' personal_onedrive(auth_type="device_code")
+#'
 #' odb <- business_onedrive("mycompany")
 #' odb$list_items()
 #'
@@ -30,8 +33,10 @@
 #' }
 #' @rdname client
 #' @export
-personal_onedrive <- function(...)
+personal_onedrive <- function(app=NULL, ...)
 {
+    if(is.null(app))
+        app <- .microsoft365r_app_id
     scopes <- c("Files.ReadWrite.All", "User.Read")
     login <- try(get_graph_login("consumers", app=.microsoft365r_app_id, scopes=scopes, refresh=FALSE),
                  silent=TRUE)

@@ -12,12 +12,15 @@ Microsoft365R is intended to be a simple yet powerful R interface to [Microsoft 
 
 ## OneDrive
 
-To access your personal OneDrive, call the `personal_onedrive()` function. This uses your Internet browser to authenticate with OneDrive, in a similar manner to other web apps. You will see a screen asking you to grant permission for the AzureR Graph app to access your information.
+To access your personal OneDrive, call the `personal_onedrive()` function. This uses your Internet browser to authenticate with OneDrive, in a similar manner to other web apps. You will see a screen asking you to grant permission for the AzureR Graph app to access your information. If your machine doesn't have a browser available (for example if you are in a remote RStudio Server session), you can pass the argument `auth_type="device_code"`; this uses the device code authentication flow which is intended for such scenarios.
 
 Once the authentication is complete, `personal_onedrive()` returns an R6 client object of class `ms_drive`, which has methods for working with files and folders.
 
 ```r
 od <- personal_onedrive()
+
+# or if you don't have a browser
+od <- personal_onedrive(auth_type="device_code")
 
 # list files and folders
 od$list_items()
@@ -31,7 +34,7 @@ od$upload_file("somedata.xlsx")
 od$create_folder("Documents/newfolder")
 ```
 
-You can open a file or folder in your browser with the `open_item()` method. For example, assuming you have a Microsoft 365 (formerly known as Office 365) license, a Word document or Excel spreadsheet will open in Word or Excel Online, and a folder will be shown in OneDrive.
+You can open a file or folder in your browser with the `open_item()` method. For example, a Word document or Excel spreadsheet will open in Word or Excel Online, and a folder will be shown in OneDrive.
 
 ```r
 od$open_item("Documents/myfile.docx")

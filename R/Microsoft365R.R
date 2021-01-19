@@ -28,3 +28,6 @@ utils::globalVariables(c("self", "private"))
 
 # helper function
 error_message <- get("error_message", getNamespace("AzureGraph"))
+
+# dummy mention to keep CRAN happy
+vctrs::vec_rbind

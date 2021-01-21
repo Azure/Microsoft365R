@@ -58,7 +58,7 @@ personal_onedrive <- function(app=NULL, scopes=NULL, ...)
     if(is.null(scopes))
         scopes <- c("Files.ReadWrite.All", "User.Read")
 
-    do_login(tenant, app, scopes, ...)$get_user()$get_drive()
+    do_login("consumers", app, scopes, ...)$get_user()$get_drive()
 }
 
 #' @rdname client

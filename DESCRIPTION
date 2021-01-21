@@ -12,7 +12,8 @@ License: MIT + file LICENSE
 VignetteBuilder: knitr
 Depends: 
     R (>= 3.3)
-Imports: 
+Imports:
+    AzureAuth,
     AzureGraph (>= 1.2.0),
     utils,
     curl,

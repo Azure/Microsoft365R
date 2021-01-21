@@ -1,23 +1,33 @@
+tenant <- Sys.getenv("AZ_TEST_TENANT_ID")
 app <- Sys.getenv("AZ_TEST_NATIVE_APP_ID")
 
-if(app == "")
-    skip("OneDrive tests skipped: Microsoft Graph credentials not set")
+if(tenant == "" || app == "")
+    skip("OneDrive for Business tests skipped: Microsoft Graph credentials not set")
 
 if(!interactive())
-    skip("OneDrive tests skipped: must be in interactive session")
+    skip("OneDrive for Business tests skipped: must be in interactive session")
 
-tok <- try(AzureAuth::get_azure_token(c("openid", "offline_access"),
-    tenant="9188040d-6c67-4c5b-b112-36a304b66dad", app=.microsoft365r_app_id, version=2, use_cache=FALSE),
+tok <- try(AzureAuth::get_azure_token(
+    c("https://graph.microsoft.com/Files.ReadWrite.All",
+      "https://graph.microsoft.com/User.Read",
+      "openid",
+      "offline_access"),
+    tenant=tenant, app=.microsoft365r_app_id, version=2, use_cache=FALSE),
     silent=TRUE)
 if(inherits(tok, "try-error"))
-    skip("OneDrive tests skipped: unable to login to consumers tenant")
+    skip("OneDrive for Business tests skipped: no access to tenant")
 
-test_that("OneDrive personal works",
+test_that("OneDrive for Business works",
 {
-    od <- personal_onedrive()
+    gr <- AzureGraph::ms_graph$new(token=tok)
+    drv <- try(gr$get_user()$get_drive(), silent=TRUE)
+    if(inherits(drv, "try-error"))
+        skip("OneDrive for Business tests skipped: service not available")
+
+    od <- business_onedrive(tenant=tenant)
     expect_is(od, "ms_drive")
 
-    od2 <- personal_onedrive(app=app)
+    od2 <- business_onedrive(tenant=tenant, app=app)
     expect_is(od2, "ms_drive")
 
     ls <- od$list_items()

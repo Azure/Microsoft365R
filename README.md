@@ -8,11 +8,19 @@ Microsoft365R is intended to be a simple yet powerful R interface to [Microsoft 
 
 The primary repo for this package is at https://github.com/Azure/Microsoft365R; please submit issues and PRs there. It is also mirrored at the Cloudyr org at https://github.com/cloudyr/Microsoft365R. You can install the development version of the package with `devtools::install_github("Azure/Microsoft365R")`.
 
+## Authentication details
+
+The first time you call one of the Microsoft365R functions (see below), it will use your Internet browser to authenticate you with Azure Active Directory, in a similar manner to other web apps. You will get a dialog box asking for permission to access your information.
+
+For authentication purposes, the package is registered as an app in the 'aicatr' AAD tenant; depending on your organisation's security policy, you may have to get an admin to grant it access to your tenant. The default permissions requested are:
+
+- For `personal_onedrive`: Files.ReadWrite.All, User.Read
+- For `business_onedrive`: Files.ReadWrite.All, User.Read
+- For `sharepoint_site`: Sites.ReadWrite.All, User.Read
+
 ## OneDrive
 
-To access your personal OneDrive, call the `personal_onedrive()` function. This uses your Internet browser to authenticate with OneDrive, in a similar manner to other web apps. You will see a screen asking you to grant permission for the AzureR Graph app to access your information.
-
-Once the authentication is complete, `personal_onedrive()` returns an R6 client object of class `ms_drive`, which has methods for working with files and folders.
+To access your personal OneDrive, call the `personal_onedrive()` function. This returns an R6 client object of class `ms_drive`, which has methods for working with files and folders.
 
 ```r
 od <- personal_onedrive()

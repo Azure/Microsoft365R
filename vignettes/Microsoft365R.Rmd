@@ -10,11 +10,19 @@ vignette: >
 
 Microsoft365R is intended to be a simple yet powerful R interface to [Microsoft 365](https://www.microsoft.com/en-us/microsoft-365) (formerly known as Office 365), leveraging the facilities provided by the [AzureGraph](https://cran.r-project.org/package=AzureGraph) package. Currently it enables access to data stored in [SharePoint Online](https://www.microsoft.com/en-au/microsoft-365/sharepoint/collaboration) sites and [OneDrive](https://www.microsoft.com/en-au/microsoft-365/onedrive/online-cloud-storage). Both personal OneDrive and OneDrive for Business are supported. Future versions may add support for Teams, Outlook and other Microsoft 365 services.
 
+## Authentication details
+
+The first time you call one of the Microsoft365R functions (see below), it will use your Internet browser to authenticate you with Azure Active Directory, in a similar manner to other web apps. You will get a dialog box asking for permission to access your information.
+
+For authentication purposes, the package is registered as an app in the 'aicatr' AAD tenant; depending on your organisation's security policy, you may have to get an admin to grant it access to your tenant. The default permissions requested are:
+
+- For `personal_onedrive`: Files.ReadWrite.All, User.Read
+- For `business_onedrive`: Files.ReadWrite.All, User.Read
+- For `sharepoint_site`: Sites.ReadWrite.All, User.Read
+
 ## OneDrive
 
-To access your personal OneDrive, call the `personal_onedrive()` function. This uses your Internet browser to authenticate with OneDrive, in a similar manner to other web apps. You will see a screen asking you to grant permission for the AzureR Graph app to access your information. If your machine doesn't have a browser available (for example if you are in a remote RStudio Server session), you can pass the argument `auth_type="device_code"`; this uses the device code authentication flow which is intended for such scenarios.
-
-Once the authentication is complete, `personal_onedrive()` returns an R6 client object of class `ms_drive`, which has methods for working with files and folders.
+To access your personal OneDrive, call the `personal_onedrive()` function. This returns an R6 client object of class `ms_drive`, which has methods for working with files and folders.
 
 ```r
 od <- personal_onedrive()

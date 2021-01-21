@@ -20,14 +20,14 @@ utils::globalVariables(c("self", "private"))
     add_methods()
 }
 
-# authentication app ID for SharePoint: leverage the az CLI
-.az_cli_app_id <- "04b07795-8ddb-461a-bbee-02f9e1bf7b46"
-
-# authentication app ID for OneDrive
+# authentication app ID
 .microsoft365r_app_id <- "d44a05d5-c6a5-4bbb-82d2-443123722380"
 
 # helper function
 error_message <- get("error_message", getNamespace("AzureGraph"))
 
 # dummy mention to keep CRAN happy
+# we need to ensure that vctrs is loaded so that AzureGraph will use vec_rbind
+# to combine paged results into a single data frame: individual pages can have
+# different structures, which will break base::rbind
 vctrs::vec_rbind

@@ -6,15 +6,17 @@
 \alias{sharepoint_site}
 \title{OneDrive and Sharepoint Online clients}
 \usage{
-personal_onedrive(app = NULL, ...)
+personal_onedrive(app = NULL, scopes = NULL, ...)
 
-business_onedrive(tenant = "common", app = NULL, ...)
+business_onedrive(tenant = "common", app = NULL, scopes = NULL, ...)
 
 sharepoint_site(site_url = NULL, site_id = NULL, tenant = "common",
-  app = NULL, ...)
+  app = NULL, scopes = NULL, ...)
 }
 \arguments{
 \item{app}{Optionally, a custom app registration ID to use for authentication.}
+
+\item{scopes}{The Microsoft Graph scopes (permissions) to obtain.}
 
 \item{...}{Optional arguments to be passed to \code{AzureGraph::create_graph_login}.}
 
@@ -29,14 +31,24 @@ An object of class \code{ms_drive}.
 OneDrive and Sharepoint Online clients
 }
 \details{
-These functions provide easy access to OneDrive and SharePoint in the cloud. They work by loading your existing Microsoft Graph login, and if that isn't found, creating a new one using any arguments passed in \code{...}. In particular, if your machine doesn't have a web browser available to authenticate with (for example if you are in a remote RStudio Server session), pass \code{auth_type="device_code"} which is intended for such scenarios.
+\code{personal_onedrive}, \code{business_onedrive} and \code{sharepoint_site} provide easy access to OneDrive, OneDrive for Business, and SharePoint Online respectively. On first use, they will call your web browser to authenticate with Azure Active Directory, in a similar manner to other web apps. You will get a dialog box asking for permission to access your information. You only have to authenticate once per client; your credentials will be saved and reloaded in subsequent sessions.
 
-Use \code{personal_onedrive} to access the drive for your personal account, and \code{business_onedrive} to access your OneDrive for Business. On first use, you will get a dialog box in your browser asking permission for Microsoft365R to access your information.
+When authenticating, you can pass optional arguments in \code{...} which will ultimately be received by \code{AzureAuth::get_azure_token}. In particular, if your machine doesn't have a web browser available to authenticate with (for example if you are in a remote RStudio Server session), pass \code{auth_type="device_code"} which is intended for such scenarios.
 
 The default "common" tenant for \code{business_onedrive} and \code{sharepoint_site} attempts to detect your actual tenant from your saved credentials in your browser. This may not always succeed, for example if you have a personal account that is also a guest account in a tenant. In this case, supply the actual tenant name.
-
-Note that OneDrive for Business and SharePoint are part of Microsoft 365 Business, so trying to access these services will fail if you don't have an appropriate license.
 }
+\section{Setting the app ID}{
+
+For authentication purposes, Microsoft365R is registered as an app in the "aicatr" AAD tenant; depending on your organisation's security policy, you may have to get an admin to grant it access to your tenant. As an alternative, you (or your admin) can create your own app registration, and supply its ID in the \code{app} argument. The app should have a native redirect URI of \verb{http://localhost:1410}, and the default permissions requested are:
+\itemize{
+\item For \code{personal_onedrive}: Files.ReadWrite.All, User.Read
+\item For \code{business_onedrive}: Files.ReadWrite.All, User.Read
+\item For \code{sharepoint_site}: Sites.ReadWrite.All, User.Read
+}
+
+In addition, for SharePoint (only) it's possible to use the Azure CLI app ID to access document libraries and lists. See the examples below. Be warned, however, that this may attract the attention of your admin!
+}
+
 \examples{
 \dontrun{
 
@@ -50,6 +62,16 @@ odb$list_items()
 
 site <- sharepoint_site("https://mycompany.sharepoint.com/sites/my-site-name", tenant="mycompany")
 site$get_drive()$list_items()
+
+
+# you can also use your own app registration ID:
+business_onedrive(app="app_id")
+sharepoint_site("https://mycompany.sharepoint.com/sites/my-site-name", app="app_id")
+
+# for SharePoint, a fallback is to use the Azure CLI app ID and the '.default' scope:
+sharepoint_site("https://mycompany.sharepoint.com/sites/my-site-name",
+    app=AzureGraph:::.az_cli_app_id,
+    scopes=".default")
 
 }
 }

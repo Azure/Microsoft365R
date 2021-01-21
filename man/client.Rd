@@ -6,21 +6,27 @@
 \alias{sharepoint_site}
 \title{OneDrive and Sharepoint Online clients}
 \usage{
-personal_onedrive(app = NULL, scopes = NULL, ...)
+personal_onedrive(app = Sys.getenv("CLIMICROSOFT365_AADAPPID",
+  .microsoft365r_app_id), scopes = c("Files.ReadWrite.All", "User.Read"),
+  ...)
 
-business_onedrive(tenant = "common", app = NULL, scopes = NULL, ...)
+business_onedrive(tenant = Sys.getenv("CLIMICROSOFT365_TENANT", "common"),
+  app = Sys.getenv("CLIMICROSOFT365_AADAPPID", .microsoft365r_app_id),
+  scopes = c("Files.ReadWrite.All", "User.Read"), ...)
 
-sharepoint_site(site_url = NULL, site_id = NULL, tenant = "common",
-  app = NULL, scopes = NULL, ...)
+sharepoint_site(site_url = NULL, site_id = NULL,
+  tenant = Sys.getenv("CLIMICROSOFT365_TENANT", "common"),
+  app = Sys.getenv("CLIMICROSOFT365_AADAPPID", .microsoft365r_app_id),
+  scopes = c("Sites.ReadWrite.All", "User.Read"), ...)
 }
 \arguments{
-\item{app}{Optionally, a custom app registration ID to use for authentication.}
+\item{app}{A custom app registration ID to use for authentication. If not supplied, use the value of the \code{CLIMICROSOFT365_AADAPPID} environment variable, or an internal app ID if that is unset.}
 
 \item{scopes}{The Microsoft Graph scopes (permissions) to obtain.}
 
 \item{...}{Optional arguments to be passed to \code{AzureGraph::create_graph_login}.}
 
-\item{tenant}{For \code{business_onedrive} and \code{sharepoint_site}, the name of your Azure Active Directory (AAD) tenant. If not supplied, use the default tenant for your currently logged-in account.}
+\item{tenant}{For \code{business_onedrive} and \code{sharepoint_site}, the name of your Azure Active Directory (AAD) tenant. If not supplied, use the value of the \code{CLIMICROSOFT365_TENANT} environment variable, or "common" if that is unset.}
 
 \item{site_url, site_id}{For \code{sharepoint_site}, the web URL and ID of the SharePoint site to retrieve. Supply one or the other, but not both.}
 }
@@ -35,20 +41,14 @@ OneDrive and Sharepoint Online clients
 
 When authenticating, you can pass optional arguments in \code{...} which will ultimately be received by \code{AzureAuth::get_azure_token}. In particular, if your machine doesn't have a web browser available to authenticate with (for example if you are in a remote RStudio Server session), pass \code{auth_type="device_code"} which is intended for such scenarios.
 
-The default "common" tenant for \code{business_onedrive} and \code{sharepoint_site} attempts to detect your actual tenant from your saved credentials in your browser. This may not always succeed, for example if you have a personal account that is also a guest account in a tenant. In this case, supply the actual tenant name.
-}
-\section{Setting the app ID}{
+The default "common" tenant for \code{business_onedrive} and \code{sharepoint_site} attempts to detect your actual tenant from your saved credentials in your browser. This may not always succeed, for example if you have a personal account that is also a guest account in a tenant. In this case, supply the actual tenant name, either in the \code{tenant} argument or in the \code{CLIMICROSOFT365_TENANT} environment variable. The latter allows sharing authentication details with the CLI for Microsoft 365.
 
-For authentication purposes, Microsoft365R is registered as an app in the "aicatr" AAD tenant; depending on your organisation's security policy, you may have to get an admin to grant it access to your tenant. As an alternative, you (or your admin) can create your own app registration, and supply its ID in the \code{app} argument. The app should have a native redirect URI of \verb{http://localhost:1410}, and the default permissions requested are:
-\itemize{
-\item For \code{personal_onedrive}: Files.ReadWrite.All, User.Read
-\item For \code{business_onedrive}: Files.ReadWrite.All, User.Read
-\item For \code{sharepoint_site}: Sites.ReadWrite.All, User.Read
-}
+For authentication purposes, Microsoft365R is registered as an app in the "aicatr" AAD tenant. Depending on your organisation's security policy, you may have to get an admin to grant it access to your tenant.
+
+As an alternative to using the default app ID, you (or your admin) can create your own app registration. It should have a native redirect URI of \verb{http://localhost:1410}, and the "public client" option should be enabled if you want to use the device code authentication flow. You can supply your app ID either via the \code{app} argument, or in the environment variable \code{CLIMICROSOFT365_AADAPPID}.
 
 In addition, for SharePoint (only) it's possible to use the Azure CLI app ID to access document libraries and lists. See the examples below. Be warned, however, that this may attract the attention of your admin!
 }
-
 \examples{
 \dontrun{
 
@@ -77,4 +77,6 @@ sharepoint_site("https://mycompany.sharepoint.com/sites/my-site-name",
 }
 \seealso{
 \link{ms_drive}, \link[AzureGraph:graph_login]{AzureGraph::create_graph_login}
+
+\href{https://pnp.github.io/cli-microsoft365/}{CLI for Microsoft 365} -- where the \code{CLIMICROSOFT365_AADAPPID} and \code{CLIMICROSOFT365_TENANT} environment variables come from
 }

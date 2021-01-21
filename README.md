@@ -18,6 +18,8 @@ For authentication purposes, the package is registered as an app in the 'aicatr'
 - For `business_onedrive`: Files.ReadWrite.All, User.Read
 - For `sharepoint_site`: Sites.ReadWrite.All, User.Read
 
+If the environment variable `CLIMICROSOFT365_AADAPPID` is set, Microsoft365R will use its value as the app ID for authenticating instead. You can also specify the app ID as an argument when calling the functions.
+
 ## OneDrive
 
 To access your personal OneDrive, call the `personal_onedrive()` function. This returns an R6 client object of class `ms_drive`, which has methods for working with files and folders.

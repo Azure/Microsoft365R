@@ -11,7 +11,7 @@ tok <- try(AzureAuth::get_azure_token(
     c("https://graph.microsoft.com/.default",
       "openid",
       "offline_access"),
-    tenant=tenant, app=app, version=2, use_cache=FALSE),
+    tenant=tenant, app=app, version=2),
     silent=TRUE)
 if(inherits(tok, "try-error"))
     skip("OneDrive for Business tests skipped: no access to tenant")

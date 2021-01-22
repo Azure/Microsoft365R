@@ -14,16 +14,9 @@ Microsoft365R is intended to be a simple yet powerful R interface to [Microsoft 
 
 The first time you call one of the Microsoft365R functions (see below), it will use your Internet browser to authenticate you with Azure Active Directory, in a similar manner to other web apps. You will get a dialog box asking for permission to access your information.
 
-For authentication purposes, the package is registered as an app in the 'aicatr' AAD tenant; depending on your organisation's security policy, you may have to get an admin to grant it access to your tenant. The default permissions requested are:
+For authentication purposes, the package is registered as an app in the 'aicatr' AAD tenant; depending on your organisation's security policy, you may have to get an admin to grant it access to your tenant. Alternatively, if the environment variable `CLIMICROSOFT365_AADAPPID` is set, Microsoft365R will use its value as the app ID for authenticating to the Microsoft 365 Business services (SharePoint and OneDrive for Business). You can also specify the app ID as an argument when calling the functions below.
 
-- User.Read
-- Files.ReadWrite.All
-- Group.ReadWrite.All
-- profile
-- email
-- openid
-
-If the environment variable `CLIMICROSOFT365_AADAPPID` is set, Microsoft365R will use its value as the app ID for authenticating instead. You can also specify the app ID as an argument when calling the functions.
+If creating your own app registration is impractical, it's possible to work around access issues by piggybacking on the [CLI for Microsoft365](https://pnp.github.io/cli-microsoft365/). By setting the R option `microsoft365r_use_cli_app_id` to a non-NULL value, authentication will be done using the CLI's app ID. Technically this app still requires admin approval, but it is in widespread use and so may already be allowed in your organisation. Be warned that this solution may draw the attention of your admin!
 
 ## OneDrive
 
@@ -88,9 +81,14 @@ od$set_item_properties("Documents/myfile.docx", name="myfile version 2.docx")
 file_props$update(name="myfile version 2.docx")
 ```
 
-To access OneDrive for Business call `business_onedrive()`. This also returns an object of class `ms_drive`, so the exact same methods are available as for personal OneDrive. Note that OneDrive for Business is technically part of SharePoint and requires a Microsoft 365 Business license.
+To access OneDrive for Business call `business_onedrive()`. This also returns an object of class `ms_drive`, so the exact same methods are available as for personal OneDrive.
 
 ```r
+# by default, authenticate with the Microsoft365R internal app ID
+odb <- business_onedrive()
+
+# authenticating with the CLI for Microsoft 365 app ID: set a global option
+options(microsoft365r_use_cli_app_id=TRUE)
 odb <- business_onedrive()
 
 odb$list_items()

@@ -17,9 +17,7 @@
 #'
 #' The default when authenticating to these services is for Microsoft365R to use its own internal app ID. Depending on your organisation's security policy, you may have to get an admin to grant it access to your tenant. As an alternative to the default app ID, you (or your admin) can create your own app registration: it should have a native redirect URI of `http://localhost:1410`, and the "public client" option should be enabled if you want to use the device code authentication flow. You can supply your app ID either via the `app` argument, or in the environment variable `CLIMICROSOFT365_AADAPPID`.
 #'
-#' If creating your own app registration is impractical, there are a couple of ways to work around access issues by piggybacking on other well-known apps. Be warned that these solutions may draw the attention of your admin!
-#' - If the R option `microsoft365r_use_cli_app_id` is set to a non-NULL value, authentication will be done using the app ID for the CLI for Microsoft 365. Technically this app still requires admin approval, but it is in widespread use and so may already be allowed in your organisation.
-#' - For SharePoint (only) it's possible to use the Azure CLI app ID to access document libraries and lists. As a first-party Microsoft app the Azure CLI is available in every AAD tenant, but is not intended for working with Microsoft 365.
+#' If creating your own app registration is impractical, it's possible to work around access issues by piggybacking on the CLI for Microsoft365. By setting the R option `microsoft365r_use_cli_app_id` to a non-NULL value, authentication will be done using the CLI's app ID. Technically this app still requires admin approval, but it is in widespread use and so may already be allowed in your organisation. Be warned that this solution may draw the attention of your admin!
 #'
 #' @return
 #' For `personal_onedrive` and `business_onedrive`, an object of class `ms_drive`. For `sharepoint_site`, an object of class `ms_site`.
@@ -27,7 +25,6 @@
 #' [ms_drive], [ms_site], [AzureGraph::create_graph_login], [AzureAuth::get_azure_token]
 #'
 #' [CLI for Microsoft 365](https://pnp.github.io/cli-microsoft365/) -- a commandline tool for managing Microsoft 365
-#' [Azure CLI](https://docs.microsoft.com/en-us/cli/azure/what-is-azure-cli)
 #' @examples
 #' \dontrun{
 #'
@@ -51,10 +48,6 @@
 #' options(microsoft365r_use_cli_app_id=TRUE)
 #' business_onedrive()
 #' sharepoint_site("https://mycompany.sharepoint.com/sites/my-site-name")
-#'
-#' # for SharePoint, it's possible to use the Azure CLI app ID:
-#' sharepoint_site("https://mycompany.sharepoint.com/sites/my-site-name",
-#'     app=AzureGraph:::.az_cli_app_id)
 #'
 #' }
 #' @rdname client

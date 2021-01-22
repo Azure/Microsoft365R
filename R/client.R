@@ -1,7 +1,7 @@
 #' OneDrive and Sharepoint Online clients
 #'
 #' @param tenant For `business_onedrive` and `sharepoint_site`, the name of your Azure Active Directory (AAD) tenant. If not supplied, use the value of the `CLIMICROSOFT365_TENANT` environment variable, or "common" if that is unset.
-#' @param app A custom app registration ID to use for authentication. If not supplied, use the value of the `CLIMICROSOFT365_AADAPPID` environment variable, or an internal app ID if that is unset.
+#' @param app A custom app registration ID to use for authentication. For `personal_onedrive`, the default is to use Microsoft365R's internal app ID. For `business_onedrive` and `sharepoint_site`, see below.
 #' @param scopes The Microsoft Graph scopes (permissions) to obtain.
 #' @param site_url,site_id For `sharepoint_site`, the web URL and ID of the SharePoint site to retrieve. Supply one or the other, but not both.
 #' @param ... Optional arguments to be passed to `AzureGraph::create_graph_login`.
@@ -10,20 +10,24 @@
 #'
 #' When authenticating, you can pass optional arguments in `...` which will ultimately be received by `AzureAuth::get_azure_token`. In particular, if your machine doesn't have a web browser available to authenticate with (for example if you are in a remote RStudio Server session), pass `auth_type="device_code"` which is intended for such scenarios.
 #'
-#' The default "common" tenant for `business_onedrive` and `sharepoint_site` attempts to detect your actual tenant from your saved credentials in your browser. This may not always succeed, for example if you have a personal account that is also a guest account in a tenant. In this case, supply the actual tenant name, either in the `tenant` argument or in the `CLIMICROSOFT365_TENANT` environment variable. The latter allows sharing authentication details with the CLI for Microsoft 365.
+#' @section Authenticating to Microsoft 365 Business services:
+#' Authenticating to Microsoft 365 Business services (SharePoint and OneDrive for Business) has some specific complexities.
 #'
-#' For authentication purposes, Microsoft365R is registered as an app in the "aicatr" AAD tenant. Depending on your organisation's security policy, you may have to get an admin to grant it access to your tenant.
+#' The default "common" tenant for `business_onedrive` and `sharepoint_site` attempts to detect your actual tenant from your saved credentials in your browser. This may not always succeed, for example if you have a personal account that is also a guest account in a tenant. In this case, supply the actual tenant name, either in the `tenant` argument or in the `CLIMICROSOFT365_TENANT` environment variable. The latter allows sharing authentication details with the [CLI for Microsoft 365](https://pnp.github.io/cli-microsoft365/).
 #'
-#' As an alternative to using the default app ID, you (or your admin) can create your own app registration. It should have a native redirect URI of `http://localhost:1410`, and the "public client" option should be enabled if you want to use the device code authentication flow. You can supply your app ID either via the `app` argument, or in the environment variable `CLIMICROSOFT365_AADAPPID`.
+#' The default when authenticating to these services is for Microsoft365R to use its own internal app ID. Depending on your organisation's security policy, you may have to get an admin to grant it access to your tenant. As an alternative to the default app ID, you (or your admin) can create your own app registration: it should have a native redirect URI of `http://localhost:1410`, and the "public client" option should be enabled if you want to use the device code authentication flow. You can supply your app ID either via the `app` argument, or in the environment variable `CLIMICROSOFT365_AADAPPID`.
 #'
-#' In addition, for SharePoint (only) it's possible to use the Azure CLI app ID to access document libraries and lists. See the examples below. Be warned, however, that this may attract the attention of your admin!
+#' If creating your own app registration is impractical, there are a couple of ways to work around access issues by piggybacking on other well-known apps. Be warned that these solutions may draw the attention of your admin!
+#' - If the R option `microsoft365r_use_cli_app_id` is set to a non-NULL value, authentication will be done using the app ID for the CLI for Microsoft 365. Technically this app still requires admin approval, but it is in widespread use and so may already be allowed in your organisation.
+#' - For SharePoint (only) it's possible to use the Azure CLI app ID to access document libraries and lists. As a first-party Microsoft app the Azure CLI is available in every AAD tenant, but is not intended for working with Microsoft 365.
 #'
 #' @return
-#' An object of class `ms_drive`.
+#' For `personal_onedrive` and `business_onedrive`, an object of class `ms_drive`. For `sharepoint_site`, an object of class `ms_site`.
 #' @seealso
-#' [ms_drive], [AzureGraph::create_graph_login]
+#' [ms_drive], [ms_site], [AzureGraph::create_graph_login], [AzureAuth::get_azure_token]
 #'
-#' [CLI for Microsoft 365](https://pnp.github.io/cli-microsoft365/) -- where the `CLIMICROSOFT365_AADAPPID` and `CLIMICROSOFT365_TENANT` environment variables come from
+#' [CLI for Microsoft 365](https://pnp.github.io/cli-microsoft365/) -- a commandline tool for managing Microsoft 365
+#' [Azure CLI](https://docs.microsoft.com/en-us/cli/azure/what-is-azure-cli)
 #' @examples
 #' \dontrun{
 #'
@@ -43,15 +47,19 @@
 #' business_onedrive(app="app_id")
 #' sharepoint_site("https://mycompany.sharepoint.com/sites/my-site-name", app="app_id")
 #'
-#' # for SharePoint, a fallback is to use the Azure CLI app ID and the '.default' scope:
+#' # using the app ID for the CLI for Microsoft 365: set a global option
+#' options(microsoft365r_use_cli_app_id=TRUE)
+#' business_onedrive()
+#' sharepoint_site("https://mycompany.sharepoint.com/sites/my-site-name")
+#'
+#' # for SharePoint, it's possible to use the Azure CLI app ID:
 #' sharepoint_site("https://mycompany.sharepoint.com/sites/my-site-name",
-#'     app=AzureGraph:::.az_cli_app_id,
-#'     scopes=".default")
+#'     app=AzureGraph:::.az_cli_app_id)
 #'
 #' }
 #' @rdname client
 #' @export
-personal_onedrive <- function(app=Sys.getenv("CLIMICROSOFT365_AADAPPID", .microsoft365r_app_id),
+personal_onedrive <- function(app=.microsoft365r_app_id,
                               scopes=c("Files.ReadWrite.All", "User.Read"),
                               ...)
 {
@@ -61,10 +69,11 @@ personal_onedrive <- function(app=Sys.getenv("CLIMICROSOFT365_AADAPPID", .micros
 #' @rdname client
 #' @export
 business_onedrive <- function(tenant=Sys.getenv("CLIMICROSOFT365_TENANT", "common"),
-                              app=Sys.getenv("CLIMICROSOFT365_AADAPPID", .microsoft365r_app_id),
-                              scopes=c("Files.ReadWrite.All", "User.Read"),
+                              app=Sys.getenv("CLIMICROSOFT365_AADAPPID"),
+                              scopes=".default",
                               ...)
 {
+    app <- choose_app(app)
     do_login(tenant, app, scopes, ...)$get_user()$get_drive()
 }
 
@@ -72,10 +81,11 @@ business_onedrive <- function(tenant=Sys.getenv("CLIMICROSOFT365_TENANT", "commo
 #' @export
 sharepoint_site <- function(site_url=NULL, site_id=NULL,
                             tenant=Sys.getenv("CLIMICROSOFT365_TENANT", "common"),
-                            app=Sys.getenv("CLIMICROSOFT365_AADAPPID", .microsoft365r_app_id),
-                            scopes=c("Sites.ReadWrite.All", "User.Read"),
+                            app=Sys.getenv("CLIMICROSOFT365_AADAPPID"),
+                            scopes=".default",
                             ...)
 {
+    app <- choose_app(app)
     do_login(tenant, app, scopes, ...)$get_sharepoint_site(site_url, site_id)
 }
 
@@ -86,4 +96,16 @@ do_login <- function(tenant, app, scopes, ...)
     if(inherits(login, "try-error"))
         login <- create_graph_login(tenant, app=app, scopes=scopes, ...)
     login
+}
+
+
+choose_app <- function(app)
+{
+    if(is.null(app) || app == "")
+    {
+        if(!is.null(getOption("microsoft365r_use_cli_app_id")))
+            .cli_microsoft365_app_id
+        else .microsoft365r_app_id
+    }
+    else app
 }

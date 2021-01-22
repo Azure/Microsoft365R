@@ -16,9 +16,12 @@ The first time you call one of the Microsoft365R functions (see below), it will 
 
 For authentication purposes, the package is registered as an app in the 'aicatr' AAD tenant; depending on your organisation's security policy, you may have to get an admin to grant it access to your tenant. The default permissions requested are:
 
-- For `personal_onedrive`: Files.ReadWrite.All, User.Read
-- For `business_onedrive`: Files.ReadWrite.All, User.Read
-- For `sharepoint_site`: Sites.ReadWrite.All, User.Read
+- User.Read
+- Files.ReadWrite.All
+- Group.ReadWrite.All
+- profile
+- email
+- openid
 
 If the environment variable `CLIMICROSOFT365_AADAPPID` is set, Microsoft365R will use its value as the app ID for authenticating instead. You can also specify the app ID as an argument when calling the functions.
 

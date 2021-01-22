@@ -5,6 +5,9 @@ utils::globalVariables(c("self", "private"))
 
 .onLoad <- function(libname, pkgname)
 {
+    # set Graph API to beta, for more powerful permissions
+    options(azure_graph_api_version="beta")
+
     register_graph_class("site", ms_site,
         function(props) grepl("sharepoint", props$id, fixed=TRUE))
 
@@ -20,8 +23,11 @@ utils::globalVariables(c("self", "private"))
     add_methods()
 }
 
-# authentication app ID
+# default app ID
 .microsoft365r_app_id <- "d44a05d5-c6a5-4bbb-82d2-443123722380"
+
+# CLI for Microsoft 365 app ID
+.cli_microsoft365_app_id <- "31359c7f-bd7e-475c-86db-fdb8c937548e"
 
 # helper function
 error_message <- get("error_message", getNamespace("AzureGraph"))

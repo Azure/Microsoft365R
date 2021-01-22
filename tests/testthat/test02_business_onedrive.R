@@ -8,11 +8,10 @@ if(!interactive())
     skip("OneDrive for Business tests skipped: must be in interactive session")
 
 tok <- try(AzureAuth::get_azure_token(
-    c("https://graph.microsoft.com/Files.ReadWrite.All",
-      "https://graph.microsoft.com/User.Read",
+    c("https://graph.microsoft.com/.default",
       "openid",
       "offline_access"),
-    tenant=tenant, app=.microsoft365r_app_id, version=2, use_cache=FALSE),
+    tenant=tenant, app=app, version=2, use_cache=FALSE),
     silent=TRUE)
 if(inherits(tok, "try-error"))
     skip("OneDrive for Business tests skipped: no access to tenant")
@@ -52,6 +51,9 @@ test_that("OneDrive for Business works",
     expect_identical(item$properties$name, "newname")
     expect_silent(item$update(name=basename(dest)))
     expect_identical(item$properties$name, basename(dest))
+
+    # ODB requires that folders be empty before deleting them (!)
+    expect_silent(item$delete(confirm=FALSE))
 
     expect_silent(od$delete_item(newfolder, confirm=FALSE))
 })

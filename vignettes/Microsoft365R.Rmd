@@ -59,26 +59,17 @@ od$create_share_link("Documents/myfile.docx", type="edit", expiry="24 hours")
 od$create_share_link("Documents/myfile.docx", password="Use-strong-passwords!")
 ```
 
-You can look at the metadata properties for a file or folder with `get_item_properties()`. This returns an R6 object of class `ms_drive_item`; the properties themselves can be found under the `properties` field. One notable file property is `@microsoft.graph.downloadUrl`, which is an Internet URL from which to download the file. Be careful though: this URL is accessible by _anyone_, so don't share a link for a file you want to remain private!
+You can get and set the metadata properties for a file or folder with `get_item_properties()` and `set_item_properties()`. For the latter, provide the new properties as named arguments to the method. Not all properties can be changed; some, like the file size and last modified date, are read-only. You can also retrieve an object representing the file or folder with `get_item()`, which has methods appropriate for for drive items.
 
 ```r
-file_props <- od$get_item_properties("Documents/myfile.docx")
+od$get_item_properties("Documents/myfile.docx")
 
-# all metadata is stored as a list in 'properties'
-file_props$properties
-
-# public download link for a file -- don't give it out if the file should remain private
-file_props$properties$`@microsoft.graph.downloadUrl`
-```
-
-Similarly, you can change the metadata for a file with `set_item_properties()`. Provide the new properties as named arguments to the method. Not all properties can be changed; some, like the file size and last modified date, are read-only.
-
-```r
 # rename a file -- version control via filename is bad, mmkay
 od$set_item_properties("Documents/myfile.docx", name="myfile version 2.docx")
 
 # alternatively, you can call the file object's update() method
-file_props$update(name="myfile version 2.docx")
+item <- od$get_item("Documents/myfile.docx")
+item$update(name="myfile version 2.docx")
 ```
 
 To access OneDrive for Business call `business_onedrive()`. This also returns an object of class `ms_drive`, so the exact same methods are available as for personal OneDrive.

@@ -39,23 +39,17 @@ You can open a file or folder in your browser with the `open_item()` method. For
 od$open_item("Documents/myfile.docx")
 ```
 
-You can look at the metadata properties for a file or folder with `get_item_properties()`. This returns an R6 object of class `ms_drive_item`; the properties themselves can be found under the `properties` field.
+You can get and set the metadata properties for a file or folder with `get_item_properties()` and `set_item_properties()`. For the latter, provide the new properties as named arguments to the method. Not all properties can be changed; some, like the file size and last modified date, are read-only. You can also retrieve an object representing the file or folder with `get_item()`, which has methods appropriate for drive items.
 
 ```r
-file_props <- od$get_item_properties("Documents/myfile.docx")
+od$get_item_properties("Documents/myfile.docx")
 
-# all metadata is stored as a list in 'properties'
-file_props$properties
-```
-
-Similarly, you can change the metadata for a file with `set_item_properties()`. Provide the new properties as named arguments to the method. Not all properties can be changed; some, like the file size and last modified date, are read-only.
-
-```r
 # rename a file -- version control via filename is bad, mmkay
 od$set_item_properties("Documents/myfile.docx", name="myfile version 2.docx")
 
 # alternatively, you can call the file object's update() method
-file_props$update(name="myfile version 2.docx")
+item <- od$get_item("Documents/myfile.docx")
+item$update(name="myfile version 2.docx")
 ```
 
 To access OneDrive for Business call `business_onedrive()`. This also returns an object of class `ms_drive`, so the exact same methods are available as for personal OneDrive.

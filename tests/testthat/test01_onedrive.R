@@ -34,7 +34,7 @@ test_that("OneDrive personal works",
 
     expect_true(files_identical(src, newsrc))
 
-    item <- od$get_item_properties(dest)
+    item <- od$get_item(dest)
     expect_is(item, "ms_drive_item")
 
     expect_silent(od$set_item_properties(dest, name="newname"))

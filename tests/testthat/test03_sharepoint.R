@@ -62,4 +62,27 @@ test_that("SharePoint client works",
     items2 <- lst$list_items(all_metadata=TRUE)
     expect_is(items2, "data.frame")
     expect_identical(items, items2$fields)
+
+    items3 <- lst$list_items(as_data_frame=FALSE)
+    expect_is(items3, "list")
+    expect_true(all(sapply(items3, inherits, "ms_list_item")))
+
+    item_id <- items3[[1]]$properties$id
+    item <- lst$get_item(item_id)
+    expect_is(item, "ms_list_item")
+
+    newtitle <- make_name(10)
+    newitem <- lst$create_item(Title=newtitle)
+    expect_is(newitem, "ms_list_item")
+    newid <- newitem$properties$id
+
+    updatetitle <- make_name(10)
+    expect_silent(lst$update_item(newid, Title=updatetitle))
+
+    updateitem <- lst$get_item(newid)
+    expect_identical(updateitem$properties$fields$Title, updatetitle)
+
+    expect_silent(lst$delete_item(newid, confirm=FALSE))
+    items4 <- lst$list_items()
+    expect_identical(nrow(items), nrow(items4))
 })

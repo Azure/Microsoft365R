@@ -39,7 +39,7 @@ You can open a file or folder in your browser with the `open_item()` method. For
 od$open_item("Documents/myfile.docx")
 ```
 
-You can get and set the metadata properties for a file or folder with `get_item_properties()` and `set_item_properties()`. For the latter, provide the new properties as named arguments to the method. Not all properties can be changed; some, like the file size and last modified date, are read-only. You can also retrieve an object representing the file or folder with `get_item()`, which has methods appropriate for for drive items.
+You can get and set the metadata properties for a file or folder with `get_item_properties()` and `set_item_properties()`. For the latter, provide the new properties as named arguments to the method. Not all properties can be changed; some, like the file size and last modified date, are read-only. You can also retrieve an object representing the file or folder with `get_item()`, which has methods appropriate for drive items.
 
 ```r
 od$get_item_properties("Documents/myfile.docx")

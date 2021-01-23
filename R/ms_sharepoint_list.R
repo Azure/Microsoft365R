@@ -75,6 +75,22 @@ public=list(
         else df
     },
 
+    create_item <- function(...)
+    {
+        fields <- list(...)
+        do_operation("items", body=list(fields=fields), http_verb="POST")
+    },
+
+    update_item <- function(...)
+    {
+
+    },
+
+    delete_item <- function(id)
+    {
+
+    },
+
     get_column_info=function()
     {
         res <- self$do_operation(options=list(expand="columns"), simplify=TRUE)

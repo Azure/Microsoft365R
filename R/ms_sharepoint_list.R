@@ -56,9 +56,9 @@
 #' lst$delete_item("item_id")
 #'
 #' }
-#' @format An R6 object of class `ms_sharepoint_list`, inheriting from `ms_object`.
+#' @format An R6 object of class `ms_list`, inheriting from `ms_object`.
 #' @export
-ms_sharepoint_list <- R6::R6Class("ms_sharepoint_list", inherit=ms_object,
+ms_list <- R6::R6Class("ms_list", inherit=ms_object,
 
 public=list(
 

@@ -45,12 +45,12 @@ test_that("SharePoint client works",
     # list
     lists <- site$get_lists()
     expect_is(lists, "list")
-    expect_true(all(sapply(lists, inherits, "ms_sharepoint_list")))
+    expect_true(all(sapply(lists, inherits, "ms_list")))
 
     lst <- site$get_list(list_name=list_name)
     lst2 <- site$get_list(list_id=list_id)
-    expect_is(lst, "ms_sharepoint_list")
-    expect_is(lst2, "ms_sharepoint_list")
+    expect_is(lst, "ms_list")
+    expect_is(lst2, "ms_list")
     expect_identical(lst$properties, lst2$properties)
 
     cols <- lst$get_column_info()

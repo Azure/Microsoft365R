@@ -85,7 +85,7 @@ public=list(
         else stop("Must supply either list name or ID")
 
         res <- self$do_operation(op)
-        ms_sharepoint_list$new(self$token, self$tenant, res)
+        ms_list$new(self$token, self$tenant, res)
     },
 
     print=function(...)

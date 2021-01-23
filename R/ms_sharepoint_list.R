@@ -46,6 +46,10 @@
 #' lst$list_items()
 #' lst$list_items(filter="startswith(fields/firstname, 'John')", select="firstname,lastname")
 #'
+#' lst$get_item("item-id")
+#' lst$update_item("item_id", firstname="Mary")
+#' lst$delete_item("item_id")
+#'
 #' }
 #' @format An R6 object of class `ms_sharepoint_list`, inheriting from `ms_object`.
 #' @export
@@ -60,7 +64,7 @@ public=list(
         super$initialize(token, tenant, properties)
     },
 
-    list_items=function(filter=NULL, select=NULL, all_metadata=FALSE, pagesize=5000)
+    list_items=function(filter=NULL, select=NULL, all_metadata=FALSE, as_data_frame=TRUE, pagesize=5000)
     {
         select <- if(is.null(select))
             "fields"
@@ -68,27 +72,40 @@ public=list(
         options <- list(expand=select, `$filter`=filter, `$top`=pagesize)
         headers <- httr::add_headers(Prefer="HonorNonIndexedQueriesWarningMayFailRandomly")
 
-        items <- self$do_operation("items", options=options, headers, simplify=TRUE)
-        df <- private$get_paged_list(items, simplify=TRUE)
-        if(!all_metadata)
+        items <- self$do_operation("items", options=options, headers, simplify=as_data_frame)
+        df <- private$get_paged_list(items, simplify=as_data_frame)
+        if(!as_data_frame)
+            lapply(df, function(item) ms_list_item$new(self$token, self$tenant, item))
+        else if(!all_metadata)
             df$fields
         else df
     },
 
-    create_item <- function(...)
+    create_item=function(...)
     {
         fields <- list(...)
-        do_operation("items", body=list(fields=fields), http_verb="POST")
+        res <- do_operation("items", body=list(fields=fields), http_verb="POST")
+        invisible(ms_list_item$new(self$token, self$tenant, res))
     },
 
-    update_item <- function(...)
+    get_item=function(id)
     {
-
+        select <- if(is.null(select))
+            "fields"
+        else paste0("fields(select=", paste0(select, collapse=","), ")")
+        res <- do_operation(file.path("items", id), options=list(expand=select))
+        ms_list_item$new(self$token, self$tenant, res)
     },
 
-    delete_item <- function(id)
+    update_item=function(id, ...)
     {
+        fields <- list(...)
+        self$get_item(id)$update(fields=list(...))
+    },
 
+    delete_item=function(id, confirm=TRUE)
+    {
+        self$get_item(id)$delete(confirm=confirm)
     },
 
     get_column_info=function()

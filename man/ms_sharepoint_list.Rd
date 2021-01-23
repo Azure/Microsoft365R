@@ -62,6 +62,10 @@ lst$get_column_info()
 lst$list_items()
 lst$list_items(filter="startswith(fields/firstname, 'John')", select="firstname,lastname")
 
+lst$get_item("item-id")
+lst$update_item("item_id", firstname="Mary")
+lst$delete_item("item_id")
+
 }
 }
 \seealso{

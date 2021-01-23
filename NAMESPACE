@@ -3,6 +3,7 @@
 export(business_onedrive)
 export(ms_drive)
 export(ms_drive_item)
+export(ms_list_item)
 export(ms_sharepoint_list)
 export(ms_site)
 export(personal_onedrive)

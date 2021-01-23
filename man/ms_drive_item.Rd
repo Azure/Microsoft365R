@@ -36,7 +36,7 @@ Class representing an item (file or folder) in a OneDrive or SharePoint document
 
 \section{Initialization}{
 
-Creating new objects of this class should be done via the \code{get_item_properties} method of the \link{ms_drive} class. Calling the \code{new()} method for this class only constructs the R object; it does not call the Microsoft Graph API to retrieve or create the actual item.
+Creating new objects of this class should be done via the \code{get_item} method of the \link{ms_drive} class. Calling the \code{new()} method for this class only constructs the R object; it does not call the Microsoft Graph API to retrieve or create the actual item.
 }
 
 \section{Sharing}{
@@ -59,7 +59,7 @@ gr2 <- get_graph_login("consumers")
 me <- gr2$get_user()
 mydrv <- me$get_drive()
 
-myfile <- drv$get_item_properties("myfile.docx")
+myfile <- drv$get_item("myfile.docx")
 myfile$properties
 
 # rename a file
@@ -78,7 +78,6 @@ myfile$create_share_link(password="Use-strong-passwords!")
 
 # delete the file (will ask for confirmation first)
 myfile$delete()
-
 
 }
 }

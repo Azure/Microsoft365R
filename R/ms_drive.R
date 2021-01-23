@@ -21,6 +21,7 @@
 #' - `open_item(path)`: Open a file or folder.
 #' - `create_share_link(...)`: Create a shareable link for a file or folder.
 #' - `delete_item(path, confirm)`: Delete a file or folder.
+#' - `get_item(path)`: Get an item representing a file or folder.
 #' - `get_item_properties(path)`: Get the properties (metadata) for a file or folder.
 #' - `set_item_properties(path, ...)`: Set the properties for a file or folder.
 #'
@@ -54,9 +55,11 @@
 #'
 #' `delete_item` deletes a file or folder. By default, it will ask for confirmation first.
 #'
-#' `get_item_properties` returns an object of [ms_drive_item], containing the properties (metadata) for a given file or folder. The properties can be found in the `properties` field of this object.
+#' `get_item` returns an object of class [ms_drive_item], containing the properties (metadata) for a given file or folder and methods for working with it.
 #'
-#' `set_item_properties` sets the properties (metadata) of a file or folder. The new properties should be specified as individual named arguments to the method. Any existing properties that aren't listed as arguments will retain their previous values or be recalculated based on changes to other properties, as appropriate.
+#' `get_item_properties` is a convenience function that returns the properties of a file or folder as a list.
+#'
+#' `set_item_properties` sets the properties of a file or folder. The new properties should be specified as individual named arguments to the method. Any existing properties that aren't listed as arguments will retain their previous values or be recalculated based on changes to other properties, as appropriate.
 #'
 #' @seealso
 #' [personal_onedrive], [business_onedrive], [ms_site], [ms_drive_item]
@@ -89,8 +92,8 @@
 #' drv$create_share_link("myfile", type="edit", expiry="24 hours")
 #' drv$create_share_link("myfile", password="Use-strong-passwords!")
 #'
-#' myfile <- drv$get_item_properties("myfile")
-#' myfile$properties
+#' # file metadata (name, date created, etc)
+#' drv$get_item_properties("myfile")
 #'
 #' # rename a file
 #' drv$set_item_properties("myfile", name="newname")
@@ -206,26 +209,26 @@ public=list(
 
     download_file=function(src, dest=basename(src), overwrite=FALSE)
     {
-        self$get_item_properties(src)$download(dest, overwrite=overwrite)
+        self$get_item(src)$download(dest, overwrite=overwrite)
     },
 
     create_share_link=function(path, type=c("view", "edit", "embed"), expiry="7 days", password=NULL, scope=NULL)
     {
         type <- match.arg(type)
-        self$get_item_properties(path)$get_share_link(type, expiry, password, scope)
+        self$get_item(path)$get_share_link(type, expiry, password, scope)
     },
 
     open_item=function(path)
     {
-        self$get_item_properties(path)$open()
+        self$get_item(path)$open()
     },
 
     delete_item=function(path, confirm=TRUE)
     {
-        self$get_item_properties(path)$delete(confirm=confirm)
+        self$get_item(path)$delete(confirm=confirm)
     },
 
-    get_item_properties=function(path)
+    get_item=function(path)
     {
         op <- if(path != "/")
         {
@@ -236,16 +239,14 @@ public=list(
         ms_drive_item$new(self$token, self$tenant, self$do_operation(op))
     },
 
+    get_item_properties=function(path)
+    {
+        self$get_item(path)$properties
+    },
+
     set_item_properties=function(path, ...)
     {
-        op <- if(path != "/")
-        {
-            path <- curl::curl_escape(gsub("^/|/$", "", path)) # remove any leading and trailing slashes
-            file.path("root:", path)
-        }
-        else "root"
-        res <- self$do_operation(op, body=list(...), http_verb="PATCH")
-        invisible(ms_drive_item$new(self$token, self$tenant, res))
+        self$get_item(path)$update(...)
     },
 
     print=function(...)

@@ -19,7 +19,7 @@
 #' - `create_share_link(type, expiry, password, scope)`: Create a shareable link to the file or folder. See 'Sharing' below.
 #'
 #' @section Initialization:
-#' Creating new objects of this class should be done via the `get_item_properties` method of the [ms_drive] class. Calling the `new()` method for this class only constructs the R object; it does not call the Microsoft Graph API to retrieve or create the actual item.
+#' Creating new objects of this class should be done via the `get_item` method of the [ms_drive] class. Calling the `new()` method for this class only constructs the R object; it does not call the Microsoft Graph API to retrieve or create the actual item.
 #'
 #' @section Sharing:
 #' `create_share_link(type, expiry, password, scope)` returns a shareable link to the item. Its arguments are
@@ -42,7 +42,7 @@
 #' me <- gr2$get_user()
 #' mydrv <- me$get_drive()
 #'
-#' myfile <- drv$get_item_properties("myfile.docx")
+#' myfile <- drv$get_item("myfile.docx")
 #' myfile$properties
 #'
 #' # rename a file
@@ -61,7 +61,6 @@
 #'
 #' # delete the file (will ask for confirmation first)
 #' myfile$delete()
-#'
 #'
 #' }
 #' @format An R6 object of class `ms_drive_item`, inheriting from `ms_object`.

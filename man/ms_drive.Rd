@@ -35,6 +35,7 @@ Class representing a personal OneDrive or SharePoint document library.
 \item \code{open_item(path)}: Open a file or folder.
 \item \code{create_share_link(...)}: Create a shareable link for a file or folder.
 \item \code{delete_item(path, confirm)}: Delete a file or folder.
+\item \code{get_item(path)}: Get an item representing a file or folder.
 \item \code{get_item_properties(path)}: Get the properties (metadata) for a file or folder.
 \item \code{set_item_properties(path, ...)}: Set the properties for a file or folder.
 }
@@ -77,9 +78,11 @@ This function returns a URL to access the item, for \code{type="view"} or "\verb
 
 \code{delete_item} deletes a file or folder. By default, it will ask for confirmation first.
 
-\code{get_item_properties} returns an object of \link{ms_drive_item}, containing the properties (metadata) for a given file or folder. The properties can be found in the \code{properties} field of this object.
+\code{get_item} returns an object of class \link{ms_drive_item}, containing the properties (metadata) for a given file or folder and methods for working with it.
 
-\code{set_item_properties} sets the properties (metadata) of a file or folder. The new properties should be specified as individual named arguments to the method. Any existing properties that aren't listed as arguments will retain their previous values or be recalculated based on changes to other properties, as appropriate.
+\code{get_item_properties} is a convenience function that returns the properties of a file or folder as a list.
+
+\code{set_item_properties} sets the properties of a file or folder. The new properties should be specified as individual named arguments to the method. Any existing properties that aren't listed as arguments will retain their previous values or be recalculated based on changes to other properties, as appropriate.
 }
 
 \examples{
@@ -107,8 +110,8 @@ drv$create_share_link("myfile")
 drv$create_share_link("myfile", type="edit", expiry="24 hours")
 drv$create_share_link("myfile", password="Use-strong-passwords!")
 
-myfile <- drv$get_item_properties("myfile")
-myfile$properties
+# file metadata (name, date created, etc)
+drv$get_item_properties("myfile")
 
 # rename a file
 drv$set_item_properties("myfile", name="newname")

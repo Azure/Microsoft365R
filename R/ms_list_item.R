@@ -48,16 +48,30 @@ public=list(
     initialize=function(token, tenant=NULL, properties=NULL)
     {
         self$type <- "list item"
-        private$api_type <- "items"
+        context <- parse_listitem_context(properties[["fields@odata.context"]])
+        private$api_type <- file.path("sites", context$site_id, "lists", context$list_id, "items")
         super$initialize(token, tenant, properties)
     },
 
     print=function(...)
     {
-        cat("<Sharepoint list item '", self$properties$displayName, "'>\n", sep="")
+        cat("<Sharepoint list item '", self$properties$fields$Title, "'>\n", sep="")
         cat("  directory id:", self$properties$id, "\n")
+        cat("  web link:", self$properties$webUrl, "\n")
         cat("---\n")
         cat(format_public_methods(self))
         invisible(self)
     }
 ))
+
+
+parse_listitem_context <- function(x)
+{
+    if(is.null(x))
+        stop("Unable to initialize list item object: no OData context", call.=FALSE)
+    x <- sub("^.+#sites\\('", "", x)
+    sid <- utils::URLdecode(sub("'\\).+$", "", x))
+    x <- sub("^.+lists\\('", "", x)
+    lid <- sub("'\\).+", "", x)
+    list(site_id=sid, list_id=lid)
+}

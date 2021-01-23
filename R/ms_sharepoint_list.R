@@ -10,12 +10,16 @@
 #' - `properties`: The item properties (metadata).
 #' @section Methods:
 #' - `new(...)`: Initialize a new object. Do not call this directly; see 'Initialization' below.
-#' - `delete(confirm=TRUE)`: Delete this item. By default, ask for confirmation first.
-#' - `update(...)`: Update the item's properties in Microsoft Graph.
-#' - `do_operation(...)`: Carry out an arbitrary operation on the item.
-#' - `sync_fields()`: Synchronise the R object with the item metadata in Microsoft Graph.
+#' - `delete(confirm=TRUE)`: Delete this list. By default, ask for confirmation first.
+#' - `update(...)`: Update the list's properties in Microsoft Graph.
+#' - `do_operation(...)`: Carry out an arbitrary operation on the list.
+#' - `sync_fields()`: Synchronise the R object with the list metadata in Microsoft Graph.
 #' - `list_items(filter, select, all_metadata, pagesize)`: Queries the list and returns items as a data frame. See 'List querying below'.
 #' - `get_column_info()`: Return a data frame containing metadata on the columns (fields) in the list.
+#' - `get_item(id)`: Get an individual list item.
+#' - `create_item(...)`: Create a new list item, using the named arguments as fields.
+#' - `update_item(id, ...)`: Update the _data_ fields in the given item, using the named arguments. To update the item's metadata, use `get_item()` to retrieve the item object, then call its `update()` method.
+#' - `delete_item(confirm=TRUE)`: Delete a list item. By default, ask for confirmation first.
 #'
 #' @section Initialization:
 #' Creating new objects of this class should be done via the `get_list` method of the [ms_site] class. Calling the `new()` method for this class only constructs the R object; it does not call the Microsoft Graph API to retrieve or create the actual item.
@@ -30,7 +34,7 @@
 #' For more information, see [Use query parameters](https://docs.microsoft.com/en-us/graph/query-parameters?view=graph-rest-1.0) at the Graph API reference.
 #'
 #' @seealso
-#' [sharepoint_site], [ms_site]
+#' [sharepoint_site], [ms_site], [ms_list_item]
 #'
 #' [Microsoft Graph overview](https://docs.microsoft.com/en-us/graph/overview),
 #' [SharePoint sites API reference](https://docs.microsoft.com/en-us/graph/api/resources/sharepoint?view=graph-rest-1.0)
@@ -46,8 +50,9 @@
 #' lst$list_items()
 #' lst$list_items(filter="startswith(fields/firstname, 'John')", select="firstname,lastname")
 #'
+#' lst$create_item(firstname="Mary", lastname="Smith")
 #' lst$get_item("item-id")
-#' lst$update_item("item_id", firstname="Mary")
+#' lst$update_item("item_id", firstname="Eliza")
 #' lst$delete_item("item_id")
 #'
 #' }
@@ -84,16 +89,13 @@ public=list(
     create_item=function(...)
     {
         fields <- list(...)
-        res <- do_operation("items", body=list(fields=fields), http_verb="POST")
+        res <- self$do_operation("items", body=list(fields=fields), http_verb="POST")
         invisible(ms_list_item$new(self$token, self$tenant, res))
     },
 
     get_item=function(id)
     {
-        select <- if(is.null(select))
-            "fields"
-        else paste0("fields(select=", paste0(select, collapse=","), ")")
-        res <- do_operation(file.path("items", id), options=list(expand=select))
+        res <- self$do_operation(file.path("items", id))
         ms_list_item$new(self$token, self$tenant, res)
     },
 

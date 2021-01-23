@@ -138,6 +138,15 @@ lst$list_items(
 )
 ```
 
+There are also `get_item()`, `create_item()`, `update_item()` and `delete_item()` methods for working directly with individual items.
+
+```r
+item <- list$create_item(firstname="Mary", lastname="Smith")
+iid <- item$properties$id
+list$update_item(iid, firstname="Eliza")
+list$delete_item(iid)
+```
+
 Finally, you can retrieve subsites with `list_subsites()` and `get_subsite()`. These also return SharePoint site objects, so all the methods above are available for a subsite.
 
 Currently, Microsoft365R only supports SharePoint Online, the cloud-hosted version of the product. Support for SharePoint Server (the on-premises version) may come at a later stage.

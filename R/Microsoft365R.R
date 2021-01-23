@@ -17,7 +17,7 @@ utils::globalVariables(c("self", "private"))
     register_graph_class("driveItem", ms_drive_item,
         function(props) !is_empty(props$parentReference$driveId))
 
-    register_graph_class("list", ms_sharepoint_list,
+    register_graph_class("list", ms_list,
         function(props) !is_empty(props$list))
 
     add_methods()

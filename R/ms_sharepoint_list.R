@@ -10,12 +10,16 @@
 #' - `properties`: The item properties (metadata).
 #' @section Methods:
 #' - `new(...)`: Initialize a new object. Do not call this directly; see 'Initialization' below.
-#' - `delete(confirm=TRUE)`: Delete this item. By default, ask for confirmation first.
-#' - `update(...)`: Update the item's properties in Microsoft Graph.
-#' - `do_operation(...)`: Carry out an arbitrary operation on the item.
-#' - `sync_fields()`: Synchronise the R object with the item metadata in Microsoft Graph.
+#' - `delete(confirm=TRUE)`: Delete this list. By default, ask for confirmation first.
+#' - `update(...)`: Update the list's properties in Microsoft Graph.
+#' - `do_operation(...)`: Carry out an arbitrary operation on the list.
+#' - `sync_fields()`: Synchronise the R object with the list metadata in Microsoft Graph.
 #' - `list_items(filter, select, all_metadata, pagesize)`: Queries the list and returns items as a data frame. See 'List querying below'.
 #' - `get_column_info()`: Return a data frame containing metadata on the columns (fields) in the list.
+#' - `get_item(id)`: Get an individual list item.
+#' - `create_item(...)`: Create a new list item, using the named arguments as fields.
+#' - `update_item(id, ...)`: Update the _data_ fields in the given item, using the named arguments. To update the item's metadata, use `get_item()` to retrieve the item object, then call its `update()` method.
+#' - `delete_item(confirm=TRUE)`: Delete a list item. By default, ask for confirmation first.
 #'
 #' @section Initialization:
 #' Creating new objects of this class should be done via the `get_list` method of the [ms_site] class. Calling the `new()` method for this class only constructs the R object; it does not call the Microsoft Graph API to retrieve or create the actual item.
@@ -30,7 +34,7 @@
 #' For more information, see [Use query parameters](https://docs.microsoft.com/en-us/graph/query-parameters?view=graph-rest-1.0) at the Graph API reference.
 #'
 #' @seealso
-#' [sharepoint_site], [ms_site]
+#' [sharepoint_site], [ms_site], [ms_list_item]
 #'
 #' [Microsoft Graph overview](https://docs.microsoft.com/en-us/graph/overview),
 #' [SharePoint sites API reference](https://docs.microsoft.com/en-us/graph/api/resources/sharepoint?view=graph-rest-1.0)
@@ -46,10 +50,15 @@
 #' lst$list_items()
 #' lst$list_items(filter="startswith(fields/firstname, 'John')", select="firstname,lastname")
 #'
+#' lst$create_item(firstname="Mary", lastname="Smith")
+#' lst$get_item("item-id")
+#' lst$update_item("item_id", firstname="Eliza")
+#' lst$delete_item("item_id")
+#'
 #' }
-#' @format An R6 object of class `ms_sharepoint_list`, inheriting from `ms_object`.
+#' @format An R6 object of class `ms_list`, inheriting from `ms_object`.
 #' @export
-ms_sharepoint_list <- R6::R6Class("ms_sharepoint_list", inherit=ms_object,
+ms_list <- R6::R6Class("ms_list", inherit=ms_object,
 
 public=list(
 
@@ -60,7 +69,7 @@ public=list(
         super$initialize(token, tenant, properties)
     },
 
-    list_items=function(filter=NULL, select=NULL, all_metadata=FALSE, pagesize=5000)
+    list_items=function(filter=NULL, select=NULL, all_metadata=FALSE, as_data_frame=TRUE, pagesize=5000)
     {
         select <- if(is.null(select))
             "fields"
@@ -68,11 +77,37 @@ public=list(
         options <- list(expand=select, `$filter`=filter, `$top`=pagesize)
         headers <- httr::add_headers(Prefer="HonorNonIndexedQueriesWarningMayFailRandomly")
 
-        items <- self$do_operation("items", options=options, headers, simplify=TRUE)
-        df <- private$get_paged_list(items, simplify=TRUE)
-        if(!all_metadata)
+        items <- self$do_operation("items", options=options, headers, simplify=as_data_frame)
+        df <- private$get_paged_list(items, simplify=as_data_frame)
+        if(!as_data_frame)
+            lapply(df, function(item) ms_list_item$new(self$token, self$tenant, item))
+        else if(!all_metadata)
             df$fields
         else df
+    },
+
+    create_item=function(...)
+    {
+        fields <- list(...)
+        res <- self$do_operation("items", body=list(fields=fields), http_verb="POST")
+        invisible(ms_list_item$new(self$token, self$tenant, res))
+    },
+
+    get_item=function(id)
+    {
+        res <- self$do_operation(file.path("items", id))
+        ms_list_item$new(self$token, self$tenant, res)
+    },
+
+    update_item=function(id, ...)
+    {
+        fields <- list(...)
+        self$get_item(id)$update(fields=list(...))
+    },
+
+    delete_item=function(id, confirm=TRUE)
+    {
+        self$get_item(id)$delete(confirm=confirm)
     },
 
     get_column_info=function()

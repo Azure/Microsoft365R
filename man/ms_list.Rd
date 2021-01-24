@@ -28,7 +28,7 @@ Class representing a list in a SharePoint site.
 \item \code{update(...)}: Update the list's properties in Microsoft Graph.
 \item \code{do_operation(...)}: Carry out an arbitrary operation on the list.
 \item \code{sync_fields()}: Synchronise the R object with the list metadata in Microsoft Graph.
-\item \code{list_items(filter, select, all_metadata, pagesize)}: Queries the list and returns items as a data frame. See 'List querying below'.
+\item \code{list_items(filter, select, all_metadata, as_data_frame, pagesize)}: Queries the list and returns items as a data frame. See 'List querying' below.
 \item \code{get_column_info()}: Return a data frame containing metadata on the columns (fields) in the list.
 \item \code{get_item(id)}: Get an individual list item.
 \item \code{create_item(...)}: Create a new list item, using the named arguments as fields.
@@ -49,6 +49,7 @@ Creating new objects of this class should be done via the \code{get_list} method
 \item \code{filter}: A string giving a logical expression to filter the rows to return. Note that column names used in the expression must be prefixed with \verb{fields/} to distinguish them from item metadata.
 \item \code{select}: A string containing comma-separated column names to include in the returned data frame. If not supplied, includes all columns.
 \item \code{all_metadata}: If TRUE, the returned data frame will contain extended metadata as separate columns, while the data fields will be in a nested data frame named \code{fields}.
+\item \code{as_data_frame}: If FALSE, return the result as a list of individual \code{ms_list_item} objects, rather than a data frame. The \code{all_metadata} argument is ignored if \code{as_data_frame=FALSE}.
 \item \code{pagesize}: The number of results to return for each call to the REST endpoint. You can try reducing this argument below the default of 5000 if you are experiencing timeouts.
 }
 

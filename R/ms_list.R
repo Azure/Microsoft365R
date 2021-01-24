@@ -14,7 +14,7 @@
 #' - `update(...)`: Update the list's properties in Microsoft Graph.
 #' - `do_operation(...)`: Carry out an arbitrary operation on the list.
 #' - `sync_fields()`: Synchronise the R object with the list metadata in Microsoft Graph.
-#' - `list_items(filter, select, all_metadata, pagesize)`: Queries the list and returns items as a data frame. See 'List querying below'.
+#' - `list_items(filter, select, all_metadata, as_data_frame, pagesize)`: Queries the list and returns items as a data frame. See 'List querying' below.
 #' - `get_column_info()`: Return a data frame containing metadata on the columns (fields) in the list.
 #' - `get_item(id)`: Get an individual list item.
 #' - `create_item(...)`: Create a new list item, using the named arguments as fields.
@@ -29,6 +29,7 @@
 #' - `filter`: A string giving a logical expression to filter the rows to return. Note that column names used in the expression must be prefixed with `fields/` to distinguish them from item metadata.
 #' - `select`: A string containing comma-separated column names to include in the returned data frame. If not supplied, includes all columns.
 #' - `all_metadata`: If TRUE, the returned data frame will contain extended metadata as separate columns, while the data fields will be in a nested data frame named `fields`.
+#' - `as_data_frame`: If FALSE, return the result as a list of individual `ms_list_item` objects, rather than a data frame. The `all_metadata` argument is ignored if `as_data_frame=FALSE`.
 #' - `pagesize`: The number of results to return for each call to the REST endpoint. You can try reducing this argument below the default of 5000 if you are experiencing timeouts.
 #'
 #' For more information, see [Use query parameters](https://docs.microsoft.com/en-us/graph/query-parameters?view=graph-rest-1.0) at the Graph API reference.

@@ -45,6 +45,7 @@ Creating new objects of this class should be done via the \code{get_item} method
 \itemize{
 \item \code{type}: Either "view" for a read-only link, "edit" for a read-write link, or "embed" for a link that can be embedded in a web page. The last one is only available for personal OneDrive.
 \item \code{expiry}: How long the link is valid for. The default is 7 days; you can set an alternative like "15 minutes", "24 hours", "2 weeks", "3 months", etc. To leave out the expiry date, set this to NULL.
+\item \code{password}: An optional password to protect the link.
 \item \code{scope}: Optionally the scope of the link, either "anonymous" or "organization". The latter allows only users in your AAD tenant to access the link, and is only available for OneDrive for Business or SharePoint.
 }
 

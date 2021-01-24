@@ -65,7 +65,7 @@ public=list(
     initialize=function(token, tenant=NULL, properties=NULL)
     {
         self$type <- "list"
-        private$api_type <- "lists"
+        private$api_type <- file.path("sites", properties$parentReference$siteId, "lists")
         super$initialize(token, tenant, properties)
     },
 
@@ -114,16 +114,6 @@ public=list(
     {
         res <- self$do_operation(options=list(expand="columns"), simplify=TRUE)
         res$columns
-    },
-
-    do_operation=function(op="", ...)
-    {
-        op <- sub("/$", "", file.path(
-            "sites", self$properties$parentReference$siteId,
-            "lists", self$properties$id,
-            op
-        ))
-        call_graph_endpoint(self$token, op, ...)
     },
 
     print=function(...)

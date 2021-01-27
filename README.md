@@ -10,20 +10,7 @@ The primary repo for this package is at https://github.com/Azure/Microsoft365R; 
 
 ## Authentication details
 
-The first time you call one of the Microsoft365R functions (see below), it will use your Internet browser to authenticate you with Azure Active Directory, in a similar manner to other web apps. You will get a dialog box asking for permission to access your information.
-
-For authentication purposes, the package is registered as an app in the 'aicatr' AAD tenant; depending on your organisation's security policy, you may have to get an admin to grant it access to your tenant.  The app ID is **d44a05d5-c6a5-4bbb-82d2-443123722380** and the default requested permissions are
-
-- User.Read
-- Files.ReadWrite.All
-- Group.ReadWrite.All
-- Directory.AccessAsUser.All
-- Mail.Send
-- Mail.ReadWrite
-- AllSites.Manage
-- email, profile, openid, offline_access
-
-Alternatively, if the environment variable `CLIMICROSOFT365_AADAPPID` is set, Microsoft365R will use its value as the app ID for authenticating to the Microsoft 365 Business services (SharePoint and OneDrive for Business). You can also specify the app ID as an argument when calling the functions below.
+The first time you call one of the Microsoft365R functions (see below), it will use your Internet browser to authenticate with Azure Active Directory, in a similar manner to other web apps. See [app_registration.md](https://github.com/Azure/Microsoft365R/blob/master/inst/app_registration.md) for more details on the app registration and permissions requested.
 
 ## OneDrive
 

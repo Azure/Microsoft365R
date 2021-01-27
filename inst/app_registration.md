@@ -5,7 +5,7 @@ Microsoft365R is registered as an app in the `aicatr` AAD tenant. Depending on y
 - User.Read
 - Files.ReadWrite.All
 - Group.ReadWrite.All
-- Directory.AccessAsUser.All
+- Directory.Read.All
 - Mail.Send
 - Mail.ReadWrite
 - AllSites.Manage

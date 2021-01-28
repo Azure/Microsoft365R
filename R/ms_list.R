@@ -59,7 +59,7 @@
 #'
 #' df <- data.frame(
 #'     firstname=c("Satya", "Mark", "Tim", "Jeff", "Sundar"),
-#'     lastname=c("Nadella", "Zuckerberg", "Cook", "Pichai")
+#'     lastname=c("Nadella", "Zuckerberg", "Cook", "Bezos", "Pichai")
 #' )
 #' lst$bulk_import(df)
 #'
@@ -121,7 +121,7 @@ public=list(
     bulk_import=function(data)
     {
         stopifnot("Must supply a data frame"=is.data.frame(data))
-        invisible(lapply(seq_len(nrow(data)), function(i) do.call(self$create_item, data[i, ])))
+        invisible(lapply(seq_len(nrow(data)), function(i) do.call(self$create_item, data[i, , drop=FALSE])))
     },
 
     get_column_info=function()

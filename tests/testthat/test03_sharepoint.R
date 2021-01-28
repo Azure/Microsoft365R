@@ -85,4 +85,11 @@ test_that("SharePoint client works",
     expect_silent(lst$delete_item(newid, confirm=FALSE))
     items4 <- lst$list_items()
     expect_identical(nrow(items), nrow(items4))
+
+    df <- data.frame(Title=c("item1", "item2", "item3"), stringsAsFactors=FALSE)
+    items5 <- lst$bulk_import(df)
+    expect_is(items5, "list")
+    expect_true(all(sapply(items5, inherits, "ms_list_item")))
+
+    expect_silent(lapply(items5, function(it) it$delete(confirm=FALSE)))
 })

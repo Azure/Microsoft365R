@@ -34,6 +34,7 @@ Class representing a list in a SharePoint site.
 \item \code{create_item(...)}: Create a new list item, using the named arguments as fields.
 \item \code{update_item(id, ...)}: Update the \emph{data} fields in the given item, using the named arguments. To update the item's metadata, use \code{get_item()} to retrieve the item object, then call its \code{update()} method.
 \item \code{delete_item(confirm=TRUE)}: Delete a list item. By default, ask for confirmation first.
+\item \code{bulk_import(data)}: Imports a data frame into the list.
 }
 }
 
@@ -71,6 +72,12 @@ lst$create_item(firstname="Mary", lastname="Smith")
 lst$get_item("item-id")
 lst$update_item("item_id", firstname="Eliza")
 lst$delete_item("item_id")
+
+df <- data.frame(
+    firstname=c("Satya", "Mark", "Tim", "Jeff", "Sundar"),
+    lastname=c("Nadella", "Zuckerberg", "Cook", "Bezos", "Pichai")
+)
+lst$bulk_import(df)
 
 }
 }

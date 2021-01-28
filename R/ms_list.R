@@ -20,6 +20,7 @@
 #' - `create_item(...)`: Create a new list item, using the named arguments as fields.
 #' - `update_item(id, ...)`: Update the _data_ fields in the given item, using the named arguments. To update the item's metadata, use `get_item()` to retrieve the item object, then call its `update()` method.
 #' - `delete_item(confirm=TRUE)`: Delete a list item. By default, ask for confirmation first.
+#' - `bulk_import(data)`: Imports a data frame into the list.
 #'
 #' @section Initialization:
 #' Creating new objects of this class should be done via the `get_list` method of the [ms_site] class. Calling the `new()` method for this class only constructs the R object; it does not call the Microsoft Graph API to retrieve or create the actual item.
@@ -55,6 +56,12 @@
 #' lst$get_item("item-id")
 #' lst$update_item("item_id", firstname="Eliza")
 #' lst$delete_item("item_id")
+#'
+#' df <- data.frame(
+#'     firstname=c("Satya", "Mark", "Tim", "Jeff", "Sundar"),
+#'     lastname=c("Nadella", "Zuckerberg", "Cook", "Pichai")
+#' )
+#' lst$bulk_import(df)
 #'
 #' }
 #' @format An R6 object of class `ms_list`, inheriting from `ms_object`.
@@ -109,6 +116,12 @@ public=list(
     delete_item=function(id, confirm=TRUE)
     {
         self$get_item(id)$delete(confirm=confirm)
+    },
+
+    bulk_import=function(data)
+    {
+        stopifnot("Must supply a data frame"=is.data.frame(data))
+        invisible(lapply(seq_len(nrow(data)), function(i) do.call(self$create_item, data[i, ])))
     },
 
     get_column_info=function()

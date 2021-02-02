@@ -20,6 +20,12 @@ utils::globalVariables(c("self", "private"))
     register_graph_class("list", ms_list,
         function(props) !is_empty(props$list))
 
+    register_graph_class("team", ms_team,
+        function(props) "memberSettings" %in% names(props))
+
+    register_graph_class("channel", ms_channel,
+        function(props) "moderationSettings" %in% names(props))
+
     add_methods()
 }
 

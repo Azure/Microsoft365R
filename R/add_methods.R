@@ -94,6 +94,13 @@ add_methods <- function()
         ms_drive$new(self$token, self$tenant, self$call_graph_endpoint(op))
     })
 
+    ms_graph$set("public", "get_team", overwrite=TRUE,
+    function(team_id)
+    {
+        op <- file.path("teams", team_id)
+        ms_team$new(self$token, self$tenant, self$call_graph_endpoint(op))
+    })
+
     az_user$set("public", "list_drives", overwrite=TRUE,
     function()
     {
@@ -108,6 +115,32 @@ add_methods <- function()
             "drive"
         else file.path("drives", drive_id)
         ms_drive$new(self$token, self$tenant, self$do_operation(op))
+    })
+
+    az_user$set("public", "get_team", overwrite=TRUE,
+    function(team_name=NULL, team_id=NULL)
+    {
+        if(!is.null(team_name) && is.null(team_id))
+        {
+            myteams <- self$list_teams()
+            myteamnames <- sapply(myteams, function(team) team$properties$displayName)
+            if(!(team_name %in% myteamnames))
+                stop("Team '", team_name, "' not found", call.=FALSE)
+            myteams[[which(team_name == myteamnames)]]
+        }
+        else if(is.null(team_name) && !is.null(team_id))
+        {
+            op <- file.path("teams", team_id)
+            ms_team$new(self$token, self$tenant, self$call_graph_endpoint(op))
+        }
+        else stop("Must supply either team name or ID", call.=FALSE)
+    })
+
+    az_user$set("public", "list_teams", overwrite=TRUE,
+    function()
+    {
+        res <- private$get_paged_list(self$do_operation("joinedTeams"))
+        private$init_list_objects(res, "team")
     })
 
     az_group$set("public", "get_sharepoint_site", overwrite=TRUE,

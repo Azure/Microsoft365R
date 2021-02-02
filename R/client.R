@@ -4,6 +4,7 @@
 #' @param app A custom app registration ID to use for authentication. For `personal_onedrive`, the default is to use Microsoft365R's internal app ID. For `business_onedrive` and `sharepoint_site`, see below.
 #' @param scopes The Microsoft Graph scopes (permissions) to obtain.
 #' @param site_url,site_id For `sharepoint_site`, the web URL and ID of the SharePoint site to retrieve. Supply one or the other, but not both.
+#' @param team_name,team_id For `team`, the name and ID of the team to retrieve. Supply one or the other, but not both.
 #' @param ... Optional arguments to be passed to `AzureGraph::create_graph_login`.
 #' @details
 #' `personal_onedrive`, `business_onedrive` and `sharepoint_site` provide easy access to OneDrive, OneDrive for Business, and SharePoint Online respectively. On first use, they will call your web browser to authenticate with Azure Active Directory, in a similar manner to other web apps. You will get a dialog box asking for permission to access your information. You only have to authenticate once per client; your credentials will be saved and reloaded in subsequent sessions.
@@ -80,6 +81,24 @@ sharepoint_site <- function(site_url=NULL, site_id=NULL,
 {
     app <- choose_app(app)
     do_login(tenant, app, scopes, ...)$get_sharepoint_site(site_url, site_id)
+}
+
+#' @rdname client
+#' @export
+team <- function(team_name=NULL, team_id=NULL,
+                 tenant=Sys.getenv("CLIMICROSOFT365_TENANT", "common"),
+                 app=Sys.getenv("CLIMICROSOFT365_AADAPPID"),
+                 scopes=".default",
+                 ...)
+{
+    app <- choose_app(app)
+    login <- do_login(tenant, app, scopes, ...)
+
+    if(!is.null(team_name) && is.null(team_id))
+        login$get_user()$get_team(team_name)
+    else if(is.null(team_name) && !is.null(team_id))
+        login$get_team(team_id)
+    else stop("Must supply either team name or ID", call.=FALSE)
 }
 
 

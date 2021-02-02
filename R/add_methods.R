@@ -131,7 +131,7 @@ add_methods <- function()
         else if(is.null(team_name) && !is.null(team_id))
         {
             op <- file.path("teams", team_id)
-            ms_team$new(self$token, self$tenant, self$call_graph_endpoint(op))
+            ms_team$new(self$token, self$tenant, call_graph_endpoint(self$token, op))
         }
         else stop("Must supply either team name or ID", call.=FALSE)
     })
@@ -140,7 +140,7 @@ add_methods <- function()
     function()
     {
         res <- private$get_paged_list(self$do_operation("joinedTeams"))
-        private$init_list_objects(res, "team")
+        lapply(private$init_list_objects(res, "team"), function(team) team$sync_fields())
     })
 
     az_group$set("public", "get_sharepoint_site", overwrite=TRUE,
@@ -164,5 +164,12 @@ add_methods <- function()
             "drive"
         else file.path("drives", drive_id)
         ms_drive$new(self$token, self$tenant, self$do_operation(op))
+    })
+
+    az_group$set("public", "get_team", overwrite=TRUE,
+    function()
+    {
+        op <- file.path("teams", self$properties$id)
+        ms_team$new(self$token, self$tenant, call_graph_endpoint(self$token, op))
     })
 }

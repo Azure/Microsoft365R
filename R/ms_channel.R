@@ -10,6 +10,30 @@ public=list(
         super$initialize(token, tenant, properties)
     },
 
+    send_message=function(body, ...)
+    {
+        call_body <- list(body=body, ...)
+        res <- self$do_operation("messages", body=call_body, http_verb="POST")
+        chat_message$new(self$token, self$tenant, res)
+    },
+
+    list_messages=function(n=50)
+    {
+        lst <- private$get_paged_list(self$do_operation("messages"))
+        private$init_list_objects(lst, "chatMessage")
+    },
+
+    get_message=function(message_id)
+    {
+        op <- file.path("messages", message_id)
+        chat_message$new(self$token, self$tenant, self$do_operation(op))
+    },
+
+    delete_message=function(message_id, confirm=TRUE)
+    {
+        self$get_message(message_id)$delete(confirm=confirm)
+    },
+
     print=function(...)
     {
         cat("<Teams channel '", self$properties$displayName, "'>\n", sep="")

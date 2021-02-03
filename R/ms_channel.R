@@ -10,8 +10,6 @@ public=list(
         super$initialize(token, tenant, properties)
     },
 
-    post_message=function() {},
-
     print=function(...)
     {
         cat("<Teams channel '", self$properties$displayName, "'>\n", sep="")

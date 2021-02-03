@@ -25,23 +25,33 @@ public=list(
 
     list_drives=function()
     {
-        op <- private$group_path("drives")
-        lst <- private$get_paged_list(call_graph_endpoint(self$token, op))
-        private$init_list_objects(lst, "drive")
+        res <- private$get_paged_list(self$do_group_operation("drives"))
+        private$init_list_objects(res, "drive")
     },
 
     get_drive=function(drive_id=NULL)
     {
         op <- if(is.null(drive_id))
-            private$group_path("drive")
-        else private$group_path("drives", drive_id)
-        ms_drive$new(self$token, self$tenant, call_graph_endpoint(self$token, op))
+            "drive"
+        else file.path("drives", drive_id)
+        ms_drive$new(self$token, self$tenant, self$do_group_operation(op))
     },
 
     get_sharepoint_site=function()
     {
-        op <- private$group_path("sites/root")
-        ms_site$new(self$token, self$tenant, call_graph_endpoint(self$token, op))
+        op <- "sites/root"
+        ms_site$new(self$token, self$tenant, self$do_group_operation(op))
+    },
+
+    get_group=function()
+    {
+        az_group$new(self$token, self$tenant, self$do_group_operation())
+    },
+
+    do_group_operation=function(op="", ...)
+    {
+        op <- sub("/$", "", file.path("groups", self$properties$id, op))
+        call_graph_endpoint(self$token, op, ...)
     },
 
     print=function(...)
@@ -53,13 +63,5 @@ public=list(
         cat("---\n")
         cat(format_public_methods(self))
         invisible(self)
-    }
-),
-
-private=list(
-
-    group_path=function(...)
-    {
-        file.path("groups", self$properties$id, ...)
     }
 ))

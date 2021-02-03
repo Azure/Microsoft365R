@@ -22,13 +22,13 @@ public=list(
     get_reply=function(message_id)
     {
         op <- file.path("replies", message_id)
-        chat_message$new(self$token, self$tenant, self$do_operation(op))
+        ms_chat_message$new(self$token, self$tenant, self$do_operation(op))
     },
 
     send_reply=function(body, ...)
     {
         res <- self$do_operation("replies", body=call_body, http_verb="POST")
-        chat_message$new(self$token, self$tenant, res)
+        ms_chat_message$new(self$token, self$tenant, res)
     },
 
     delete_reply=function(message_id, confirm=TRUE)
@@ -50,7 +50,7 @@ public=list(
 parse_chatmsg_context <- function(x)
 {
     if(is.null(x))
-        stop("Unable to initialize list item object: no OData context", call.=FALSE)
+        stop("Unable to initialize Teams message object: no OData context", call.=FALSE)
     # is this a channel or chat msg?
     if(grepl("^.+#teams\\('", x))
     {

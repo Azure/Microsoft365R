@@ -34,16 +34,22 @@ public=list(
         self$get_message(message_id)$delete(confirm=confirm)
     },
 
-    get_group=function()
+    list_files=function(path="", ...)
     {
-        az_group$new(self$token, self$tenant, self$do_group_operation())
+        path <- sub("/$", "", file.path(self$properties$displayName, path))
+        private$get_drive()$list_files(path, ...)
     },
 
-    do_group_operation=function(op="", ...)
+    download_file=function(src, dest=basename(src), ...)
     {
-        gid <- parse_channel_weburl(self$properties$webUrls)
-        op <- sub("/$", "", file.path("groups", gid, op))
-        call_graph_endpoint(self$token, op, ...)
+        src <- file.path(self$properties$displayName, src)
+        private$get_drive()$download_file(src, dest, ...)
+    },
+
+    upload_file=function(src, dest, ...)
+    {
+        dest <- file.path(self$properties$displayName, dest)
+        private$get_drive()$upload_file(src, dest, ...)
     },
 
     print=function(...)
@@ -58,6 +64,26 @@ public=list(
 ),
 
 private=list(
+
+    get_drive=function(drive_id=NULL)
+    {
+        op <- if(is.null(drive_id))
+            "drive"
+        else file.path("drives", drive_id)
+        ms_drive$new(self$token, self$tenant, private$do_group_operation(op))
+    },
+
+    get_group=function()
+    {
+        az_group$new(self$token, self$tenant, private$do_group_operation())
+    },
+
+    do_group_operation=function(op="", ...)
+    {
+        gid <- parse_channel_weburl(self$properties$webUrl)
+        op <- sub("/$", "", file.path("groups", gid, op))
+        call_graph_endpoint(self$token, op, ...)
+    },
 
     get_paged_list=function(lst, next_link_name="@odata.nextLink", value_name="value", simplify=FALSE, n=Inf)
     {

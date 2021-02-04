@@ -4,6 +4,7 @@
 \alias{personal_onedrive}
 \alias{business_onedrive}
 \alias{sharepoint_site}
+\alias{team}
 \title{OneDrive and Sharepoint Online clients}
 \usage{
 personal_onedrive(app = .microsoft365r_app_id,
@@ -13,6 +14,10 @@ business_onedrive(tenant = Sys.getenv("CLIMICROSOFT365_TENANT", "common"),
   app = Sys.getenv("CLIMICROSOFT365_AADAPPID"), scopes = ".default", ...)
 
 sharepoint_site(site_url = NULL, site_id = NULL,
+  tenant = Sys.getenv("CLIMICROSOFT365_TENANT", "common"),
+  app = Sys.getenv("CLIMICROSOFT365_AADAPPID"), scopes = ".default", ...)
+
+team(team_name = NULL, team_id = NULL,
   tenant = Sys.getenv("CLIMICROSOFT365_TENANT", "common"),
   app = Sys.getenv("CLIMICROSOFT365_AADAPPID"), scopes = ".default", ...)
 }
@@ -26,6 +31,8 @@ sharepoint_site(site_url = NULL, site_id = NULL,
 \item{tenant}{For \code{business_onedrive} and \code{sharepoint_site}, the name of your Azure Active Directory (AAD) tenant. If not supplied, use the value of the \code{CLIMICROSOFT365_TENANT} environment variable, or "common" if that is unset.}
 
 \item{site_url, site_id}{For \code{sharepoint_site}, the web URL and ID of the SharePoint site to retrieve. Supply one or the other, but not both.}
+
+\item{team_name, team_id}{For \code{team}, the name and ID of the team to retrieve. Supply one or the other, but not both.}
 }
 \value{
 For \code{personal_onedrive} and \code{business_onedrive}, an object of class \code{ms_drive}. For \code{sharepoint_site}, an object of class \code{ms_site}.

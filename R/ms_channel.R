@@ -87,16 +87,13 @@ private=list(
 
     get_paged_list=function(lst, next_link_name="@odata.nextLink", value_name="value", simplify=FALSE, n=Inf)
     {
-        bind_fn <- if(requireNamespace("vctrs"))
-            vctrs::vec_rbind
-        else base::rbind
         res <- lst[[value_name]]
         if(n <= 0) n <- Inf
         while(!is_empty(lst[[next_link_name]]) && length(res) < n)
         {
             lst <- call_graph_url(self$token, lst[[next_link_name]], simplify=simplify)
             res <- if(simplify)
-                bind_fn(res, lst[[value_name]])  # this assumes all objects have the exact same fields
+                vctrs::vec_rbind(res, lst[[value_name]])
             else c(res, lst[[value_name]])
         }
         if(n < length(res))

@@ -5,10 +5,8 @@ public=list(
     initialize=function(token, tenant=NULL, properties=NULL)
     {
         self$type <- "Teams message"
-        context <- parse_chatmsg_context(properties[["fields@odata.context"]])
-        private$api_type <- if(!is.null(context$team_id))
-            file.path("teams", context$team_id, "channels", context$channel_id, "messages")
-        else file.path("users", context$user_id, "chats", context$chat_id, "messages")
+        context <- properties$channelIdentity
+        private$api_type <- file.path("teams", context$teamId, "channels", context$channelId, "messages")
         super$initialize(token, tenant, properties)
     },
 
@@ -40,6 +38,8 @@ public=list(
     {
         cat("<Teams message>\n", sep="")
         cat("  directory id:", self$properties$id, "\n")
+        cat("  team:", self$properties$channelIdentity$teamId, "\n")
+        cat("  channel:", self$properties$channelIdentity$channelId, "\n")
         cat("---\n")
         cat(format_public_methods(self))
         invisible(self)
@@ -62,33 +62,8 @@ private=list(
                 bind_fn(res, lst[[value_name]])  # this assumes all objects have the exact same fields
             else c(res, lst[[value_name]])
         }
-        if(n < Inf)
+        if(n < length(res))
             res[seq_len(n)]
         else res
     }
 ))
-
-
-parse_chatmsg_context <- function(x)
-{
-    if(is.null(x))
-        stop("Unable to initialize Teams message object: no OData context", call.=FALSE)
-    # is this a channel or chat msg?
-    if(grepl("^.+#teams\\('", x))
-    {
-        x <- sub("^.+#teams\\('", "", x)
-        tid <- utils::URLdecode(sub("'\\).+$", "", x))
-        x <- sub("^.+channels\\('", "", x)
-        cid <- sub("'\\).+", "", x)
-        list(team_id=tid, channel_id=cid)
-    }
-    else
-    {
-        x <- sub("^.+#users\\('", "", x)
-        uid <- utils::URLdecode(sub("'\\).+$", "", x))
-        x <- sub("^.+chats\\('", "", x)
-        cid <- sub("'\\).+", "", x)
-        list(user_id=uid, chat_id=cid)
-    }
-}
-

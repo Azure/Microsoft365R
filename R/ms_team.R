@@ -19,7 +19,7 @@ public=list(
     {
         op <- if(is.null(channel_id))
             "primaryChannel"
-        else file.path("channels", drive_id)
+        else file.path("channels", channel_id)
         ms_channel$new(self$token, self$tenant, self$do_operation(op))
     },
 

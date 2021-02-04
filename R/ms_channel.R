@@ -5,7 +5,7 @@ public=list(
     initialize=function(token, tenant=NULL, properties=NULL)
     {
         self$type <- "channel"
-        gid <- parse_channel_weburl(properties[["webUrl"]])
+        gid <- parse_channel_weburl(properties$webUrl)
         private$api_type <- file.path("teams", gid, "channels")
         super$initialize(token, tenant, properties)
     },
@@ -26,12 +26,24 @@ public=list(
     get_message=function(message_id)
     {
         op <- file.path("messages", message_id)
-        chat_message$new(self$token, self$tenant, self$do_operation(op))
+        ms_chat_message$new(self$token, self$tenant, self$do_operation(op))
     },
 
     delete_message=function(message_id, confirm=TRUE)
     {
         self$get_message(message_id)$delete(confirm=confirm)
+    },
+
+    get_group=function()
+    {
+        az_group$new(self$token, self$tenant, self$do_group_operation())
+    },
+
+    do_group_operation=function(op="", ...)
+    {
+        gid <- parse_channel_weburl(self$properties$webUrls)
+        op <- sub("/$", "", file.path("groups", gid, op))
+        call_graph_endpoint(self$token, op, ...)
     },
 
     print=function(...)
@@ -61,7 +73,7 @@ private=list(
                 bind_fn(res, lst[[value_name]])  # this assumes all objects have the exact same fields
             else c(res, lst[[value_name]])
         }
-        if(n < Inf)
+        if(n < length(res))
             res[seq_len(n)]
         else res
     }

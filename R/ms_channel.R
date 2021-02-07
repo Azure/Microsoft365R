@@ -2,11 +2,14 @@ ms_channel <- R6::R6Class("ms_channel", inherit=ms_object,
 
 public=list(
 
+    team_id=NULL,
+
     initialize=function(token, tenant=NULL, properties=NULL, team_id)
     {
         self$type <- "channel"
+        self$team_id <- team_id
         gid <- parse_channel_weburl(properties$webUrl)
-        private$api_type <- file.path("teams", gid, "channels")
+        private$api_type <- file.path("teams", self$team_id, "channels")
         super$initialize(token, tenant, properties)
     },
 
@@ -14,19 +17,21 @@ public=list(
     {
         call_body <- list(body=body, ...)
         res <- self$do_operation("messages", body=call_body, http_verb="POST")
-        chat_message$new(self$token, self$tenant, res)
+        chat_message$new(self$token, self$tenant, res,
+                         parent=list(team_id=self$team_id, channel_id=self$properties$id))
     },
 
     list_messages=function(n=50)
     {
         lst <- private$get_paged_list(self$do_operation("messages"), n=n)
-        private$init_list_objects(lst, "chatMessage")
+        private$init_list_objects(lst, "chatMessage", parent=list(team_id=self$team_id, channel_id=self$properties$id))
     },
 
     get_message=function(message_id)
     {
         op <- file.path("messages", message_id)
-        ms_chat_message$new(self$token, self$tenant, self$do_operation(op))
+        ms_chat_message$new(self$token, self$tenant, self$do_operation(op),
+                            parent=list(team_id=self$team_id, channel_id=self$properties$id))
     },
 
     delete_message=function(message_id, confirm=TRUE)

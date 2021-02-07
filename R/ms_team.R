@@ -12,7 +12,7 @@ public=list(
     list_channels=function()
     {
         res <- private$get_paged_list(self$do_operation("channels"))
-        private$init_list_objects(res, "channel")
+        private$init_list_objects(res, "channel", team_id=self$properties$id)
     },
 
     get_channel=function(channel_id=NULL)
@@ -20,7 +20,7 @@ public=list(
         op <- if(is.null(channel_id))
             "primaryChannel"
         else file.path("channels", channel_id)
-        ms_channel$new(self$token, self$tenant, self$do_operation(op))
+        ms_channel$new(self$token, self$tenant, self$do_operation(op), team_id=self$properties$id)
     },
 
     list_drives=function()

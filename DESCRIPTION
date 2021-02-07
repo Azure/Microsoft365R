@@ -14,7 +14,7 @@ Depends:
     R (>= 3.3)
 Imports:
     AzureAuth,
-    AzureGraph (>= 1.2.0),
+    AzureGraph (>= 1.2.0.9000),
     utils,
     curl,
     httr,
@@ -28,3 +28,5 @@ Suggests:
     testthat
 Roxygen: list(markdown=TRUE, r6=FALSE, old_usage=TRUE)
 RoxygenNote: 7.1.1
+Remotes:
+    Azure/AzureGraph

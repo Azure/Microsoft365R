@@ -2,7 +2,9 @@ ms_chat_message <- R6::R6Class("ms_chat_message", inherit=ms_object,
 
 public=list(
 
-    initialize=function(token, tenant=NULL, properties=NULL)
+    parent=NULL,
+
+    initialize=function(token, tenant=NULL, properties=NULL, parent)
     {
         self$type <- "Teams message"
         context <- properties$channelIdentity
@@ -44,23 +46,23 @@ public=list(
         cat(format_public_methods(self))
         invisible(self)
     }
-),
-
-private=list(
-
-    get_paged_list=function(lst, next_link_name="@odata.nextLink", value_name="value", simplify=FALSE, n=Inf)
-    {
-        res <- lst[[value_name]]
-        if(n <= 0) n <- Inf
-        while(!is_empty(lst[[next_link_name]]) && length(res) < n)
-        {
-            lst <- call_graph_url(self$token, lst[[next_link_name]], simplify=simplify)
-            res <- if(simplify)
-                vctrs::vec_rbind(res, lst[[value_name]])
-            else c(res, lst[[value_name]])
-        }
-        if(n < length(res))
-            res[seq_len(n)]
-        else res
-    }
 ))
+
+# private=list(
+
+#     get_paged_list=function(lst, next_link_name="@odata.nextLink", value_name="value", simplify=FALSE, n=Inf)
+#     {
+#         res <- lst[[value_name]]
+#         if(n <= 0) n <- Inf
+#         while(!is_empty(lst[[next_link_name]]) && length(res) < n)
+#         {
+#             lst <- call_graph_url(self$token, lst[[next_link_name]], simplify=simplify)
+#             res <- if(simplify)
+#                 vctrs::vec_rbind(res, lst[[value_name]])
+#             else c(res, lst[[value_name]])
+#         }
+#         if(n < length(res))
+#             res[seq_len(n)]
+#         else res
+#     }
+# ))

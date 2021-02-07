@@ -2,7 +2,7 @@ ms_channel <- R6::R6Class("ms_channel", inherit=ms_object,
 
 public=list(
 
-    initialize=function(token, tenant=NULL, properties=NULL)
+    initialize=function(token, tenant=NULL, properties=NULL, team_id)
     {
         self$type <- "channel"
         gid <- parse_channel_weburl(properties$webUrl)
@@ -83,23 +83,23 @@ private=list(
         gid <- parse_channel_weburl(self$properties$webUrl)
         op <- sub("/$", "", file.path("groups", gid, op))
         call_graph_endpoint(self$token, op, ...)
-    },
-
-    get_paged_list=function(lst, next_link_name="@odata.nextLink", value_name="value", simplify=FALSE, n=Inf)
-    {
-        res <- lst[[value_name]]
-        if(n <= 0) n <- Inf
-        while(!is_empty(lst[[next_link_name]]) && length(res) < n)
-        {
-            lst <- call_graph_url(self$token, lst[[next_link_name]], simplify=simplify)
-            res <- if(simplify)
-                vctrs::vec_rbind(res, lst[[value_name]])
-            else c(res, lst[[value_name]])
-        }
-        if(n < length(res))
-            res[seq_len(n)]
-        else res
     }
+
+    # get_paged_list=function(lst, next_link_name="@odata.nextLink", value_name="value", simplify=FALSE, n=Inf)
+    # {
+    #     res <- lst[[value_name]]
+    #     if(n <= 0) n <- Inf
+    #     while(!is_empty(lst[[next_link_name]]) && length(res) < n)
+    #     {
+    #         lst <- call_graph_url(self$token, lst[[next_link_name]], simplify=simplify)
+    #         res <- if(simplify)
+    #             vctrs::vec_rbind(res, lst[[value_name]])
+    #         else c(res, lst[[value_name]])
+    #     }
+    #     if(n < length(res))
+    #         res[seq_len(n)]
+    #     else res
+    # }
 ))
 
 

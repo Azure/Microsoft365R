@@ -4,21 +4,21 @@ public=list(
 
     team_id=NULL,
 
-    initialize=function(token, tenant=NULL, properties=NULL, team_id)
+    initialize=function(token, tenant=NULL, properties=NULL, team_id=NULL)
     {
         self$type <- "channel"
         self$team_id <- team_id
-        gid <- parse_channel_weburl(properties$webUrl)
         private$api_type <- file.path("teams", self$team_id, "channels")
         super$initialize(token, tenant, properties)
     },
 
-    send_message=function(body, ...)
+    send_message=function(body, content_type=c("text", "html"), ...)
     {
-        call_body <- list(body=body, ...)
+        content_type <- match.arg(content_type)
+        call_body <- list(body=list(content=body, contentType=content_type), ...)
         res <- self$do_operation("messages", body=call_body, http_verb="POST")
-        chat_message$new(self$token, self$tenant, res,
-                         parent=list(team_id=self$team_id, channel_id=self$properties$id))
+        ms_chat_message$new(self$token, self$tenant, res,
+                            parent=list(team_id=self$team_id, channel_id=self$properties$id))
     },
 
     list_messages=function(n=50)
@@ -85,8 +85,7 @@ private=list(
 
     do_group_operation=function(op="", ...)
     {
-        gid <- parse_channel_weburl(self$properties$webUrl)
-        op <- sub("/$", "", file.path("groups", gid, op))
+        op <- sub("/$", "", file.path("groups", self$team_id, op))
         call_graph_endpoint(self$token, op, ...)
     }
 
@@ -106,11 +105,3 @@ private=list(
     #     else res
     # }
 ))
-
-
-parse_channel_weburl <- function(x)
-{
-    if(is.null(x))
-        stop("Unable to initialize team channel object: no web URL", call.=FALSE)
-    httr::parse_url(x)$query$groupId
-}

@@ -29,4 +29,4 @@ Suggests:
 Roxygen: list(markdown=TRUE, r6=FALSE, old_usage=TRUE)
 RoxygenNote: 7.1.1
 Remotes:
-    Azure/AzureGraph@object-enhancements
+    Azure/AzureGraph

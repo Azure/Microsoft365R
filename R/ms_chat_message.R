@@ -15,7 +15,6 @@ public=list(
     list_replies=function(n=50)
     {
         private$assert_not_nested_reply()
-        op <- "replies"
         parent <- c(self$parent, message_id=self$properties$id)
         res <- private$get_paged_list(self$do_operation("replies"), n=n)
         private$init_list_objects(res, "chatMessage", parent=parent)

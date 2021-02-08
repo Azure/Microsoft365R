@@ -15,11 +15,21 @@ public=list(
         private$init_list_objects(res, "channel", team_id=self$properties$id)
     },
 
-    get_channel=function(channel_id=NULL)
+    get_channel=function(channel_name=NULL, channel_id=NULL)
     {
-        op <- if(is.null(channel_id))
+        if(!is.null(channel_name) && is.null(channel_id))
+        {
+            channels <- self$list_channels()
+            n <- which(sapply(channels, function(ch) ch$properties$displayName == channel_name))
+            if(length(n) != 1)
+                stop("Invalid channel name", call.=FALSE)
+            return(channels[[n]])
+        }
+        op <- if(is.null(channel_name) && is.null(channel_id))
             "primaryChannel"
-        else file.path("channels", channel_id)
+        else if(is.null(channel_name) && !is.null(channel_id))
+            file.path("channels", channel_id)
+        else stop("Do not supply both the channel name and ID", call.=FALSE)
         ms_channel$new(self$token, self$tenant, self$do_operation(op), team_id=self$properties$id)
     },
 

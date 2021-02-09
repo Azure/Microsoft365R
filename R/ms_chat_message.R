@@ -28,12 +28,13 @@ public=list(
     {
         private$assert_not_nested_reply()
         content_type <- match.arg(content_type)
-        call_body <- list(body=list(content=body, contentType=content_type), ...)
+        call_body <- list(body=list(content=paste(body, collapse="\n"), contentType=content_type), ...)
         if(!is_empty(attachments))
         {
+            chan <- private$get_channel()
             call_body$attachments <- lapply(attachments, function(f)
             {
-                att <- self$upload_file(f, dest=basename(f))
+                att <- chan$upload_file(f, dest=basename(f))
                 list(
                     id=uuid::UUIDgenerate(),
                     name=att$properties$name,
@@ -69,6 +70,12 @@ public=list(
 ),
 
 private=list(
+
+    get_channel=function()
+    {
+        channel <- self$properties$channelIdentity
+        ms_channel$new(self$token, self$tenant, list(id=channel$channelId), team_id=channel$teamId)
+    },
 
     assert_not_nested_reply=function()
     {

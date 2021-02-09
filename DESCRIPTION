@@ -20,7 +20,8 @@ Imports:
     httr,
     jsonlite,
     R6,
-    vctrs
+    vctrs,
+    uuid
 Suggests:
     openssl,
     knitr,

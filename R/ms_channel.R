@@ -15,17 +15,24 @@ public=list(
     send_message=function(body, content_type=c("text", "html"), attachments=NULL, ...)
     {
         content_type <- match.arg(content_type)
-        call_body <- list(body=list(content=body, contentType=content_type), ...)
+        call_body <- list(body=list(content=paste(body, collapse="\n"), contentType=content_type), ...)
         if(!is_empty(attachments))
+        {
             call_body$attachments <- lapply(attachments, function(f)
             {
                 att <- self$upload_file(f, dest=basename(f))
                 list(
+                    id=uuid::UUIDgenerate(),
                     name=att$properties$name,
                     contentUrl=att$properties$webUrl,
                     contentType="reference"
                 )
             })
+            att_tags <- lapply(call_body$attachments,
+                function(att) paste0('<attachment id="', att$id, '"></attachment>'))
+            call_body$body$content <- paste(call_body$body$content, paste(att_tags, collapse=""))
+        }
+
         res <- self$do_operation("messages", body=call_body, http_verb="POST")
         ms_chat_message$new(self$token, self$tenant, res)
     },

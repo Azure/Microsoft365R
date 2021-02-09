@@ -12,27 +12,10 @@ public=list(
         super$initialize(token, tenant, properties)
     },
 
-    send_message=function(body, content_type=c("text", "html"), attachments=NULL, ...)
+    send_message=function(body, content_type=c("text", "html"), attachments=NULL)
     {
         content_type <- match.arg(content_type)
-        call_body <- list(body=list(content=paste(body, collapse="\n"), contentType=content_type), ...)
-        if(!is_empty(attachments))
-        {
-            call_body$attachments <- lapply(attachments, function(f)
-            {
-                att <- self$upload_file(f, dest=basename(f))
-                list(
-                    id=uuid::UUIDgenerate(),
-                    name=att$properties$name,
-                    contentUrl=att$properties$webUrl,
-                    contentType="reference"
-                )
-            })
-            att_tags <- lapply(call_body$attachments,
-                function(att) paste0('<attachment id="', att$id, '"></attachment>'))
-            call_body$body$content <- paste(call_body$body$content, paste(att_tags, collapse=""))
-        }
-
+        call_body <- build_chatmessage_body(self, body, content_type, attachments)
         res <- self$do_operation("messages", body=call_body, http_verb="POST")
         ms_chat_message$new(self$token, self$tenant, res)
     },
@@ -103,20 +86,4 @@ private=list(
         op <- sub("/$", "", file.path("groups", self$team_id, op))
         call_graph_endpoint(self$token, op, ...)
     }
-
-    # get_paged_list=function(lst, next_link_name="@odata.nextLink", value_name="value", simplify=FALSE, n=Inf)
-    # {
-    #     res <- lst[[value_name]]
-    #     if(n <= 0) n <- Inf
-    #     while(!is_empty(lst[[next_link_name]]) && length(res) < n)
-    #     {
-    #         lst <- call_graph_url(self$token, lst[[next_link_name]], simplify=simplify)
-    #         res <- if(simplify)
-    #             vctrs::vec_rbind(res, lst[[value_name]])
-    #         else c(res, lst[[value_name]])
-    #     }
-    #     if(n < length(res))
-    #         res[seq_len(n)]
-    #     else res
-    # }
 ))

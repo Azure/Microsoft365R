@@ -2,30 +2,26 @@ ms_chat_message <- R6::R6Class("ms_chat_message", inherit=ms_object,
 
 public=list(
 
-    parent=NULL,
-
-    initialize=function(token, tenant=NULL, properties=NULL, parent=NULL)
+    initialize=function(token, tenant=NULL, properties=NULL)
     {
         self$type <- "Teams message"
-        self$parent <- parent
-        private$api_type <- file.path("teams", parent$team_id, "channels", parent$channel_id, "messages")
+        parent <- properties$channelIdentity
+        private$api_type <- file.path("teams", parent[[1]], "channels", parent[[2]], "messages")
         super$initialize(token, tenant, properties)
     },
 
     list_replies=function(n=50)
     {
         private$assert_not_nested_reply()
-        parent <- c(self$parent, message_id=self$properties$id)
         res <- private$get_paged_list(self$do_operation("replies"), n=n)
-        private$init_list_objects(res, "chatMessage", parent=parent)
+        private$init_list_objects(res, "chatMessage")
     },
 
     get_reply=function(message_id)
     {
         private$assert_not_nested_reply()
         op <- file.path("replies", message_id)
-        parent <- c(self$parent, message_id=self$properties$id)
-        ms_chat_message$new(self$token, self$tenant, self$do_operation(op), parent=parent)
+        ms_chat_message$new(self$token, self$tenant, self$do_operation(op))
     },
 
     send_reply=function(body, content_type=c("text", "html"), ...)
@@ -33,9 +29,8 @@ public=list(
         private$assert_not_nested_reply()
         content_type <- match.arg(content_type)
         call_body <- list(body=list(content=body, contentType=content_type), ...)
-        parent <- c(self$parent, message_id=self$properties$id)
         res <- self$do_operation("replies", body=call_body, http_verb="POST")
-        ms_chat_message$new(self$token, self$tenant, res, parent=parent)
+        ms_chat_message$new(self$token, self$tenant, res)
     },
 
     delete_reply=function(message_id, confirm=TRUE)
@@ -45,10 +40,11 @@ public=list(
 
     print=function(...)
     {
+        parent <- self$properties$channelIdentity
         cat("<Teams message>\n", sep="")
         cat("  directory id:", self$properties$id, "\n")
-        cat("  team:", self$parent$team_id, "\n")
-        cat("  channel:", self$parent$channel_id, "\n")
+        cat("  team:", parent[[1]], "\n")
+        cat("  channel:", parent[[2]], "\n")
         cat("---\n")
         cat(format_public_methods(self))
         invisible(self)
@@ -59,7 +55,7 @@ private=list(
 
     assert_not_nested_reply=function()
     {
-        stopifnot("Nested replies not allowed in Teams channels"=is.null(self$parent$message_id))
+        stopifnot("Nested replies not allowed in Teams channels"=is.null(self$properties$replyToId))
     }
 
 #     get_paged_list=function(lst, next_link_name="@odata.nextLink", value_name="value", simplify=FALSE, n=Inf)

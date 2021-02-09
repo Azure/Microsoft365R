@@ -12,26 +12,36 @@ public=list(
         super$initialize(token, tenant, properties)
     },
 
-    send_message=function(body, content_type=c("text", "html"), ...)
+    send_message=function(body, content_type=c("text", "html"), attachments=NULL, ...)
     {
         content_type <- match.arg(content_type)
         call_body <- list(body=list(content=body, contentType=content_type), ...)
+        if(!is_empty(attachments))
+        {
+            call_body$atts <- lapply(attachments, function(f)
+            {
+                att <- self$upload_file(f, dest=basename(f))
+                list(
+                    name=att$properties$name,
+                    contentUrl=att$properties$webUrl,
+                    contentType="reference"
+                )
+            })
+        }
         res <- self$do_operation("messages", body=call_body, http_verb="POST")
-        ms_chat_message$new(self$token, self$tenant, res,
-                            parent=list(team_id=self$team_id, channel_id=self$properties$id))
+        ms_chat_message$new(self$token, self$tenant, res)
     },
 
     list_messages=function(n=50)
     {
         lst <- private$get_paged_list(self$do_operation("messages"), n=n)
-        private$init_list_objects(lst, "chatMessage", parent=list(team_id=self$team_id, channel_id=self$properties$id))
+        private$init_list_objects(lst, "chatMessage")
     },
 
     get_message=function(message_id)
     {
         op <- file.path("messages", message_id)
-        ms_chat_message$new(self$token, self$tenant, self$do_operation(op),
-                            parent=list(team_id=self$team_id, channel_id=self$properties$id))
+        ms_chat_message$new(self$token, self$tenant, self$do_operation(op))
     },
 
     delete_message=function(message_id, confirm=TRUE)

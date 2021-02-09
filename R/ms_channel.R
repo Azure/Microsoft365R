@@ -18,7 +18,7 @@ public=list(
         call_body <- list(body=list(content=body, contentType=content_type), ...)
         if(!is_empty(attachments))
         {
-            call_body$atts <- lapply(attachments, function(f)
+            call_body$attachments <- lapply(attachments, function(f)
             {
                 att <- self$upload_file(f, dest=basename(f))
                 list(

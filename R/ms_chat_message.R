@@ -24,11 +24,21 @@ public=list(
         ms_chat_message$new(self$token, self$tenant, self$do_operation(op))
     },
 
-    send_reply=function(body, content_type=c("text", "html"), ...)
+    send_reply=function(body, content_type=c("text", "html"), attachments=NULL, ...)
     {
         private$assert_not_nested_reply()
         content_type <- match.arg(content_type)
         call_body <- list(body=list(content=body, contentType=content_type), ...)
+        if(!is_empty(attachments))
+            call_body$attachments <- lapply(attachments, function(f)
+            {
+                att <- self$upload_file(f, dest=basename(f))
+                list(
+                    name=att$properties$name,
+                    contentUrl=att$properties$webUrl,
+                    contentType="reference"
+                )
+            })
         res <- self$do_operation("replies", body=call_body, http_verb="POST")
         ms_chat_message$new(self$token, self$tenant, res)
     },

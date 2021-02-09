@@ -17,7 +17,6 @@ public=list(
         content_type <- match.arg(content_type)
         call_body <- list(body=list(content=body, contentType=content_type), ...)
         if(!is_empty(attachments))
-        {
             call_body$attachments <- lapply(attachments, function(f)
             {
                 att <- self$upload_file(f, dest=basename(f))
@@ -27,7 +26,6 @@ public=list(
                     contentType="reference"
                 )
             })
-        }
         res <- self$do_operation("messages", body=call_body, http_verb="POST")
         ms_chat_message$new(self$token, self$tenant, res)
     },

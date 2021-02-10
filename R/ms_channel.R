@@ -1,3 +1,52 @@
+#' Teams channel
+#'
+#' Class representing a Microsoft Teams channel.
+#'
+#' @docType class
+#' @section Fields:
+#' - `token`: The token used to authenticate with the Graph host.
+#' - `tenant`: The Azure Active Directory tenant for the parent drive.
+#' - `type`: Always "channel" for a channel object
+#' - `team_id`: The ID of the parent team.
+#' - `properties`: The item properties (metadata).
+#' @section Methods:
+#' - `new(...)`: Initialize a new object. Do not call this directly; see 'Initialization' below.
+#' - `delete(confirm=TRUE)`: Delete this channel. By default, ask for confirmation first.
+#' - `update(...)`: Update the channel's properties (metadata) in Microsoft Graph.
+#' - `do_operation(...)`: Carry out an arbitrary operation on the channel.
+#' - `sync_fields()`: Synchronise the R object with the channel metadata in Microsoft Graph.
+#' - `send_message(body, content_type, attachments)`: Sends a new message to the channel.
+#' - `list_messages(n=50)`: Retrieves the messages in the channel. By default, this is limited to the 50 most recent messages; set the `n` argument to change this.
+#' - `get_message(message_id)`: Retrieves a specific message in the channel.
+#' - `delete_message(message_id, confirm=TRUE)`: Deletes a message. By default, ask for confirmation first.
+#' - `list_files()`: List the files for the channel.
+#' - `upload_file()`: Uploads a file to the channel.
+#' - `download_file()`: Downloads a file from the channel.
+#'
+#' @section Initialization:
+#' Creating new objects of this class should be done via the `get_channel` and `list_channels` methods of the [ms_team] class. Calling the `new()` method for this class only constructs the R object; it does not call the Microsoft Graph API to retrieve or create the actual channel.
+#'
+#' @seealso
+#' [ms_team], [ms_chat_message]
+#'
+#' [Microsoft Graph overview](https://docs.microsoft.com/en-us/graph/overview),
+#' [Microsoft Teams API reference](https://docs.microsoft.com/en-us/graph/api/resources/teams-api-overview?view=graph-rest-1.0)
+#'
+#' @examples
+#' \dontrun{
+#'
+#' myteam <- team("my team")
+#' myteam$list_channels()
+#'
+#' chan <- myteam$get_channel()
+#' chan$send_message("hello from R", attachments="myfile.csv")
+#' chan$list_messages()
+#'
+#' chan$upload_file("mydocument.docx")
+#'
+#' }
+#' @format An R6 object of class `ms_channel`, inheriting from `ms_object`.
+#' @export
 ms_channel <- R6::R6Class("ms_channel", inherit=ms_object,
 
 public=list(

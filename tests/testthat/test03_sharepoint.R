@@ -1,7 +1,7 @@
 tenant <- Sys.getenv("AZ_TEST_TENANT_ID")
 app <- Sys.getenv("AZ_TEST_NATIVE_APP_ID")
-site_url <- Sys.getenv("AZ_TEST_SHAREPOINT_SITE_URL")
-site_id <- Sys.getenv("AZ_TEST_SHAREPOINT_SITE_ID")
+site_url <- Sys.getenv("AZ_TEST_get_sharepoint_site_URL")
+site_id <- Sys.getenv("AZ_TEST_get_sharepoint_site_ID")
 list_name <- Sys.getenv("AZ_TEST_SHAREPOINT_LIST_NAME")
 list_id <- Sys.getenv("AZ_TEST_SHAREPOINT_LIST_ID")
 
@@ -27,10 +27,10 @@ test_that("SharePoint client works",
     if(inherits(testsite, "try-error"))
         skip("SharePoint tests skipped: service not available")
 
-    site <- sharepoint_site(site_url, tenant=tenant, app=app)
+    site <- get_sharepoint_site(site_url, tenant=tenant, app=app)
     expect_is(site, "ms_site")
 
-    site2 <- sharepoint_site(site_id=site_id, tenant=tenant, app=app)
+    site2 <- get_sharepoint_site(site_id=site_id, tenant=tenant, app=app)
     expect_is(site2, "ms_site")
     expect_identical(site$properties, site2$properties)
 

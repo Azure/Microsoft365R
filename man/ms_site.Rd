@@ -44,7 +44,7 @@ Creating new objects of this class should be done via the \code{get_sharepoint_s
 \examples{
 \dontrun{
 
-site <- sharepoint_site("https://mycompany.sharepoint.com/sites/my-site-name")
+site <- get_sharepoint_site("My site")
 site$list_drives()
 site$get_drive()
 

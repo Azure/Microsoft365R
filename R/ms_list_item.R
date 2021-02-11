@@ -27,7 +27,7 @@
 #' @examples
 #' \dontrun{
 #'
-#' site <- sharepoint_site("https://mycompany.sharepoint.com/sites/my-site-name")
+#' site <- get_sharepoint_site("My site")
 #' lst <- site$get_list("mylist")
 #'
 #' lst_items <- lst$list_items(as_data_frame=FALSE)

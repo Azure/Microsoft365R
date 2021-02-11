@@ -23,10 +23,10 @@ test_that("OneDrive for Business works",
     if(inherits(drv, "try-error"))
         skip("OneDrive for Business tests skipped: service not available")
 
-    od <- business_onedrive(tenant=tenant)
+    od <- get_business_onedrive(tenant=tenant)
     expect_is(od, "ms_drive")
 
-    od2 <- business_onedrive(tenant=tenant, app=app)
+    od2 <- get_business_onedrive(tenant=tenant, app=app)
     expect_is(od2, "ms_drive")
 
     ls <- od$list_items()

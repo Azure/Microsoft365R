@@ -36,7 +36,7 @@
 #' For more information, see [Use query parameters](https://docs.microsoft.com/en-us/graph/query-parameters?view=graph-rest-1.0) at the Graph API reference.
 #'
 #' @seealso
-#' [sharepoint_site], [ms_site], [ms_list_item]
+#' [get_sharepoint_site], [ms_site], [ms_list_item]
 #'
 #' [Microsoft Graph overview](https://docs.microsoft.com/en-us/graph/overview),
 #' [SharePoint sites API reference](https://docs.microsoft.com/en-us/graph/api/resources/sharepoint?view=graph-rest-1.0)
@@ -44,7 +44,7 @@
 #' @examples
 #' \dontrun{
 #'
-#' site <- sharepoint_site("https://mycompany.sharepoint.com/sites/my-site-name")
+#' site <- get_sharepoint_site("My site")
 #' lst <- site$get_list("mylist")
 #'
 #' lst$get_column_info()

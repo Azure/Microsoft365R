@@ -60,7 +60,7 @@ For more information, see \href{https://docs.microsoft.com/en-us/graph/query-par
 \examples{
 \dontrun{
 
-site <- sharepoint_site("https://mycompany.sharepoint.com/sites/my-site-name")
+site <- get_sharepoint_site("My site")
 lst <- site$get_list("mylist")
 
 lst$get_column_info()
@@ -82,7 +82,7 @@ lst$bulk_import(df)
 }
 }
 \seealso{
-\link{sharepoint_site}, \link{ms_site}, \link{ms_list_item}
+\link{get_sharepoint_site}, \link{ms_site}, \link{ms_list_item}
 
 \href{https://docs.microsoft.com/en-us/graph/overview}{Microsoft Graph overview},
 \href{https://docs.microsoft.com/en-us/graph/api/resources/sharepoint?view=graph-rest-1.0}{SharePoint sites API reference}

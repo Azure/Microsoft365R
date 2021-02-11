@@ -14,10 +14,10 @@ The first time you call one of the Microsoft365R functions (see below), it will 
 
 ## OneDrive
 
-To access your personal OneDrive, call the `personal_onedrive()` function. This returns an R6 client object of class `ms_drive`, which has methods for working with files and folders.
+To access your personal OneDrive, call the `get_personal_onedrive()` function. This returns an R6 client object of class `ms_drive`, which has methods for working with files and folders.
 
 ```r
-od <- personal_onedrive()
+od <- get_personal_onedrive()
 
 # list files and folders
 od$list_items()
@@ -50,10 +50,10 @@ item <- od$get_item("Documents/myfile.docx")
 item$update(name="myfile version 2.docx")
 ```
 
-To access OneDrive for Business call `business_onedrive()`. This also returns an object of class `ms_drive`, so the exact same methods are available as for personal OneDrive.
+To access OneDrive for Business call `get_business_onedrive()`. This also returns an object of class `ms_drive`, so the exact same methods are available as for personal OneDrive.
 
 ```r
-odb <- business_onedrive()
+odb <- get_business_onedrive()
 
 odb$list_items()
 odb$open_item("myproject/demo.pptx")
@@ -61,10 +61,11 @@ odb$open_item("myproject/demo.pptx")
 
 ## SharePoint
 
-To access a SharePoint site, use the `sharepoint_site()` function and provide the site URL or ID.
+To access a SharePoint site, use the `get_sharepoint_site()` function and provide the site name, URL or ID. You can also list the sites you're following with `list_sharepoint_sites()`.
 
 ```r
-site <- sharepoint_site("https://myaadtenant.sharepoint.com/sites/my-site-name")
+list_sharepoint_sites()
+site <- get_sharepoint_site("My site")
 ```
 
 The client object has methods to retrieve drives (document libraries) and lists. To show all drives in a site, use the `list_drives()` method, and to retrieve a specific drive, use `get_drive()`. Each drive is an object of class `ms_drive`, just like the OneDrive clients above.
@@ -121,7 +122,7 @@ In addition to the client functions given above, Microsoft365R enhances the `az_
 
 `az_user` gains `list_drives()` and `get_drive()` methods. The first shows all the drives that the user has access to, including those that are shared from other users. The second retrieves a specific drive, by default the user's OneDrive. Whether these are personal or business drives depends on the tenant that was specified in `AzureGraph::get_graph_login()`/`create_graph_login()`: if the tenant was "consumers", it will be the personal OneDrive.
 
-`az_group` gains `list_drives()`, `get_drive()` and `get_sharepoint_site()` methods. The first two do the same as for `az_user`: they retrieve the drive(s) for the group. The third method retrieves the SharePoint site associated with the group, if one exists.
+`az_group` gains `list_drives()`, `get_drive()` and `get_get_sharepoint_site()` methods. The first two do the same as for `az_user`: they retrieve the drive(s) for the group. The third method retrieves the SharePoint site associated with the group, if one exists.
 
 ----
 <p align="center"><a href="https://github.com/Azure/AzureR"><img src="https://github.com/Azure/AzureR/raw/master/images/logo2.png" width=800 /></a></p>

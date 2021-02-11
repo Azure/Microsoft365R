@@ -11,5 +11,5 @@ Microsoft365R is registered as an app in the `aicatr` AAD tenant. Depending on y
 - AllSites.Manage
 - email, profile, openid, offline_access
 
-Alternatively, if the environment variable `CLIMICROSOFT365_AADAPPID` is set, Microsoft365R will use its value as the app ID for authenticating to the Microsoft 365 Business services (SharePoint and OneDrive for Business). You can also specify the app ID as an argument when calling `personal_onedrive()`, `business_onedrive()` et al.
+Alternatively, if the environment variable `CLIMICROSOFT365_AADAPPID` is set, Microsoft365R will use its value as the app ID for authenticating to the Microsoft 365 Business services (SharePoint and OneDrive for Business). You can also specify the app ID as an argument when calling `get_personal_onedrive()`, `get_business_onedrive()` et al.
 

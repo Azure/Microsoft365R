@@ -20,13 +20,13 @@ If creating your own app registration is impractical, it's possible to work arou
 
 ## OneDrive
 
-To access your personal OneDrive, call the `personal_onedrive()` function. This returns an R6 client object of class `ms_drive`, which has methods for working with files and folders.
+To access your personal OneDrive, call the `get_personal_onedrive()` function. This returns an R6 client object of class `ms_drive`, which has methods for working with files and folders.
 
 ```r
-od <- personal_onedrive()
+od <- get_personal_onedrive()
 
 # or if you don't have a browser
-od <- personal_onedrive(auth_type="device_code")
+od <- get_personal_onedrive(auth_type="device_code")
 
 # list files and folders
 od$list_items()
@@ -72,15 +72,15 @@ item <- od$get_item("Documents/myfile.docx")
 item$update(name="myfile version 2.docx")
 ```
 
-To access OneDrive for Business call `business_onedrive()`. This also returns an object of class `ms_drive`, so the exact same methods are available as for personal OneDrive.
+To access OneDrive for Business call `get_business_onedrive()`. This also returns an object of class `ms_drive`, so the exact same methods are available as for personal OneDrive.
 
 ```r
 # by default, authenticate with the Microsoft365R internal app ID
-odb <- business_onedrive()
+odb <- get_business_onedrive()
 
 # authenticating with the CLI for Microsoft 365 app ID: set a global option
 options(microsoft365r_use_cli_app_id=TRUE)
-odb <- business_onedrive()
+odb <- get_business_onedrive()
 
 odb$list_items()
 odb$open_item("myproject/demo.pptx")
@@ -88,10 +88,11 @@ odb$open_item("myproject/demo.pptx")
 
 ## SharePoint
 
-To access a SharePoint site, use the `sharepoint_site()` function and provide the site URL or ID.
+To access a SharePoint site, use the `get_sharepoint_site()` function and provide the site name, URL or ID. You can also list the sites you're following with `list_sharepoint_sites()`.
 
 ```r
-site <- sharepoint_site("https://myaadtenant.sharepoint.com/sites/my-site-name")
+list_sharepoint_sites()
+site <- get_sharepoint_site("My site")
 ```
 
 The client object has methods to retrieve drives (document libraries) and lists. To show all drives in a site, use the `list_drives()` method, and to retrieve a specific drive, use `get_drive()`. Each drive is an object of class `ms_drive`, just like the OneDrive clients above.
@@ -148,25 +149,25 @@ In addition to the client functions given above, Microsoft365R enhances the `az_
 
 `az_user` gains `list_drives()` and `get_drive()` methods. The first shows all the drives that the user has access to, including those that are shared from other users. The second retrieves a specific drive, by default the user's OneDrive. Whether these are personal or business drives depends on the tenant that was specified in `AzureGraph::get_graph_login()`/`create_graph_login()`: if the tenant was "consumers", it will be the personal OneDrive.
 
-`az_group` gains `list_drives()`, `get_drive()` and `get_sharepoint_site()` methods. The first two do the same as for `az_user`: they retrieve the drive(s) for the group. The third method retrieves the SharePoint site associated with the group, if one exists.
+`az_group` gains `list_drives()`, `get_drive()` and `get_get_sharepoint_site()` methods. The first two do the same as for `az_user`: they retrieve the drive(s) for the group. The third method retrieves the SharePoint site associated with the group, if one exists.
 
 ## Authentication troubleshooting
 
 Microsoft365R's default authentication flow leverages your Internet browser to provide the same login experience as other web apps. This may be a problem if your R session is taking place in a context where a browser is unavailable, for example in a text-only terminal in a VM or container. If so, you can switch to the device code flow, by adding `auth_type="device_code"` as an argument:
 
 ```r
-personal_onedrive(auth_type="device_code")
+get_personal_onedrive(auth_type="device_code")
 
-business_onedrive(auth_type="device_code")
+get_business_onedrive(auth_type="device_code")
 
-sharepoint_site("https://site-url", auth_type="device_code")
+get_sharepoint_site("https://site-url", auth_type="device_code")
 ```
 
 When authenticating for SharePoint and OneDrive for Business, by default Microsoft365R will detect your Azure Active Directory tenant from your logged-in credentials in the browser. If this doesn't work, specify your tenant name with the `tenant` argument:
 
 ```r
-business_onedrive(tenant="myaadtenant")
+get_business_onedrive(tenant="myaadtenant")
 
-sharepoint_site("https://site-url", tenant="myaadtenant")
+get_sharepoint_site("https://site-url", tenant="myaadtenant")
 ```
 

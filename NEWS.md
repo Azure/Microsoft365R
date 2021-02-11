@@ -9,11 +9,11 @@
   - Send messages to channels, send replies to messages
   - Upload and download files
 - Rename the client functions to allow for listing teams and sites:
-  - `sharepoint_site()` is now `get_sharepoint_site()`
-  - `personal_onedrive()` is now `get_personal_onedrive()`
-  - `business_onedrive()` is now `get_business_onedrive()`
-- The first argument to `get_sharepoint_site()` is `site_name` to get a site by name, for consistency with `get_team()`. To get a site by URL, specify the `site_url` argument explicitly: `get_sharepoint_site(site_url="https://my-site-url")`.
-- Add `list_sharepoint_sites()` function to list all sites you follow.
+  - `get_sharepoint_site()` is now `get_get_sharepoint_site()`
+  - `get_personal_onedrive()` is now `get_get_personal_onedrive()`
+  - `get_business_onedrive()` is now `get_get_business_onedrive()`
+- The first argument to `get_get_sharepoint_site()` is `site_name` to get a site by name, for consistency with `get_team()`. To get a site by URL, specify the `site_url` argument explicitly: `get_get_sharepoint_site(site_url="https://my-site-url")`.
+- Add `list_get_sharepoint_sites()` function to list all sites you follow.
 
 ## Other changes
 

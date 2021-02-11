@@ -19,7 +19,7 @@
 #' - `list_drives()`: List the drives (shared document libraries) associated with this team.
 #' - `get_drive(drive_id)`: Retrieve a shared document library for this team. If the ID is not specified, this returns the default document library.
 #' - `get_sharepoint_site()`: Get the SharePoint site associated with the team.
-#' - `get_group()`: Get the Azure Active Directory group associated with the team.
+#' - `get_group()`: Retrieve the Microsoft 365 group associated with the team.
 #'
 #' @section Initialization:
 #' Creating new objects of this class should be done via the `get_team` and `list_teams` methods of the [ms_graph], [az_user] or [az_group] classes. Calling the `new()` method for this class only constructs the R object; it does not call the Microsoft Graph API to retrieve or create the actual team.

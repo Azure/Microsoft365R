@@ -32,7 +32,7 @@
 #' @examples
 #' \dontrun{
 #'
-#' site <- get_sharepoint_site("https://mycompany.sharepoint.com/sites/my-site-url")
+#' site <- get_sharepoint_site("My site")
 #' site$list_drives()
 #' site$get_drive()
 #'

@@ -85,7 +85,7 @@ myuser <- gr2$get_user("username@mycompany.onmicrosoft.com")
 myuser$get_drive()
 
 # get a site/drive directly from a URL/ID
-gr2$get_sharepoint_site("https://mycompany.sharepoint.com/sites/my-site-url")
+gr2$get_sharepoint_site("My site")
 gr2$get_drive("drive-id")
 
 # site/drive(s) for a group

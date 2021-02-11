@@ -96,7 +96,7 @@ mydrv <- get_personal_onedrive()
 busdrv <- get_business_onedrive("mycompany")
 
 # shared document library for a SharePoint site
-site <- get_sharepoint_site("https://mycompany.sharepoint.com/sites/my-site-url")
+site <- get_sharepoint_site("My site")
 drv <- site$get_drive()
 
 ## file/folder operationss

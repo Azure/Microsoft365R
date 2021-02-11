@@ -46,21 +46,22 @@
 #' odb$list_items()
 #'
 #' mysite <- get_sharepoint_site("My site", tenant="mycompany")
-#' mysite <- get_sharepoint_site("https://mycompany.sharepoint.com/sites/my-site-url")
+#' mysite <- get_sharepoint_site(site_url="https://mycompany.sharepoint.com/sites/my-site-url")
 #' mysite$get_drive()$list_items()
 #'
-#' myteam <- get_team("My Team", tenant="mycompany")
+#' myteam <- get_team("My team", tenant="mycompany")
 #' myteam$list_channels()
 #' myteam$get_drive()$list_items()
 #'
 #' # you can also use your own app registration ID:
 #' get_business_onedrive(app="app_id")
-#' get_sharepoint_site("https://mycompany.sharepoint.com/sites/my-site-url", app="app_id")
+#' get_sharepoint_site("My site", app="app_id")
 #'
 #' # using the app ID for the CLI for Microsoft 365: set a global option
 #' options(microsoft365r_use_cli_app_id=TRUE)
 #' get_business_onedrive()
-#' get_sharepoint_site("https://mycompany.sharepoint.com/sites/my-site-url")
+#' get_sharepoint_site("My site")
+#' get_team("My team")
 #'
 #' }
 #' @rdname client

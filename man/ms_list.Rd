@@ -60,7 +60,7 @@ For more information, see \href{https://docs.microsoft.com/en-us/graph/query-par
 \examples{
 \dontrun{
 
-site <- get_sharepoint_site("https://mycompany.sharepoint.com/sites/my-site-url")
+site <- get_sharepoint_site("My site")
 lst <- site$get_list("mylist")
 
 lst$get_column_info()

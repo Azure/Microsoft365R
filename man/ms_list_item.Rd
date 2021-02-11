@@ -39,7 +39,7 @@ Creating new objects of this class should be done via the \code{get_item} method
 \examples{
 \dontrun{
 
-site <- get_sharepoint_site("https://mycompany.sharepoint.com/sites/my-site-url")
+site <- get_sharepoint_site("My site")
 lst <- site$get_list("mylist")
 
 lst_items <- lst$list_items(as_data_frame=FALSE)

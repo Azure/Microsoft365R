@@ -118,15 +118,14 @@ do_login <- function(tenant, app, scopes, ...)
 
     login_id <- hash(tenant, app, scopes, ...)
     login <- .ms365_login_env[[login_id]]
-    if(is.null(login))
+    if(is.null(login) || !inherits(login, "ms_graph"))
     {
         login <- try(get_graph_login(tenant, app=app, scopes=scopes, refresh=FALSE), silent=TRUE)
         if(inherits(login, "try-error"))
             login <- create_graph_login(tenant, app=app, scopes=scopes, ...)
         .ms365_login_env[[login_id]] <- login
-        login
     }
-    else login
+    login
 }
 
 

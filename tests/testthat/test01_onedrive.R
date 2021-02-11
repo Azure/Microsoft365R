@@ -14,10 +14,10 @@ if(inherits(tok, "try-error"))
 
 test_that("OneDrive personal works",
 {
-    od <- personal_onedrive()
+    od <- get_personal_onedrive()
     expect_is(od, "ms_drive")
 
-    od2 <- personal_onedrive(app=app)
+    od2 <- get_personal_onedrive(app=app)
     expect_is(od2, "ms_drive")
 
     ls <- od$list_items()

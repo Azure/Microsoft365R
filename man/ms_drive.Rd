@@ -90,13 +90,13 @@ This function returns a URL to access the item, for \code{type="view"} or "\verb
 \dontrun{
 
 # personal OneDrive
-mydrv <- personal_onedrive()
+mydrv <- get_personal_onedrive()
 
 # OneDrive for Business
-busdrv <- business_onedrive("mycompany")
+busdrv <- get_business_onedrive("mycompany")
 
 # shared document library for a SharePoint site
-site <- sharepoint_site("https://mycompany.sharepoint.com/sites/my-site-name")
+site <- get_sharepoint_site("https://mycompany.sharepoint.com/sites/my-site-url")
 drv <- site$get_drive()
 
 ## file/folder operationss
@@ -120,7 +120,7 @@ drv$set_item_properties("myfile", name="newname")
 }
 }
 \seealso{
-\link{personal_onedrive}, \link{business_onedrive}, \link{ms_site}, \link{ms_drive_item}
+\link{get_personal_onedrive}, \link{get_business_onedrive}, \link{ms_site}, \link{ms_drive_item}
 
 \href{https://docs.microsoft.com/en-us/graph/overview}{Microsoft Graph overview},
 \href{https://docs.microsoft.com/en-us/graph/api/resources/onedrive?view=graph-rest-1.0}{OneDrive API reference}

@@ -57,7 +57,7 @@ Note that message attachments are actually uploaded to the channel's file listin
 \examples{
 \dontrun{
 
-myteam <- team("my team")
+myteam <- get_team("my team")
 
 chan <- myteam$get_channel()
 msg <- chan$list_messages()[[1]]

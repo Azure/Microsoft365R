@@ -33,7 +33,7 @@
 #' @examples
 #' \dontrun{
 #'
-#' myteam <- team("my team")
+#' myteam <- get_team("my team")
 #' myteam$list_channels()
 #' myteam$get_channel()
 #' myteam$get_drive()

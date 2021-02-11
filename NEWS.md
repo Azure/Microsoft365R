@@ -1,5 +1,9 @@
 # Microsoft365R 1.0.0.9000
 
+- Rename the client functions to allow for listing teams and sites:
+  - `sharepoint_site()` is now `get_sharepoint_site()`
+  - add `list_sharepoint_sites()`, `list_teams()` and `get_team()` client functions
+  - `personal_onedrive()` and `business_onedrive()` are now `get_personal_onedrive()` and `get_business_onedrive()`, for consistency
 - Add support for Teams:
   - List channels
   - List messages and replies, send messages to channels

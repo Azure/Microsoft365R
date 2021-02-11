@@ -43,7 +43,7 @@
 #' @examples
 #' \dontrun{
 #'
-#' myteam <- team("my team")
+#' myteam <- get_team("my team")
 #' myteam$list_channels()
 #'
 #' chan <- myteam$get_channel()

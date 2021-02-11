@@ -28,10 +28,7 @@ get_sharepoint_site(site_url = NULL, site_id = NULL)
 get_sharepoint_site()
 
 ## R6 method for class 'ms_graph'
-get_team(team_id=NULL)
-
-## R6 method for class 'az_user'
-get_team(team_name=NULL, team_id=NULL)
+get_team(team_id = NULL)
 
 ## R6 method for class 'az_group'
 get_team()
@@ -41,6 +38,9 @@ list_drives()
 
 ## R6 method for class 'az_group'
 list_drives()
+
+## R6 method for class 'az_user'
+list_sharepoint_sites()
 
 ## R6 method for class 'az_user'
 list_teams()
@@ -90,7 +90,7 @@ myuser <- gr2$get_user("username@mycompany.onmicrosoft.com")
 myuser$get_drive()
 
 # get a site/drive directly from a URL/ID
-gr2$get_sharepoint_site("https://mycompany.sharepoint.com/sites/my-site-name")
+gr2$get_sharepoint_site("https://mycompany.sharepoint.com/sites/my-site-url")
 gr2$get_drive("drive-id")
 
 # site/drive(s) for a group

@@ -63,7 +63,7 @@
 #' `set_item_properties` sets the properties of a file or folder. The new properties should be specified as individual named arguments to the method. Any existing properties that aren't listed as arguments will retain their previous values or be recalculated based on changes to other properties, as appropriate.
 #'
 #' @seealso
-#' [personal_onedrive], [business_onedrive], [ms_site], [ms_drive_item]
+#' [get_personal_onedrive], [get_business_onedrive], [ms_site], [ms_drive_item]
 #'
 #' [Microsoft Graph overview](https://docs.microsoft.com/en-us/graph/overview),
 #' [OneDrive API reference](https://docs.microsoft.com/en-us/graph/api/resources/onedrive?view=graph-rest-1.0)
@@ -72,13 +72,13 @@
 #' \dontrun{
 #'
 #' # personal OneDrive
-#' mydrv <- personal_onedrive()
+#' mydrv <- get_personal_onedrive()
 #'
 #' # OneDrive for Business
-#' busdrv <- business_onedrive("mycompany")
+#' busdrv <- get_business_onedrive("mycompany")
 #'
 #' # shared document library for a SharePoint site
-#' site <- sharepoint_site("https://mycompany.sharepoint.com/sites/my-site-name")
+#' site <- get_sharepoint_site("https://mycompany.sharepoint.com/sites/my-site-url")
 #' drv <- site$get_drive()
 #'
 #' ## file/folder operationss

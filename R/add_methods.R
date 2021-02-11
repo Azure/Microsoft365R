@@ -25,10 +25,7 @@
 #' get_sharepoint_site()
 #'
 #' ## R6 method for class 'ms_graph'
-#' get_team(team_id=NULL)
-#'
-#' ## R6 method for class 'az_user'
-#' get_team(team_name=NULL, team_id=NULL)
+#' get_team(team_id = NULL)
 #'
 #' ## R6 method for class 'az_group'
 #' get_team()
@@ -38,6 +35,9 @@
 #'
 #' ## R6 method for class 'az_group'
 #' list_drives()
+#'
+#' ## R6 method for class 'az_user'
+#' list_sharepoint_sites()
 #'
 #' ## R6 method for class 'az_user'
 #' list_teams()
@@ -77,7 +77,7 @@
 #' myuser$get_drive()
 #'
 #' # get a site/drive directly from a URL/ID
-#' gr2$get_sharepoint_site("https://mycompany.sharepoint.com/sites/my-site-name")
+#' gr2$get_sharepoint_site("https://mycompany.sharepoint.com/sites/my-site-url")
 #' gr2$get_drive("drive-id")
 #'
 #' # site/drive(s) for a group
@@ -94,15 +94,13 @@ add_graph_methods <- function()
     ms_graph$set("public", "get_sharepoint_site", overwrite=TRUE,
     function(site_url=NULL, site_id=NULL)
     {
-        op <- if(is.null(site_url) && !is.null(site_id))
-            file.path("sites", site_id)
-        else if(!is.null(site_url) && is.null(site_id))
+        assert_one_arg(site_url, site_id, msg="Supply exactly one of site URL or ID")
+        op <- if(!is.null(site_url))
         {
             site_url <- httr::parse_url(site_url)
             file.path("sites", paste0(site_url$hostname, ":"), site_url$path)
         }
-        else stop("Must supply either site ID or URL")
-
+        else file.path("sites", site_id)
         ms_site$new(self$token, self$tenant, self$call_graph_endpoint(op))
     })
 
@@ -139,23 +137,11 @@ add_user_methods <- function()
         ms_drive$new(self$token, self$tenant, self$do_operation(op))
     })
 
-    az_user$set("public", "get_team", overwrite=TRUE,
-    function(team_name=NULL, team_id=NULL)
+    az_user$set("public", "list_sharepoint_sites", overwrite=TRUE,
+    function()
     {
-        if(!is.null(team_name) && is.null(team_id))
-        {
-            myteams <- self$list_teams()
-            myteamnames <- sapply(myteams, function(team) team$properties$displayName)
-            if(!(team_name %in% myteamnames))
-                stop("Team '", team_name, "' not found", call.=FALSE)
-            myteams[[which(team_name == myteamnames)]]
-        }
-        else if(is.null(team_name) && !is.null(team_id))
-        {
-            op <- file.path("teams", team_id)
-            ms_team$new(self$token, self$tenant, call_graph_endpoint(self$token, op))
-        }
-        else stop("Must supply either team name or ID", call.=FALSE)
+        res <- private$get_paged_list(self$do_operation("followedSites"))
+        lapply(private$init_list_objects(res, "site"), function(site) site$sync_fields())
     })
 
     az_user$set("public", "list_teams", overwrite=TRUE,

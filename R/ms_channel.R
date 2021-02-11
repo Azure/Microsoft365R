@@ -19,7 +19,7 @@
 #' - `list_messages(n=50)`: Retrieves the messages in the channel. By default, this is limited to the 50 most recent messages; set the `n` argument to change this.
 #' - `get_message(message_id)`: Retrieves a specific message in the channel.
 #' - `delete_message(message_id, confirm=TRUE)`: Deletes a message. By default, ask for confirmation first.
-#' - `list_files()`: List the files for the channel.
+#' - `list_files()`: List the files for the channel. See [ms_drive] for the arguments available.
 #' - `upload_file()`: Uploads a file to the channel.
 #' - `download_file()`: Downloads a file from the channel.
 #'
@@ -35,7 +35,7 @@
 #' Note that message attachments are actually uploaded to the channel's file listing (a directory in the team's primary shared document folder). Support for attachments is somewhat experimental, so if you want to be sure that it works, upload the file separately using the `upload_file()` method.
 #'
 #' @seealso
-#' [ms_team], [ms_chat_message]
+#' [ms_team], [ms_drive], [ms_chat_message]
 #'
 #' [Microsoft Graph overview](https://docs.microsoft.com/en-us/graph/overview),
 #' [Microsoft Teams API reference](https://docs.microsoft.com/en-us/graph/api/resources/teams-api-overview?view=graph-rest-1.0)

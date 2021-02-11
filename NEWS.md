@@ -13,7 +13,7 @@
   - `get_personal_onedrive()` is now `get_personal_onedrive()`
   - `get_business_onedrive()` is now `get_business_onedrive()`
 - The first argument to `get_sharepoint_site()` is `site_name` to get a site by name, for consistency with `get_team()`. To get a site by URL, specify the `site_url` argument explicitly: `get_sharepoint_site(site_url="https://my-site-url")`.
-- Add `list_get_sharepoint_sites()` function to list all sites you follow.
+- Add `list_sharepoint_sites()` function to list all sites you follow.
 
 ## Other changes
 

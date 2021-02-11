@@ -1,12 +1,12 @@
 # documentation separate from code because Roxygen can't handle adding methods to another package's R6 classes
 
-#' Get SharePoint site or OneDrive
+#' Microsoft 365 object accessor methods
 #'
 #' Methods for the [AzureGraph::ms_graph], [AzureGraph::az_user] and [AzureGraph::az_group] classes.
 #'
-#' @rdname get_sharepoint_site
-#' @name get_sharepoint_site
-#' @aliases get_drive list_drives
+#' @rdname add_methods
+#' @name add_methods
+#' @aliases get_sharepoint_site get_drive list_drives get_team list_teams
 #' @section Usage:
 #' ```
 #' ## R6 method for class 'ms_graph'
@@ -24,24 +24,43 @@
 #' ## R6 method for class 'az_group'
 #' get_sharepoint_site()
 #'
+#' ## R6 method for class 'ms_graph'
+#' get_team(team_id=NULL)
+#'
+#' ## R6 method for class 'az_user'
+#' get_team(team_name=NULL, team_id=NULL)
+#'
+#' ## R6 method for class 'az_group'
+#' get_team()
+#'
 #' ## R6 method for class 'az_user'
 #' list_drives()
 #'
 #' ## R6 method for class 'az_group'
 #' list_drives()
+#'
+#' ## R6 method for class 'az_user'
+#' list_teams()
 #' ```
 #' @section Arguments:
 #' - `drive_id`: For `get_drive`, the ID of the drive or shared document library. For the `az_user` and `az_group` methods, if this is NULL the default drive/document library is returned.
 #' - `site_url`,`site_id`: For `ms_graph$get_sharepoint_site()`, the URL and ID of the site. Provide one or the other, but not both.
+#' - `team_name`,`team_id`: For `az_user$get_team()`, the name and ID of the site. Provide one or the other, but not both. For `ms_graph$get_team`, you must provide the team ID.
 #' @section Details:
-#' `get_sharepoint_site` retrieves a SharePoint site object. The method for the top-level Graph client object requires that you provide either the site URL or ID. The method for an `az_group` object will retrieve the site associated with that group, if applicable.
+#' `get_sharepoint_site` retrieves a SharePoint site object. The method for the top-level Graph client class requires that you provide either the site URL or ID. The method for the `az_group` class will retrieve the site associated with that group, if applicable.
 #'
 #' `get_drive` retrieves a OneDrive or shared document library, and `list_drives` retrieves all such drives/libraries that the user or group has access to. Whether these are personal or business drives depends on the tenant that was specified in `AzureGraph::get_graph_login()`/`create_graph_login()`: if this was "consumers" or "9188040d-6c67-4c5b-b112-36a304b66dad" (the equivalent GUID), it will be the personal OneDrive. See the examples below.
 #'
-#' Note that OneDrive for Business and SharePoint require a Microsoft 365 Business license, and are available for organisational tenants only.
+#' `get_team` retrieves a team. The method for the Graph client class requires the team ID. The method for the `az_user` class requires either the team name or ID. The method for the `az_group` class retrieves the team associated with the group, if it exists.
+#'
+#' Note that Teams, SharePoint and OneDrive for Business require a Microsoft 365 Business license, and are available for organisational tenants only.
 #'
 #' @section Value:
-#' For `get_sharepoint_site`, an object of class `ms_site`. For `get_drive`, an object of class `ms_drive`. For `list_drives`, a list of `ms_drive` objects.
+#' For `get_sharepoint_site`, an object of class `ms_site`.
+#'
+#' For `get_drive`, an object of class `ms_drive`. For `list_drives`, a list of `ms_drive` objects.
+#'
+#' For `get_team`, an object of class `ms_team`. For `list_teams`, a list of `ms_team` objects.
 #' @seealso
 #' [ms_site], [ms_drive], [az_user], [az_group]
 #' @examples
@@ -70,7 +89,7 @@
 #' }
 NULL
 
-add_methods <- function()
+add_graph_methods <- function()
 {
     ms_graph$set("public", "get_sharepoint_site", overwrite=TRUE,
     function(site_url=NULL, site_id=NULL)
@@ -94,6 +113,16 @@ add_methods <- function()
         ms_drive$new(self$token, self$tenant, self$call_graph_endpoint(op))
     })
 
+    ms_graph$set("public", "get_team", overwrite=TRUE,
+    function(team_id)
+    {
+        op <- file.path("teams", team_id)
+        ms_team$new(self$token, self$tenant, self$call_graph_endpoint(op))
+    })
+}
+
+add_user_methods <- function()
+{
     az_user$set("public", "list_drives", overwrite=TRUE,
     function()
     {
@@ -110,6 +139,35 @@ add_methods <- function()
         ms_drive$new(self$token, self$tenant, self$do_operation(op))
     })
 
+    az_user$set("public", "get_team", overwrite=TRUE,
+    function(team_name=NULL, team_id=NULL)
+    {
+        if(!is.null(team_name) && is.null(team_id))
+        {
+            myteams <- self$list_teams()
+            myteamnames <- sapply(myteams, function(team) team$properties$displayName)
+            if(!(team_name %in% myteamnames))
+                stop("Team '", team_name, "' not found", call.=FALSE)
+            myteams[[which(team_name == myteamnames)]]
+        }
+        else if(is.null(team_name) && !is.null(team_id))
+        {
+            op <- file.path("teams", team_id)
+            ms_team$new(self$token, self$tenant, call_graph_endpoint(self$token, op))
+        }
+        else stop("Must supply either team name or ID", call.=FALSE)
+    })
+
+    az_user$set("public", "list_teams", overwrite=TRUE,
+    function()
+    {
+        res <- private$get_paged_list(self$do_operation("joinedTeams"))
+        lapply(private$init_list_objects(res, "team"), function(team) team$sync_fields())
+    })
+}
+
+add_group_methods <- function()
+{
     az_group$set("public", "get_sharepoint_site", overwrite=TRUE,
     function()
     {
@@ -131,5 +189,12 @@ add_methods <- function()
             "drive"
         else file.path("drives", drive_id)
         ms_drive$new(self$token, self$tenant, self$do_operation(op))
+    })
+
+    az_group$set("public", "get_team", overwrite=TRUE,
+    function()
+    {
+        op <- file.path("teams", self$properties$id)
+        ms_team$new(self$token, self$tenant, call_graph_endpoint(self$token, op))
     })
 }

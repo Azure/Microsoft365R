@@ -4,7 +4,8 @@
 \alias{personal_onedrive}
 \alias{business_onedrive}
 \alias{sharepoint_site}
-\title{OneDrive and Sharepoint Online clients}
+\alias{team}
+\title{Login clients for Microsoft 365}
 \usage{
 personal_onedrive(app = .microsoft365r_app_id,
   scopes = c("Files.ReadWrite.All", "User.Read"), ...)
@@ -15,6 +16,10 @@ business_onedrive(tenant = Sys.getenv("CLIMICROSOFT365_TENANT", "common"),
 sharepoint_site(site_url = NULL, site_id = NULL,
   tenant = Sys.getenv("CLIMICROSOFT365_TENANT", "common"),
   app = Sys.getenv("CLIMICROSOFT365_AADAPPID"), scopes = ".default", ...)
+
+team(team_name = NULL, team_id = NULL,
+  tenant = Sys.getenv("CLIMICROSOFT365_TENANT", "common"),
+  app = Sys.getenv("CLIMICROSOFT365_AADAPPID"), scopes = ".default", ...)
 }
 \arguments{
 \item{app}{A custom app registration ID to use for authentication. For \code{personal_onedrive}, the default is to use Microsoft365R's internal app ID. For \code{business_onedrive} and \code{sharepoint_site}, see below.}
@@ -23,26 +28,28 @@ sharepoint_site(site_url = NULL, site_id = NULL,
 
 \item{...}{Optional arguments to be passed to \code{AzureGraph::create_graph_login}.}
 
-\item{tenant}{For \code{business_onedrive} and \code{sharepoint_site}, the name of your Azure Active Directory (AAD) tenant. If not supplied, use the value of the \code{CLIMICROSOFT365_TENANT} environment variable, or "common" if that is unset.}
+\item{tenant}{For \code{business_onedrive}, \code{sharepoint_site} and \code{team}, the name of your Azure Active Directory (AAD) tenant. If not supplied, use the value of the \code{CLIMICROSOFT365_TENANT} environment variable, or "common" if that is unset.}
 
 \item{site_url, site_id}{For \code{sharepoint_site}, the web URL and ID of the SharePoint site to retrieve. Supply one or the other, but not both.}
+
+\item{team_name, team_id}{For \code{team}, the name and ID of the team to retrieve. Supply one or the other, but not both.}
 }
 \value{
-For \code{personal_onedrive} and \code{business_onedrive}, an object of class \code{ms_drive}. For \code{sharepoint_site}, an object of class \code{ms_site}.
+For \code{personal_onedrive} and \code{business_onedrive}, an object of class \code{ms_drive}. For \code{sharepoint_site}, an object of class \code{ms_site}. for \code{team}, an object of class \code{ms_team}.
 }
 \description{
-OneDrive and Sharepoint Online clients
+Microsoft365R provides functions for logging into each Microsoft 365 service.
 }
 \details{
-\code{personal_onedrive}, \code{business_onedrive} and \code{sharepoint_site} provide easy access to OneDrive, OneDrive for Business, and SharePoint Online respectively. On first use, they will call your web browser to authenticate with Azure Active Directory, in a similar manner to other web apps. You will get a dialog box asking for permission to access your information. You only have to authenticate once per client; your credentials will be saved and reloaded in subsequent sessions.
+These functions provide easy access to the various collaboration services that are part of Microsoft 365. On first use, they will call your web browser to authenticate with Azure Active Directory, in a similar manner to other web apps. You will get a dialog box asking for permission to access your information. You only have to authenticate once per client; your credentials will be saved and reloaded in subsequent sessions.
 
 When authenticating, you can pass optional arguments in \code{...} which will ultimately be received by \code{AzureAuth::get_azure_token}. In particular, if your machine doesn't have a web browser available to authenticate with (for example if you are in a remote RStudio Server session), pass \code{auth_type="device_code"} which is intended for such scenarios.
 }
 \section{Authenticating to Microsoft 365 Business services}{
 
-Authenticating to Microsoft 365 Business services (SharePoint and OneDrive for Business) has some specific complexities.
+Authenticating to Microsoft 365 Business services (Teams, SharePoint and OneDrive for Business) has some specific complexities.
 
-The default "common" tenant for \code{business_onedrive} and \code{sharepoint_site} attempts to detect your actual tenant from your saved credentials in your browser. This may not always succeed, for example if you have a personal account that is also a guest account in a tenant. In this case, supply the actual tenant name, either in the \code{tenant} argument or in the \code{CLIMICROSOFT365_TENANT} environment variable. The latter allows sharing authentication details with the \href{https://pnp.github.io/cli-microsoft365/}{CLI for Microsoft 365}.
+The default "common" tenant for \code{team}, \code{business_onedrive} and \code{sharepoint_site} attempts to detect your actual tenant from your saved credentials in your browser. This may not always succeed, for example if you have a personal account that is also a guest account in a tenant. In this case, supply the actual tenant name, either in the \code{tenant} argument or in the \code{CLIMICROSOFT365_TENANT} environment variable. The latter allows sharing authentication details with the \href{https://pnp.github.io/cli-microsoft365/}{CLI for Microsoft 365}.
 
 The default when authenticating to these services is for Microsoft365R to use its own internal app ID. Depending on your organisation's security policy, you may have to get an admin to grant it access to your tenant. As an alternative to the default app ID, you (or your admin) can create your own app registration: it should have a native redirect URI of \verb{http://localhost:1410}, and the "public client" option should be enabled if you want to use the device code authentication flow. You can supply your app ID either via the \code{app} argument, or in the environment variable \code{CLIMICROSOFT365_AADAPPID}.
 
@@ -60,9 +67,12 @@ personal_onedrive(auth_type="device_code")
 odb <- business_onedrive("mycompany")
 odb$list_items()
 
-site <- sharepoint_site("https://mycompany.sharepoint.com/sites/my-site-name", tenant="mycompany")
-site$get_drive()$list_items()
+mysite <- sharepoint_site("https://mycompany.sharepoint.com/sites/my-site-name", tenant="mycompany")
+mysite$get_drive()$list_items()
 
+myteam <- team("My Team", tenant="mycompany")
+myteam$list_channels()
+myteam$get_drive()$list_items()
 
 # you can also use your own app registration ID:
 business_onedrive(app="app_id")
@@ -76,7 +86,7 @@ sharepoint_site("https://mycompany.sharepoint.com/sites/my-site-name")
 }
 }
 \seealso{
-\link{ms_drive}, \link{ms_site}, \link[AzureGraph:graph_login]{AzureGraph::create_graph_login}, \link[AzureAuth:get_azure_token]{AzureAuth::get_azure_token}
+\link{ms_drive}, \link{ms_site}, \link{ms_team}, \link[AzureGraph:graph_login]{AzureGraph::create_graph_login}, \link[AzureAuth:get_azure_token]{AzureAuth::get_azure_token}
 
 \href{https://pnp.github.io/cli-microsoft365/}{CLI for Microsoft 365} -- a commandline tool for managing Microsoft 365
 }

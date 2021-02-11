@@ -14,13 +14,23 @@
 #' - `update(...)`: Update the item's properties (metadata) in Microsoft Graph. To update the list _data_, update the `fields` property. See the examples below.
 #' - `do_operation(...)`: Carry out an arbitrary operation on the item.
 #' - `sync_fields()`: Synchronise the R object with the item metadata in Microsoft Graph.
-#' - `send_reply(body, content_type, attachments)`
+#' - `send_reply(body, content_type, attachments)`: Sends a reply to the message. See below.
 #' - `list_replies(n=50)`: List the replies to this message. By default, this is limited to the 50 most recent replies; set the `n` argument to change this.
 #' - `get_reply(message_id)`: Retrieves a specific reply to the message.
 #' - `delete_reply(message_id, confirm=TRUE)`: Deletes a reply to the message. By default, ask for confirmation first.
 #'
 #' @section Initialization:
 #' Creating new objects of this class should be done via the `get_message` and `list_messages` method of the [ms_team] class. Calling the `new()` method for this class only constructs the R object; it does not call the Microsoft Graph API to retrieve or create the actual message.
+#'
+#' @section Replying to a message:
+#' To reply to a message, use the `send_reply()` method. This has arguments:
+#' - `body`: The body of the message. This should be a character vector, which will be concatenated into a single string with newline separators. The body can be either plain text or HTML formatted.
+#' - `content_type`: Either "text" (the default) or "html".
+#' - `attachments`: Optional vector of filenames.
+#'
+#' Teams channels don't support nested replies, so replying to a reply will fail.
+#'
+#' Note that message attachments are actually uploaded to the channel's file listing (a directory in the team's primary shared document folder). Support for attachments is somewhat experimental, so if you want to be sure that it works, upload the file separately using the `upload_file()` method.
 #'
 #' @seealso
 #' [ms_team], [ms_channel]

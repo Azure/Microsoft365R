@@ -29,7 +29,7 @@ Class representing a Microsoft Teams channel.
 \item \code{update(...)}: Update the channel's properties (metadata) in Microsoft Graph.
 \item \code{do_operation(...)}: Carry out an arbitrary operation on the channel.
 \item \code{sync_fields()}: Synchronise the R object with the channel metadata in Microsoft Graph.
-\item \code{send_message(body, content_type, attachments)}: Sends a new message to the channel.
+\item \code{send_message(body, content_type, attachments)}: Sends a new message to the channel. See below.
 \item \code{list_messages(n=50)}: Retrieves the messages in the channel. By default, this is limited to the 50 most recent messages; set the \code{n} argument to change this.
 \item \code{get_message(message_id)}: Retrieves a specific message in the channel.
 \item \code{delete_message(message_id, confirm=TRUE)}: Deletes a message. By default, ask for confirmation first.
@@ -44,6 +44,18 @@ Class representing a Microsoft Teams channel.
 Creating new objects of this class should be done via the \code{get_channel} and \code{list_channels} methods of the \link{ms_team} class. Calling the \code{new()} method for this class only constructs the R object; it does not call the Microsoft Graph API to retrieve or create the actual channel.
 }
 
+\section{Messaging}{
+
+To send a message to a channel, use the \code{send_message()} method. This has arguments:
+\itemize{
+\item \code{body}: The body of the message. This should be a character vector, which will be concatenated into a single string with newline separators. The body can be either plain text or HTML formatted.
+\item \code{content_type}: Either "text" (the default) or "html".
+\item \code{attachments}: Optional vector of filenames.
+}
+
+Note that message attachments are actually uploaded to the channel's file listing (a directory in the team's primary shared document folder). Support for attachments is somewhat experimental, so if you want to be sure that it works, upload the file separately using the \code{upload_file()} method.
+}
+
 \examples{
 \dontrun{
 
@@ -51,8 +63,16 @@ myteam <- team("my team")
 myteam$list_channels()
 
 chan <- myteam$get_channel()
-chan$send_message("hello from R", attachments="myfile.csv")
 chan$list_messages()
+chan$send_message("hello from R")
+
+# a multi-line message with an attachment
+msg_text <- c(
+    "message line 1",
+    "message line 2",
+    "message line 3"
+)
+chan$send_message(msg_text, attachments="myfile.csv")
 
 chan$upload_file("mydocument.docx")
 

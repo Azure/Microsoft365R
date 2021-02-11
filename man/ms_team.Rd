@@ -33,7 +33,7 @@ Class representing a team in Microsoft Teams.
 \item \code{list_drives()}: List the drives (shared document libraries) associated with this team.
 \item \code{get_drive(drive_id)}: Retrieve a shared document library for this team. If the ID is not specified, this returns the default document library.
 \item \code{get_sharepoint_site()}: Get the SharePoint site associated with the team.
-\item \code{get_group()}: Get the group associated with the team.
+\item \code{get_group()}: Get the Azure Active Directory group associated with the team.
 }
 }
 

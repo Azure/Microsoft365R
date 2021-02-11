@@ -28,7 +28,7 @@ Class representing a message in a Teams channel or chat.
 \item \code{update(...)}: Update the item's properties (metadata) in Microsoft Graph. To update the list \emph{data}, update the \code{fields} property. See the examples below.
 \item \code{do_operation(...)}: Carry out an arbitrary operation on the item.
 \item \code{sync_fields()}: Synchronise the R object with the item metadata in Microsoft Graph.
-\item \code{send_reply(body, content_type, attachments)}
+\item \code{send_reply(body, content_type, attachments)}: Sends a reply to the message. See below.
 \item \code{list_replies(n=50)}: List the replies to this message. By default, this is limited to the 50 most recent replies; set the \code{n} argument to change this.
 \item \code{get_reply(message_id)}: Retrieves a specific reply to the message.
 \item \code{delete_reply(message_id, confirm=TRUE)}: Deletes a reply to the message. By default, ask for confirmation first.
@@ -38,6 +38,20 @@ Class representing a message in a Teams channel or chat.
 \section{Initialization}{
 
 Creating new objects of this class should be done via the \code{get_message} and \code{list_messages} method of the \link{ms_team} class. Calling the \code{new()} method for this class only constructs the R object; it does not call the Microsoft Graph API to retrieve or create the actual message.
+}
+
+\section{Replying to a message}{
+
+To reply to a message, use the \code{send_reply()} method. This has arguments:
+\itemize{
+\item \code{body}: The body of the message. This should be a character vector, which will be concatenated into a single string with newline separators. The body can be either plain text or HTML formatted.
+\item \code{content_type}: Either "text" (the default) or "html".
+\item \code{attachments}: Optional vector of filenames.
+}
+
+Teams channels don't support nested replies, so replying to a reply will fail.
+
+Note that message attachments are actually uploaded to the channel's file listing (a directory in the team's primary shared document folder). Support for attachments is somewhat experimental, so if you want to be sure that it works, upload the file separately using the \code{upload_file()} method.
 }
 
 \examples{

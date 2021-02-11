@@ -30,6 +30,8 @@ Class representing a team in Microsoft Teams.
 \item \code{sync_fields()}: Synchronise the R object with the team metadata in Microsoft Graph.
 \item \code{list_channels(filter=NULL)}: List the channels for this team. Optionally, supply an OData expression to filter the list.
 \item \code{get_channel(channel_name, channel_id)}: Retrieve a channel. If the name and ID are not specified, returns the primary channel.
+\item \code{create_channel(channel_name, description, membership)}: Create a new channel. Optionally, you can specify a short text description of the channel, and the type of membership: either standard or private (invitation-only).
+\item \code{delete_channel(channel_name, channel_id, confirm=TRUE)}: Delete a channel; by default, ask for confirmation first. You cannot delete the primary channel of a team.
 \item \code{list_drives()}: List the drives (shared document libraries) associated with this team.
 \item \code{get_drive(drive_id)}: Retrieve a shared document library for this team. If the ID is not specified, this returns the default document library.
 \item \code{get_sharepoint_site()}: Get the SharePoint site associated with the team.
@@ -49,6 +51,9 @@ myteam <- get_team("my team")
 myteam$list_channels()
 myteam$get_channel()
 myteam$get_drive()
+
+myteam$create_channel("Test channel", description="A channel for testing")
+myteam$delete_channel("Test channel")
 
 }
 }

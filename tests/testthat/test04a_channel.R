@@ -44,7 +44,7 @@ test_that("Channel methods work",
     f0 <- write_file()
     msg3 <- chan$send_message(msg3_body, attachments=f0)
     expect_is(msg3, "ms_chat_message")
-    expect_true(!nzchar(msg3$properties$attachments$contentUrl))
+    expect_true(nzchar(msg3$properties$attachments[[1]]$contentUrl))
 
     # repl_body <- sprintf("Test reply: %s", make_name(5))
     # repl <- msg$send_reply(repl_body)
@@ -52,9 +52,9 @@ test_that("Channel methods work",
 
     # expect_error(repl$send_reply("Reply to reply"))
 
-    expect_silent(msg$delete(confirm=FALSE))
-    expect_silent(chan$delete_message(msg2$properties$id, confirm=FALSE))
-    expect_silent(chan$delete_message(msg3$properties$id, confirm=FALSE))
+    # expect_silent(msg$delete(confirm=FALSE))
+    # expect_silent(chan$delete_message(msg2$properties$id, confirm=FALSE))
+    # expect_silent(chan$delete_message(msg3$properties$id, confirm=FALSE))
 
     f1 <- write_file()
     it <- chan$upload_file(f1)

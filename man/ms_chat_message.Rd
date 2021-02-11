@@ -24,14 +24,14 @@ Class representing a message in a Teams channel. Currently Microsoft365R only su
 
 \itemize{
 \item \code{new(...)}: Initialize a new object. Do not call this directly; see 'Initialization' below.
-\item \code{delete(confirm=TRUE)}: Delete this item. By default, ask for confirmation first.
+\item \code{delete(confirm=TRUE)}: Delete this message. Currently the Graph API does not support deleting Teams messages, so this method is disabled.
 \item \code{update(...)}: Update the message's properties (metadata) in Microsoft Graph.
-\item \code{do_operation(...)}: Carry out an arbitrary operation on the item.
-\item \code{sync_fields()}: Synchronise the R object with the item metadata in Microsoft Graph.
+\item \code{do_operation(...)}: Carry out an arbitrary operation on the message.
+\item \code{sync_fields()}: Synchronise the R object with the message metadata in Microsoft Graph.
 \item \code{send_reply(body, content_type, attachments)}: Sends a reply to the message. See below.
 \item \code{list_replies(n=50)}: List the replies to this message. By default, this is limited to the 50 most recent replies; set the \code{n} argument to change this.
 \item \code{get_reply(message_id)}: Retrieves a specific reply to the message.
-\item \code{delete_reply(message_id, confirm=TRUE)}: Deletes a reply to the message. By default, ask for confirmation first. You can only delete your own replies.
+\item \code{delete_reply(message_id, confirm=TRUE)}: Deletes a reply to the message. Currently the Graph API does not support deleting Teams messages, so this method is disabled.
 }
 }
 

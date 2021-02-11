@@ -10,14 +10,14 @@
 #' - `properties`: The item properties (metadata).
 #' @section Methods:
 #' - `new(...)`: Initialize a new object. Do not call this directly; see 'Initialization' below.
-#' - `delete(confirm=TRUE)`: Delete this item. By default, ask for confirmation first.
+#' - `delete(confirm=TRUE)`: Delete this message. Currently the Graph API does not support deleting Teams messages, so this method is disabled.
 #' - `update(...)`: Update the message's properties (metadata) in Microsoft Graph.
-#' - `do_operation(...)`: Carry out an arbitrary operation on the item.
-#' - `sync_fields()`: Synchronise the R object with the item metadata in Microsoft Graph.
+#' - `do_operation(...)`: Carry out an arbitrary operation on the message.
+#' - `sync_fields()`: Synchronise the R object with the message metadata in Microsoft Graph.
 #' - `send_reply(body, content_type, attachments)`: Sends a reply to the message. See below.
 #' - `list_replies(n=50)`: List the replies to this message. By default, this is limited to the 50 most recent replies; set the `n` argument to change this.
 #' - `get_reply(message_id)`: Retrieves a specific reply to the message.
-#' - `delete_reply(message_id, confirm=TRUE)`: Deletes a reply to the message. By default, ask for confirmation first. You can only delete your own replies.
+#' - `delete_reply(message_id, confirm=TRUE)`: Deletes a reply to the message. Currently the Graph API does not support deleting Teams messages, so this method is disabled.
 #'
 #' @section Initialization:
 #' Creating new objects of this class should be done via the `get_message` and `list_messages` method of the [ms_team] class. Calling the `new()` method for this class only constructs the R object; it does not call the Microsoft Graph API to retrieve or create the actual message.
@@ -92,6 +92,11 @@ public=list(
     {
         private$assert_not_nested_reply()
         self$get_reply(message_id)$delete(confirm=confirm)
+    },
+
+    delete=function(confirm=TRUE)
+    {
+        stop("Deleting Teams messages is not currently supported", call.=FALSE)
     },
 
     print=function(...)

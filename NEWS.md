@@ -4,7 +4,7 @@
 
 - Add support for Teams:
   - Add `list_teams()` and `get_team()` client functions. You can get a team by team name or ID.
-  - List channels
+  - Get, list, create and delete channels
   - List messages and replies
   - Send messages to channels, send replies to messages
   - Upload and download files

@@ -46,11 +46,11 @@ test_that("Channel methods work",
     expect_is(msg3, "ms_chat_message")
     expect_true(!nzchar(msg3$properties$attachments$contentUrl))
 
-    repl_body <- sprintf("Test reply: %s", make_name(5))
-    repl <- msg$send_reply(repl_body)
-    expect_is(repl, "ms_chat_message")
+    # repl_body <- sprintf("Test reply: %s", make_name(5))
+    # repl <- msg$send_reply(repl_body)
+    # expect_is(repl, "ms_chat_message")
 
-    expect_error(repl$send_reply("Reply to reply"))
+    # expect_error(repl$send_reply("Reply to reply"))
 
     expect_silent(msg$delete(confirm=FALSE))
     expect_silent(chan$delete_message(msg2$properties$id, confirm=FALSE))

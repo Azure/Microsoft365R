@@ -18,7 +18,7 @@
 #' - `send_message(body, content_type, attachments)`: Sends a new message to the channel. See below.
 #' - `list_messages(n=50)`: Retrieves the messages in the channel. By default, this is limited to the 50 most recent messages; set the `n` argument to change this.
 #' - `get_message(message_id)`: Retrieves a specific message in the channel.
-#' - `delete_message(message_id, confirm=TRUE)`: Deletes a message. By default, ask for confirmation first.
+#' - `delete_message(message_id, confirm=TRUE)`: Deletes a message. By default, ask for confirmation first. You can only delete your own messages.
 #' - `list_files()`: List the files for the channel. See [ms_drive] for the arguments available.
 #' - `upload_file()`: Uploads a file to the channel.
 #' - `download_file()`: Downloads a file from the channel.

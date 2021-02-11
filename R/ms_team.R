@@ -14,7 +14,7 @@
 #' - `update(...)`: Update the team metadata in Microsoft Graph.
 #' - `do_operation(...)`: Carry out an arbitrary operation on the team.
 #' - `sync_fields()`: Synchronise the R object with the team metadata in Microsoft Graph.
-#' - `list_channels()`: List the channels for this team.
+#' - `list_channels(filter=NULL)`: List the channels for this team. Optionally, supply an OData expression to filter the list.
 #' - `get_channel(channel_name, channel_id)`: Retrieve a channel. If the name and ID are not specified, returns the primary channel.
 #' - `list_drives()`: List the drives (shared document libraries) associated with this team.
 #' - `get_drive(drive_id)`: Retrieve a shared document library for this team. If the ID is not specified, this returns the default document library.
@@ -52,9 +52,10 @@ public=list(
         super$initialize(token, tenant, properties)
     },
 
-    list_channels=function()
+    list_channels=function(filter=NULL)
     {
-        res <- private$get_paged_list(self$do_operation("channels"))
+        opts <- if(!is.null(filter)) list(`$filter`=filter)
+        res <- private$get_paged_list(self$do_operation("channels", options=opts))
         private$init_list_objects(res, "channel", team_id=self$properties$id)
     },
 
@@ -62,11 +63,11 @@ public=list(
     {
         if(!is.null(channel_name) && is.null(channel_id))
         {
-            channels <- self$list_channels()
-            n <- which(sapply(channels, function(ch) ch$properties$displayName == channel_name))
-            if(length(n) != 1)
+            filter <- sprintf("displayName eq '%s'", channel_name)
+            channels <- self$list_channels(filter=filter)
+            if(length(channels) != 1)
                 stop("Invalid channel name", call.=FALSE)
-            return(channels[[n]])
+            return(channels[[1]])
         }
         op <- if(is.null(channel_name) && is.null(channel_id))
             "primaryChannel"

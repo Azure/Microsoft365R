@@ -32,8 +32,8 @@ Class representing a Microsoft Teams channel.
 \item \code{send_message(body, content_type, attachments)}: Sends a new message to the channel. See below.
 \item \code{list_messages(n=50)}: Retrieves the messages in the channel. By default, this is limited to the 50 most recent messages; set the \code{n} argument to change this.
 \item \code{get_message(message_id)}: Retrieves a specific message in the channel.
-\item \code{delete_message(message_id, confirm=TRUE)}: Deletes a message. By default, ask for confirmation first.
-\item \code{list_files()}: List the files for the channel.
+\item \code{delete_message(message_id, confirm=TRUE)}: Deletes a message. By default, ask for confirmation first. You can only delete your own messages.
+\item \code{list_files()}: List the files for the channel. See \link{ms_drive} for the arguments available.
 \item \code{upload_file()}: Uploads a file to the channel.
 \item \code{download_file()}: Downloads a file from the channel.
 }
@@ -79,7 +79,7 @@ chan$upload_file("mydocument.docx")
 }
 }
 \seealso{
-\link{ms_team}, \link{ms_chat_message}
+\link{ms_team}, \link{ms_drive}, \link{ms_chat_message}
 
 \href{https://docs.microsoft.com/en-us/graph/overview}{Microsoft Graph overview},
 \href{https://docs.microsoft.com/en-us/graph/api/resources/teams-api-overview?view=graph-rest-1.0}{Microsoft Teams API reference}

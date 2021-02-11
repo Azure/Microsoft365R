@@ -28,7 +28,7 @@ Class representing a team in Microsoft Teams.
 \item \code{update(...)}: Update the team metadata in Microsoft Graph.
 \item \code{do_operation(...)}: Carry out an arbitrary operation on the team.
 \item \code{sync_fields()}: Synchronise the R object with the team metadata in Microsoft Graph.
-\item \code{list_channels()}: List the channels for this team.
+\item \code{list_channels(filter=NULL)}: List the channels for this team. Optionally, supply an OData expression to filter the list.
 \item \code{get_channel(channel_name, channel_id)}: Retrieve a channel. If the name and ID are not specified, returns the primary channel.
 \item \code{list_drives()}: List the drives (shared document libraries) associated with this team.
 \item \code{get_drive(drive_id)}: Retrieve a shared document library for this team. If the ID is not specified, this returns the default document library.

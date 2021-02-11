@@ -107,12 +107,26 @@ team <- function(team_name=NULL, team_id=NULL,
 }
 
 
+.ms365_login_env <- new.env()
+
 do_login <- function(tenant, app, scopes, ...)
 {
-    login <- try(get_graph_login(tenant, app=app, scopes=scopes, refresh=FALSE), silent=TRUE)
-    if(inherits(login, "try-error"))
-        login <- create_graph_login(tenant, app=app, scopes=scopes, ...)
-    login
+    hash <- function(...)
+    {
+        as.character(openssl::md5(serialize(list(...), NULL)))
+    }
+
+    login_id <- hash(tenant, app, scopes, ...)
+    login <- .ms365_login_env[[login_id]]
+    if(is.null(login))
+    {
+        login <- try(get_graph_login(tenant, app=app, scopes=scopes, refresh=FALSE), silent=TRUE)
+        if(inherits(login, "try-error"))
+            login <- create_graph_login(tenant, app=app, scopes=scopes, ...)
+        .ms365_login_env[[login_id]] <- login
+        login
+    }
+    else login
 }
 
 

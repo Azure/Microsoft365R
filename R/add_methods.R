@@ -6,7 +6,6 @@
 #'
 #' @rdname add_methods
 #' @name add_methods
-#' @aliases get_sharepoint_site get_drive list_drives get_team list_teams
 #' @section Usage:
 #' ```
 #' ## R6 method for class 'ms_graph'

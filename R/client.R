@@ -31,6 +31,8 @@
 #' @seealso
 #' [ms_drive], [ms_site], [ms_team], [AzureGraph::create_graph_login], [AzureAuth::get_azure_token]
 #'
+#' [add_methods] for the associated methods that this package adds to the base AzureGraph classes
+#'
 #' [CLI for Microsoft 365](https://pnp.github.io/cli-microsoft365/) -- a commandline tool for managing Microsoft 365
 #' @examples
 #' \dontrun{

@@ -103,5 +103,7 @@ get_sharepoint_site("https://mycompany.sharepoint.com/sites/my-site-url")
 \seealso{
 \link{ms_drive}, \link{ms_site}, \link{ms_team}, \link[AzureGraph:graph_login]{AzureGraph::create_graph_login}, \link[AzureAuth:get_azure_token]{AzureAuth::get_azure_token}
 
+\link{add_methods} for the associated methods that this package adds to the base AzureGraph classes
+
 \href{https://pnp.github.io/cli-microsoft365/}{CLI for Microsoft 365} -- a commandline tool for managing Microsoft 365
 }

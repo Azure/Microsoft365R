@@ -2,11 +2,6 @@
 % Please edit documentation in R/add_methods.R
 \name{add_methods}
 \alias{add_methods}
-\alias{get_sharepoint_site}
-\alias{get_drive}
-\alias{list_drives}
-\alias{get_team}
-\alias{list_teams}
 \title{Microsoft 365 object accessor methods}
 \description{
 Methods for the \link[AzureGraph:ms_graph]{AzureGraph::ms_graph}, \link[AzureGraph:az_user]{AzureGraph::az_user} and \link[AzureGraph:az_group]{AzureGraph::az_group} classes.

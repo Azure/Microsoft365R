@@ -35,10 +35,10 @@ list_drives()
 list_drives()
 
 ## R6 method for class 'az_user'
-list_sharepoint_sites()
+list_sharepoint_sites(filter = NULL)
 
 ## R6 method for class 'az_user'
-list_teams()
+list_teams(filter = NULL)
 }
 }
 
@@ -48,6 +48,7 @@ list_teams()
 \item \code{drive_id}: For \code{get_drive}, the ID of the drive or shared document library. For the \code{az_user} and \code{az_group} methods, if this is NULL the default drive/document library is returned.
 \item \code{site_url},\code{site_id}: For \code{ms_graph$get_sharepoint_site()}, the URL and ID of the site. Provide one or the other, but not both.
 \item \code{team_name},\code{team_id}: For \code{az_user$get_team()}, the name and ID of the site. Provide one or the other, but not both. For \code{ms_graph$get_team}, you must provide the team ID.
+\item \code{filter}: For \code{az_user$list_sharepoint_sites()} and \code{az_user$list_teams()}, an optional OData expression to filter the list.
 }
 }
 

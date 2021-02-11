@@ -98,11 +98,13 @@ get_sharepoint_site <- function(site_name=NULL, site_url=NULL, site_id=NULL,
 
     if(!is.null(site_name))
     {
-        mysites <- login$get_user()$list_sharepoint_sites()
-        mysitenames <- sapply(mysites, function(site) site$properties$displayName)
-        if(!(site_name %in% mysitenames))
+        filter <- sprintf("displayName eq '%s'", site_name)
+        mysites <- login$get_user()$list_sharepoint_sites(filter=filter)
+        if(length(mysites) == 0)
             stop("Site '", site_name, "' not found", call.=FALSE)
-        mysites[[which(site_name == mysitenames)]]
+        else if(length(mysites) > 1)
+            stop("Site name '", site_name, "' is not unique", call.=FALSE)
+        mysites[[1]]
     }
     else login$get_sharepoint_site(site_url, site_id)
 }
@@ -134,11 +136,13 @@ get_team <- function(team_name=NULL, team_id=NULL,
 
     if(!is.null(team_name))
     {
-        myteams <- login$get_user()$list_teams()
-        myteamnames <- sapply(myteams, function(team) team$properties$displayName)
-        if(!(team_name %in% myteamnames))
+        filter <- sprintf("displayName eq '%s'", team_name)
+        myteams <- login$get_user()$list_teams(filter=filter)
+        if(length(myteams) == 0)
             stop("Team '", team_name, "' not found", call.=FALSE)
-        myteams[[which(team_name == myteamnames)]]
+        else if(length(myteams) > 1)
+            stop("Team name '", team_name, "' is not unique", call.=FALSE)
+        myteams[[1]]
     }
     else login$get_team(team_id)
 }

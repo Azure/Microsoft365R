@@ -36,15 +36,16 @@
 #' list_drives()
 #'
 #' ## R6 method for class 'az_user'
-#' list_sharepoint_sites()
+#' list_sharepoint_sites(filter = NULL)
 #'
 #' ## R6 method for class 'az_user'
-#' list_teams()
+#' list_teams(filter = NULL)
 #' ```
 #' @section Arguments:
 #' - `drive_id`: For `get_drive`, the ID of the drive or shared document library. For the `az_user` and `az_group` methods, if this is NULL the default drive/document library is returned.
 #' - `site_url`,`site_id`: For `ms_graph$get_sharepoint_site()`, the URL and ID of the site. Provide one or the other, but not both.
 #' - `team_name`,`team_id`: For `az_user$get_team()`, the name and ID of the site. Provide one or the other, but not both. For `ms_graph$get_team`, you must provide the team ID.
+#' - `filter`: For `az_user$list_sharepoint_sites()` and `az_user$list_teams()`, an optional OData expression to filter the list.
 #' @section Details:
 #' `get_sharepoint_site` retrieves a SharePoint site object. The method for the top-level Graph client class requires that you provide either the site URL or ID. The method for the `az_group` class will retrieve the site associated with that group, if applicable.
 #'
@@ -137,16 +138,18 @@ add_user_methods <- function()
     })
 
     az_user$set("public", "list_sharepoint_sites", overwrite=TRUE,
-    function()
+    function(filter=NULL)
     {
-        res <- private$get_paged_list(self$do_operation("followedSites"))
+        opts <- if(!is.null(filter)) list(`$filter`=filter)
+        res <- private$get_paged_list(self$do_operation("followedSites", options=opts))
         lapply(private$init_list_objects(res, "site"), function(site) site$sync_fields())
     })
 
     az_user$set("public", "list_teams", overwrite=TRUE,
-    function()
+    function(filter=NULL)
     {
-        res <- private$get_paged_list(self$do_operation("joinedTeams"))
+        opts <- if(!is.null(filter)) list(`$filter`=filter)
+        res <- private$get_paged_list(self$do_operation("joinedTeams", options=opts))
         lapply(private$init_list_objects(res, "team"), function(team) team$sync_fields())
     })
 }

@@ -119,7 +119,7 @@ list_sharepoint_sites <- function(tenant=Sys.getenv("CLIMICROSOFT365_TENANT", "c
     app <- choose_app(app)
     login <- do_login(tenant, app, scopes, ...)
 
-    login$get_user$list_sharepoint_sites()
+    login$get_user()$list_sharepoint_sites()
 }
 
 #' @rdname client

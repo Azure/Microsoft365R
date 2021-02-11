@@ -35,8 +35,6 @@ test_that("Teams client works",
     expect_is(team2, "ms_team")
     expect_identical(team1$properties$id, team_id)
 
-    expect_identical(team1$properties, team2$properties)
-
     teams <- list_teams()
     expect_is(teams, "list")
     expect_true(all(sapply(teams, inherits, "ms_team")))

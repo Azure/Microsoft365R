@@ -114,7 +114,7 @@ public=list(
         private$get_drive()$download_file(src, dest, ...)
     },
 
-    upload_file=function(src, dest, ...)
+    upload_file=function(src, dest=basename(src), ...)
     {
         dest <- file.path(self$properties$displayName, dest)
         private$get_drive()$upload_file(src, dest, ...)

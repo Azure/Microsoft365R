@@ -10,25 +10,54 @@
 #' - `properties`: The item properties (metadata).
 #' @section Methods:
 #' - `new(...)`: Initialize a new object. Do not call this directly; see 'Initialization' below.
-#' - `delete(confirm=TRUE)`: Delete this item. By default, ask for confirmation first.
+#' - `delete(confirm=TRUE)`: Delete this item. By default, ask for confirmation first. For personal OneDrives, deleting a folder will also automatically delete its contents; for business OneDrives or SharePoint document libraries, you must delete the folder contents first before deleting the folder.
 #' - `update(...)`: Update the item's properties (metadata) in Microsoft Graph.
 #' - `do_operation(...)`: Carry out an arbitrary operation on the item.
 #' - `sync_fields()`: Synchronise the R object with the item metadata in Microsoft Graph.
 #' - `open()`: Open the item in your browser.
-#' - `download(dest, overwrite)`: Download the file. Not applicable for a folder.
-#' - `create_share_link(type, expiry, password, scope)`: Create a shareable link to the file or folder. See 'Sharing' below.
+#' - `list_items(...), list_files(...)`: List the files and folders under the specified path.
+#' - `download(dest, overwrite)`: Download the file. Only applicable for a file item.
+#' - `create_share_link(type, expiry, password, scope)`: Create a shareable link to the file or folder.
+#' - `upload(src, dest, blocksize)`: Upload a file. Only applicable for a folder item.
+#' - `create_folder(path)`: Create a folder. Only applicable for a folder item.
+#' - `get_item(path)`: Get a child item (file or folder) under this folder.
+#' - `is_folder()`: Information function, returns TRUE if this item is a folder.
 #'
 #' @section Initialization:
 #' Creating new objects of this class should be done via the `get_item` method of the [ms_drive] class. Calling the `new()` method for this class only constructs the R object; it does not call the Microsoft Graph API to retrieve or create the actual item.
 #'
-#' @section Sharing:
-#' `create_share_link(type, expiry, password, scope)` returns a shareable link to the item. Its arguments are
+#' @section File and folder operations:
+#' This class exposes methods for carrying out common operations on files and folders. Note that for the methods below, any paths to child items are relative to the folder's own path.
+#'
+#' `open` opens this file or folder in your browser. If the file has an unrecognised type, most browsers will attempt to download it.
+#'
+#' `list_items(path, info, full_names, pagesize)` lists the items under the specified path. It is the analogue of base R's `dir`/`list.files`. Its arguments are
+#' - `path`: The path.
+#' - `info`: The information to return: either "partial", "name" or "all". If "partial", a data frame is returned containing the name, size and whether the item is a file or folder. If "name", a vector of file/folder names is returned. If "all", a data frame is returned containing _all_ the properties for each item (this can be large).
+#' - `full_names`: Whether to prefix the folder path to the names of the items.
+#' - `pagesize`: The number of results to return for each call to the REST endpoint. You can try reducing this argument below the default of 1000 if you are experiencing timeouts.
+#'
+#' `list_files` is a synonym for `list_items`.
+#'
+#' `download` downloads the file item to the local machine. It is an error to try to download a folder item.
+#'
+#' `upload` uploads a file from the local machine into the folder item, and returns another `ms_drive_item` object representing the uploaded file. The uploading is done in blocks of 32MB by default; you can change this by setting the `blocksize` argument. For technical reasons, the block size [must be a multiple of 320KB](https://docs.microsoft.com/en-us/graph/api/driveitem-createuploadsession?view=graph-rest-1.0#upload-bytes-to-the-upload-session). This returns an `ms_drive_item` object, invisibly.
+#'
+#' It is an error to try to upload to a file item, or to upload a source directory.
+#'
+#' `get_item` retrieves the file or folder with the given path, as another object of class `ms_drive_item`.
+#'
+#' `create_folder` creates a folder with the specified path. Trying to create an already existing folder is an error. This returns an `ms_drive_item` object, invisibly.
+#'
+#' `create_share_link(path, type, expiry, password, scope)` returns a shareable link to the item. Its arguments are
+#' - `path`: The path.
 #' - `type`: Either "view" for a read-only link, "edit" for a read-write link, or "embed" for a link that can be embedded in a web page. The last one is only available for personal OneDrive.
 #' - `expiry`: How long the link is valid for. The default is 7 days; you can set an alternative like "15 minutes", "24 hours", "2 weeks", "3 months", etc. To leave out the expiry date, set this to NULL.
 #' - `password`: An optional password to protect the link.
 #' - `scope`: Optionally the scope of the link, either "anonymous" or "organization". The latter allows only users in your AAD tenant to access the link, and is only available for OneDrive for Business or SharePoint.
 #'
-#' This function returns a URL to access the item, for `type="view"` or "`type=edit"`. For `type="embed"`, it returns a list with components `webUrl` containing the URL, and `webHtml` containing a HTML fragment to embed the link in an IFRAME.
+#' This method returns a URL to access the item, for `type="view"` or "`type=edit"`. For `type="embed"`, it returns a list with components `webUrl` containing the URL, and `webHtml` containing a HTML fragment to embed the link in an IFRAME. The default is a viewable link, expiring in 7 days.
+#'
 #' @seealso
 #' [ms_graph], [ms_site], [ms_drive]
 #'
@@ -39,11 +68,14 @@
 #' \dontrun{
 #'
 #' # personal OneDrive
-#' gr2 <- get_graph_login("consumers")
-#' me <- gr2$get_user()
-#' mydrv <- me$get_drive()
+#' mydrv <- get_personal_onedrive()
 #'
-#' myfile <- drv$get_item("myfile.docx")
+#' docs <- mydrv$get_item("Documents")
+#' docs$list_files()
+#' docs$list_items()
+#'
+#' # this is the file 'Documents/myfile.docx'
+#' myfile <- docs$get_item("myfile.docx")
 #' myfile$properties
 #'
 #' # rename a file
@@ -249,13 +281,13 @@ private=list(
     assert_is_folder=function()
     {
         if(!self$is_folder())
-            stop("This method must be called on a folder", call.=FALSE)
+            stop("This method is only applicable for a folder item", call.=FALSE)
     },
 
     assert_is_file=function()
     {
         if(self$is_folder())
-            stop("This method must be called on a file", call.=FALSE)
+            stop("This method is only applicable for a file item", call.=FALSE)
     }
 ))
 

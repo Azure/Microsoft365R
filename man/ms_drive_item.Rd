@@ -24,13 +24,18 @@ Class representing an item (file or folder) in a OneDrive or SharePoint document
 
 \itemize{
 \item \code{new(...)}: Initialize a new object. Do not call this directly; see 'Initialization' below.
-\item \code{delete(confirm=TRUE)}: Delete this item. By default, ask for confirmation first.
+\item \code{delete(confirm=TRUE)}: Delete this item. By default, ask for confirmation first. For personal OneDrives, deleting a folder will also automatically delete its contents; for business OneDrives or SharePoint document libraries, you must delete the folder contents first before deleting the folder.
 \item \code{update(...)}: Update the item's properties (metadata) in Microsoft Graph.
 \item \code{do_operation(...)}: Carry out an arbitrary operation on the item.
 \item \code{sync_fields()}: Synchronise the R object with the item metadata in Microsoft Graph.
 \item \code{open()}: Open the item in your browser.
-\item \code{download(dest, overwrite)}: Download the file. Not applicable for a folder.
-\item \code{create_share_link(type, expiry, password, scope)}: Create a shareable link to the file or folder. See 'Sharing' below.
+\item \verb{list_items(...), list_files(...)}: List the files and folders under the specified path.
+\item \code{download(dest, overwrite)}: Download the file. Only applicable for a file item.
+\item \code{create_share_link(type, expiry, password, scope)}: Create a shareable link to the file or folder.
+\item \code{upload(src, dest, blocksize)}: Upload a file. Only applicable for a folder item.
+\item \code{create_folder(path)}: Create a folder. Only applicable for a folder item.
+\item \code{get_item(path)}: Get a child item (file or folder) under this folder.
+\item \code{is_folder()}: Information function, returns TRUE if this item is a folder.
 }
 }
 
@@ -39,28 +44,56 @@ Class representing an item (file or folder) in a OneDrive or SharePoint document
 Creating new objects of this class should be done via the \code{get_item} method of the \link{ms_drive} class. Calling the \code{new()} method for this class only constructs the R object; it does not call the Microsoft Graph API to retrieve or create the actual item.
 }
 
-\section{Sharing}{
+\section{File and folder operations}{
 
-\code{create_share_link(type, expiry, password, scope)} returns a shareable link to the item. Its arguments are
+This class exposes methods for carrying out common operations on files and folders. Note that for the methods below, any paths to child items are relative to the folder's own path.
+
+\code{open} opens this file or folder in your browser. If the file has an unrecognised type, most browsers will attempt to download it.
+
+\code{list_items(path, info, full_names, pagesize)} lists the items under the specified path. It is the analogue of base R's \code{dir}/\code{list.files}. Its arguments are
 \itemize{
+\item \code{path}: The path.
+\item \code{info}: The information to return: either "partial", "name" or "all". If "partial", a data frame is returned containing the name, size and whether the item is a file or folder. If "name", a vector of file/folder names is returned. If "all", a data frame is returned containing \emph{all} the properties for each item (this can be large).
+\item \code{full_names}: Whether to prefix the folder path to the names of the items.
+\item \code{pagesize}: The number of results to return for each call to the REST endpoint. You can try reducing this argument below the default of 1000 if you are experiencing timeouts.
+}
+
+\code{list_files} is a synonym for \code{list_items}.
+
+\code{download} downloads the file item to the local machine. It is an error to try to download a folder item.
+
+\code{upload} uploads a file from the local machine into the folder item, and returns another \code{ms_drive_item} object representing the uploaded file. The uploading is done in blocks of 32MB by default; you can change this by setting the \code{blocksize} argument. For technical reasons, the block size \href{https://docs.microsoft.com/en-us/graph/api/driveitem-createuploadsession?view=graph-rest-1.0#upload-bytes-to-the-upload-session}{must be a multiple of 320KB}. This returns an \code{ms_drive_item} object, invisibly.
+
+It is an error to try to upload to a file item, or to upload a source directory.
+
+\code{get_item} retrieves the file or folder with the given path, as another object of class \code{ms_drive_item}.
+
+\code{create_folder} creates a folder with the specified path. Trying to create an already existing folder is an error. This returns an \code{ms_drive_item} object, invisibly.
+
+\code{create_share_link(path, type, expiry, password, scope)} returns a shareable link to the item. Its arguments are
+\itemize{
+\item \code{path}: The path.
 \item \code{type}: Either "view" for a read-only link, "edit" for a read-write link, or "embed" for a link that can be embedded in a web page. The last one is only available for personal OneDrive.
 \item \code{expiry}: How long the link is valid for. The default is 7 days; you can set an alternative like "15 minutes", "24 hours", "2 weeks", "3 months", etc. To leave out the expiry date, set this to NULL.
 \item \code{password}: An optional password to protect the link.
 \item \code{scope}: Optionally the scope of the link, either "anonymous" or "organization". The latter allows only users in your AAD tenant to access the link, and is only available for OneDrive for Business or SharePoint.
 }
 
-This function returns a URL to access the item, for \code{type="view"} or "\verb{type=edit"}. For \code{type="embed"}, it returns a list with components \code{webUrl} containing the URL, and \code{webHtml} containing a HTML fragment to embed the link in an IFRAME.
+This method returns a URL to access the item, for \code{type="view"} or "\verb{type=edit"}. For \code{type="embed"}, it returns a list with components \code{webUrl} containing the URL, and \code{webHtml} containing a HTML fragment to embed the link in an IFRAME. The default is a viewable link, expiring in 7 days.
 }
 
 \examples{
 \dontrun{
 
 # personal OneDrive
-gr2 <- get_graph_login("consumers")
-me <- gr2$get_user()
-mydrv <- me$get_drive()
+mydrv <- get_personal_onedrive()
 
-myfile <- drv$get_item("myfile.docx")
+docs <- mydrv$get_item("Documents")
+docs$list_files()
+docs$list_items()
+
+# this is the file 'Documents/myfile.docx'
+myfile <- docs$get_item("myfile.docx")
 myfile$properties
 
 # rename a file

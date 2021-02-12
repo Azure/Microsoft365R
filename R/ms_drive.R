@@ -29,7 +29,7 @@
 #' Creating new objects of this class should be done via the `get_drive` methods of the [ms_graph], [az_user] or [ms_site] classes. Calling the `new()` method for this class only constructs the R object; it does not call the Microsoft Graph API to retrieve or create the actual drive.
 #'
 #' @section File and folder operations:
-#' This class exposes methods for carrying out common operations on files and folders. In this context, any paths to child items are relative to the root folder of the drive.
+#' This class exposes methods for carrying out common operations on files and folders. They call down to the corresponding methods for the [ms_drive_item] class. In this context, any paths to child items are relative to the root folder of the drive.
 #'
 #' `open_item` opens the given file or folder in your browser. If the file has an unrecognised type, most browsers will attempt to download it.
 #'

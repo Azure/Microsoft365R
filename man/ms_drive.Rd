@@ -48,7 +48,7 @@ Creating new objects of this class should be done via the \code{get_drive} metho
 
 \section{File and folder operations}{
 
-This class exposes methods for carrying out common operations on files and folders. In this context, any paths to child items are relative to the root folder of the drive.
+This class exposes methods for carrying out common operations on files and folders. They call down to the corresponding methods for the \link{ms_drive_item} class. In this context, any paths to child items are relative to the root folder of the drive.
 
 \code{open_item} opens the given file or folder in your browser. If the file has an unrecognised type, most browsers will attempt to download it.
 

@@ -77,6 +77,11 @@ public=list(
         super$initialize(token, tenant, properties)
     },
 
+    is_folder=function()
+    {
+        !is.null(self$properties$folder)
+    },
+
     open=function()
     {
         httr::BROWSE(self$properties$webUrl)
@@ -104,26 +109,73 @@ public=list(
         else res$link$webUrl
     },
 
-    list_items=function() {},
+    list_items=function(path="", info=c("partial", "name", "all"), full_names=FALSE, pagesize=1000)
+    {
+        private$assert_is_folder()
+        info <- match.arg(info)
+        opts <- switch(info,
+            partial=list(`$select`="name,size,folder", `$top`=pagesize),
+            name=list(`$select`="name", `$top`=pagesize),
+            list(`$top`=pagesize)
+        )
 
-    get_item=function() {},
+        op <- sub("::", "", paste0(private$make_absolute_path(path), ":/children"))
+        children <- call_graph_endpoint(self$token, op, options=opts, simplify=TRUE)
 
-    create_folder=function() {},
+        # get file list as a data frame
+        df <- private$get_paged_list(children, simplify=TRUE)
+
+        if(is_empty(df))
+            df <- data.frame(name=character(), size=numeric(), isdir=logical())
+        else if(info != "name")
+        {
+            df$isdir <- if(!is.null(df$folder))
+                !is.na(df$folder$childCount)
+            else rep(FALSE, nrow(df))
+        }
+
+        if(full_names)
+            df$name <- file.path(sub("^/", "", path), df$name)
+        switch(info,
+            partial=df[c("name", "size", "isdir")],
+            name=df$name,
+            all=
+            {
+                firstcols <- c("name", "size", "isdir")
+                df[c(firstcols, setdiff(names(df), firstcols))]
+            }
+        )
+    },
+
+    get_item=function(path)
+    {
+        private$assert_is_folder()
+        op <- private$make_absolute_path(path)
+        ms_drive_item$new(self$token, self$tenant, call_graph_endpoint(self$token, op))
+    },
+
+    create_folder=function(path)
+    {
+        private$assert_is_folder()
+        body <- list(
+            name=enc2utf8(path),
+            folder=named_list(),
+            `@microsoft.graph.conflictBehavior`="fail"
+        )
+        res <- self$do_operation("children", body=body, http_verb="POST")
+        invisible(ms_drive_item$new(self$token, self$tenant, res))
+    },
 
     upload=function(src, dest=basename(src), blocksize=32768000)
     {
         private$assert_is_folder()
-
-        dest <- sub("^[/]+", "", file.path(private$normalize_name(), dest))
-        path <- paste0("root:/", dest, ":/createUploadSession")
-
         con <- file(src, open="rb")
         on.exit(close(con))
+
+        op <- paste0(private$make_absolute_path(dest), ":/createUploadSession")
+        upload_dest <- call_graph_endpoint(self$token, op, http_verb="POST")$uploadUrl
+
         size <- file.size(src)
-        path <- "createUploadSession"
-        body <- list(name=dest)
-        # print(path)
-        upload_dest <- call_graph_endpoint(self$token, path, body=body, http_verb="POST")$uploadUrl
         next_blockstart <- 0
         next_blockend <- size - 1
         repeat
@@ -155,7 +207,6 @@ public=list(
     download=function(dest=self$properties$name, overwrite=FALSE)
     {
         private$assert_is_file()
-
         filepath <- file.path(self$parentReference$path, self$properties$name)
         res <- self$do_operation("content", config=httr::write_disk(dest, overwrite=overwrite),
                                  http_status_handler="pass")
@@ -170,7 +221,7 @@ public=list(
 
     print=function(...)
     {
-        file_or_dir <- if(!is.null(self$properties$folder)) "file folder" else "file"
+        file_or_dir <- if(self$is_folder()) "file folder" else "file"
         cat("<Drive item '", self$properties$name, "'>\n", sep="")
         cat("  directory id:", self$properties$id, "\n")
         cat("  web link:", self$properties$webUrl, "\n")
@@ -183,23 +234,26 @@ public=list(
 
 private=list(
 
-    normalize_name=function()
+    make_absolute_path=function(dest)
     {
+        parent <- self$properties$parentReference
         name <- self$properties$name
-        if(name == "root")
-            return("")
-        parent <- self$properties$parentReference$path
-        file.path(sub("^.+root:[/]?", "", parent), name)
+        op <- if(name == "root")
+            file.path("drives", parent$driveId, "root:")
+        else file.path(parent$path, name)
+        file.path(op, enc2utf8(dest))
     },
 
     assert_is_folder=function()
     {
-        stopifnot("Must be a folder"=!is.null(self$properties$folder))
+        if(!self$is_folder())
+            stop("This method must be called on a folder", call.=FALSE)
     },
 
     assert_is_file=function()
     {
-        stopifnot("Must be a file"=is.null(self$properties$folder))
+        if(self$is_folder())
+            stop("This method must be called on a file", call.=FALSE)
     }
 ))
 

@@ -107,25 +107,24 @@ public=list(
 
     list_files=function(path="", ...)
     {
-        path <- sub("/$", "", file.path(self$properties$displayName, path))
-        private$get_drive()$list_files(path, ...)
+        self$get_folder()$list_files(path, ...)
     },
 
     download_file=function(src, dest=basename(src), ...)
     {
-        src <- file.path(self$properties$displayName, src)
-        private$get_drive()$download_file(src, dest, ...)
+        self$get_folder()$get_item(src)$download(dest, ...)
     },
 
     upload_file=function(src, dest=basename(src), ...)
     {
-        dest <- file.path(self$properties$displayName, dest)
-        private$get_drive()$upload_file(src, dest, ...)
+        self$get_folder()$upload(src, dest, ...)
     },
 
     get_folder=function()
     {
-        ms_drive_item$new(self$token, self$tenant, self$do_operation("filesFolder"))
+        if(is.null(private$folder))
+            private$folder <- ms_drive_item$new(self$token, self$tenant, self$do_operation("filesFolder"))
+        private$folder
     },
 
     print=function(...)
@@ -141,22 +140,5 @@ public=list(
 
 private=list(
 
-    get_drive=function(drive_id=NULL)
-    {
-        op <- if(is.null(drive_id))
-            "drive"
-        else file.path("drives", drive_id)
-        ms_drive$new(self$token, self$tenant, private$do_group_operation(op))
-    },
-
-    get_group=function()
-    {
-        az_group$new(self$token, self$tenant, private$do_group_operation())
-    },
-
-    do_group_operation=function(op="", ...)
-    {
-        op <- sub("/$", "", file.path("groups", self$team_id, op))
-        call_graph_endpoint(self$token, op, ...)
-    }
+    folder=NULL
 ))

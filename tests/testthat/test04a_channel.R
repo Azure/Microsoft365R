@@ -30,6 +30,9 @@ test_that("Channel methods work",
     expect_is(chan, "ms_channel")
     expect_false(inherits(chan$properties, "xml_document"))
 
+    folder <- chan$get_folder()
+    expect_is(folder, "ms_drive_item")
+
     lst <- chan$list_messages()
     expect_is(lst, "list")
     expect_identical(length(lst), 0L)

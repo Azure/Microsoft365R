@@ -33,9 +33,10 @@ Class representing a Microsoft Teams channel.
 \item \code{list_messages(n=50)}: Retrieves the messages in the channel. By default, this is limited to the 50 most recent messages; set the \code{n} argument to change this.
 \item \code{get_message(message_id)}: Retrieves a specific message in the channel.
 \item \code{delete_message(message_id, confirm=TRUE)}: Deletes a message. By default, ask for confirmation first. You can only delete your own messages.
-\item \code{list_files()}: List the files for the channel. See \link{ms_drive} for the arguments available.
+\item \code{list_files()}: List the files for the channel. See \link{ms_drive} for the arguments available for this and the file upload/download methods.
 \item \code{upload_file()}: Uploads a file to the channel.
 \item \code{download_file()}: Downloads a file from the channel.
+\item \code{get_folder()}: Retrieves the files folder for the channel, as a \link{ms_drive_item} object
 }
 }
 

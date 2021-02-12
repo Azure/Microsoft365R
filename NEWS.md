@@ -8,7 +8,11 @@
   - List messages and replies
   - Send messages to channels, send replies to messages
   - Upload and download files
-- Rename the client functions to allow for listing teams and sites:
+  - In this version only Teams channels are supported; chats between individuals may come later.
+- Move implementations for file and folder methods to the `ms_drive_item` class.
+  - This facilitates managing files for Teams channels, which have associated folders in a shared document library (drive)
+  - The existing methods for the `ms_drive` class now call down to the `ms_drive_item` methods, with appropriate arguments; their behaviour should be unchanged
+- Rename the client functions to allow for listing teams and sites. The original clients are still available but deprecated, and will be removed in a future version of the package.
   - `get_sharepoint_site()` is now `get_sharepoint_site()`
   - `get_personal_onedrive()` is now `get_personal_onedrive()`
   - `get_business_onedrive()` is now `get_business_onedrive()`

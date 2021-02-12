@@ -6,6 +6,9 @@ team_id <- Sys.getenv("AZ_TEST_TEAM_ID")
 if(tenant == "" || app == "" || team_name == "" || team_id == "")
     skip("Channel tests skipped: Microsoft Graph credentials not set")
 
+if(Sys.getenv("AZ_TEST_CHANNEL_FLAG") == "")
+    skip("Channel tests skipped: flag not set")
+
 if(!interactive())
     skip("Channel tests skipped: must be in interactive session")
 

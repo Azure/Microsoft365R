@@ -104,8 +104,58 @@ public=list(
         else res$link$webUrl
     },
 
+    list_items=function() {},
+
+    get_item=function() {},
+
+    create_folder=function() {},
+
+    upload=function(src, dest=basename(src), blocksize=32768000)
+    {
+        private$assert_is_folder()
+
+        dest <- sub("^[/]+", "", file.path(private$normalize_name(), dest))
+        path <- paste0("root:/", dest, ":/createUploadSession")
+
+        con <- file(src, open="rb")
+        on.exit(close(con))
+        size <- file.size(src)
+        path <- "createUploadSession"
+        body <- list(name=dest)
+        # print(path)
+        upload_dest <- call_graph_endpoint(self$token, path, body=body, http_verb="POST")$uploadUrl
+        next_blockstart <- 0
+        next_blockend <- size - 1
+        repeat
+        {
+            next_blocksize <- min(next_blockend - next_blockstart + 1, blocksize)
+            seek(con, next_blockstart)
+            body <- readBin(con, "raw", next_blocksize)
+            thisblock <- length(body)
+            if(thisblock == 0)
+                break
+
+            headers <- httr::add_headers(
+                `Content-Length`=thisblock,
+                `Content-Range`=sprintf("bytes %.0f-%.0f/%.0f",
+                    next_blockstart, next_blockstart + next_blocksize - 1, size)
+            )
+            res <- httr::PUT(upload_dest, headers, body=body)
+            httr::stop_for_status(res)
+
+            next_block <- parse_upload_range(httr::content(res), blocksize)
+            if(is.null(next_block))
+                break
+            next_blockstart <- next_block[1]
+            next_blockend <- next_block[2]
+        }
+        invisible(ms_drive_item$new(self$token, self$tenant, httr::content(res)))
+    },
+
     download=function(dest=self$properties$name, overwrite=FALSE)
     {
+        private$assert_is_file()
+
         filepath <- file.path(self$parentReference$path, self$properties$name)
         res <- self$do_operation("content", config=httr::write_disk(dest, overwrite=overwrite),
                                  http_status_handler="pass")
@@ -129,4 +179,30 @@ public=list(
         cat(format_public_methods(self))
         invisible(self)
     }
+),
+
+private=list(
+
+    normalize_name=function()
+    {
+        name <- self$properties$name
+        if(name == "root")
+            return("")
+        parent <- self$properties$parentReference$path
+        file.path(sub("^.+root:[/]?", "", parent), name)
+    },
+
+    assert_is_folder=function()
+    {
+        stopifnot("Must be a folder"=!is.null(self$properties$folder))
+    },
+
+    assert_is_file=function()
+    {
+        stopifnot("Must be a file"=is.null(self$properties$folder))
+    }
 ))
+
+
+# alias for convenience
+ms_drive_item$set("public", "list_files", overwrite=TRUE, ms_drive_item$public_methods$list_items)

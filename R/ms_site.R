@@ -19,7 +19,7 @@
 #' - `list_subsites()`: List the subsites of this site.
 #' - `get_lists()`: Returns the lists that are part of this site.
 #' - `get_list(list_name, list_id)`: Returns a specific list, either by name or ID.
-#' - `get_group()`: Retrieve the Microsoft 365 group associated with the site.
+#' - `get_group()`: Retrieve the Microsoft 365 group associated with the site, if it exists. A site that backs a private Teams channel will not have a group associated with it.
 #'
 #' @section Initialization:
 #' Creating new objects of this class should be done via the `get_sharepoint_site` method of the [ms_graph] or [az_group] classes. Calling the `new()` method for this class only constructs the R object; it does not call the Microsoft Graph API to retrieve or create the actual site.
@@ -93,7 +93,7 @@ public=list(
         filter <- sprintf("displayName eq '%s'", self$properties$displayName)
         res <- call_graph_endpoint(self$token, "groups", options=list(`$filter`=filter))$value
         if(length(res) != 1)
-            stop("Unable to get group", call.=FALSE)
+            stop("Unable to get Microsoft 365 group", call.=FALSE)
         az_group$new(self$token, self$tenant, res[[1]])
     },
 

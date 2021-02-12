@@ -124,8 +124,8 @@ public=list(
 
         children <- if(path != "/")
         {
-            path <- curl::curl_escape(gsub("^/|/$", "", path)) # remove any leading and trailing slashes
-            self$do_operation(paste0("root:/", path, ":/children"), options=opts, simplify=TRUE)
+            pathesc <- curl::curl_escape(gsub("^/|/$", "", path)) # remove any leading and trailing slashes
+            self$do_operation(paste0("root:/", pathesc, ":/children"), options=opts, simplify=TRUE)
         }
         else self$do_operation("root/children", options=opts, simplify=TRUE)
 

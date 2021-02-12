@@ -90,7 +90,8 @@ public=list(
             description=description,
             membershipType=membership
         )
-        ms_channel$new(self$token, self$tenant, self$do_operation("channels", body=body, http_verb="POST"))
+        ms_channel$new(self$token, self$tenant, self$do_operation("channels", body=body, http_verb="POST"),
+                       team_id=self$properties$id)
     },
 
     delete_channel=function(channel_name=NULL, channel_id=NULL, confirm=TRUE)

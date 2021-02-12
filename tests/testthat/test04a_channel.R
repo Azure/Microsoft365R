@@ -30,13 +30,9 @@ test_that("Channel methods work",
     expect_is(chan, "ms_channel")
     expect_false(inherits(chan$properties, "xml_document"))
 
-    print(chan)
-    print(chan$properties)
     lst <- chan$list_messages()
     expect_is(lst, "list")
     expect_identical(length(lst), 0L)
-
-    Sys.sleep(1)
 
     msg_body <- sprintf("Test message: %s", make_name(5))
     msg <- chan$send_message(msg_body)

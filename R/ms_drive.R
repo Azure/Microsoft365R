@@ -116,96 +116,17 @@ public=list(
     list_items=function(path="/", info=c("partial", "name", "all"), full_names=FALSE, pagesize=1000)
     {
         info <- match.arg(info)
-        opts <- switch(info,
-            partial=list(`$select`="name,size,folder", `$top`=pagesize),
-            name=list(`$select`="name", `$top`=pagesize),
-            list(`$top`=pagesize)
-        )
-
-        children <- if(path != "/")
-        {
-            pathesc <- curl::curl_escape(gsub("^/|/$", "", path)) # remove any leading and trailing slashes
-            self$do_operation(paste0("root:/", pathesc, ":/children"), options=opts, simplify=TRUE)
-        }
-        else self$do_operation("root/children", options=opts, simplify=TRUE)
-
-        # get file list as a data frame
-        df <- private$get_paged_list(children, simplify=TRUE)
-
-        if(is_empty(df))
-            df <- data.frame(name=character(), size=numeric(), isdir=logical())
-        else if(info != "name")
-        {
-            df$isdir <- if(!is.null(df$folder))
-                !is.na(df$folder$childCount)
-            else rep(FALSE, nrow(df))
-        }
-
-        if(full_names)
-            df$name <- file.path(sub("^/", "", path), df$name)
-        switch(info,
-            partial=df[c("name", "size", "isdir")],
-            name=df$name,
-            all=
-            {
-                firstcols <- c("name", "size", "isdir")
-                df[c(firstcols, setdiff(names(df), firstcols))]
-            }
-        )
+        private$get_root()$list_items(path, info, full_names, pagesize)
     },
 
     upload_file=function(src, dest, blocksize=32768000)
     {
-        dest <- curl::curl_escape(sub("^/", "", dest))
-        path <- paste0("root:/", dest, ":/createUploadSession")
-
-        con <- file(src, open="rb")
-        on.exit(close(con))
-        size <- file.size(src)
-
-        upload_dest <- self$do_operation(path, http_verb="POST")$uploadUrl
-        next_blockstart <- 0
-        next_blockend <- size - 1
-        repeat
-        {
-            next_blocksize <- min(next_blockend - next_blockstart + 1, blocksize)
-            seek(con, next_blockstart)
-            body <- readBin(con, "raw", next_blocksize)
-            thisblock <- length(body)
-            if(thisblock == 0)
-                break
-
-            headers <- httr::add_headers(
-                `Content-Length`=thisblock,
-                `Content-Range`=sprintf("bytes %.0f-%.0f/%.0f",
-                    next_blockstart, next_blockstart + next_blocksize - 1, size)
-            )
-            res <- httr::PUT(upload_dest, headers, body=body)
-            httr::stop_for_status(res)
-
-            next_block <- parse_upload_range(httr::content(res), blocksize)
-            if(is.null(next_block))
-                break
-            next_blockstart <- next_block[1]
-            next_blockend <- next_block[2]
-        }
-        invisible(ms_drive_item$new(self$token, self$tenant, httr::content(res)))
+        private$get_root()$upload(src, dest, blocksize)
     },
 
     create_folder=function(path)
     {
-        name <- basename(path)
-        parent <- dirname(path)
-        op <- if(parent %in% c(".", "/"))  # assume root
-            "root/children"
-        else paste0("root:/", sub("^/", "", parent), ":/children")
-        body <- list(
-            name=name,
-            folder=named_list(),
-            `@microsoft.graph.conflictBehavior`="fail"
-        )
-        res <- self$do_operation(op, body=body, http_verb="POST")
-        ms_drive_item$new(self$token, self$tenant, res)
+        private$get_root()$create_folder(path)
     },
 
     download_file=function(src, dest=basename(src), overwrite=FALSE)
@@ -266,6 +187,18 @@ public=list(
         cat("---\n")
         cat(format_public_methods(self))
         invisible(self)
+    }
+),
+
+private=list(
+
+    root=NULL,
+
+    get_root=function()
+    {
+        if(is.null(private$root))
+            private$root <- self$get_item("/")
+        private$root
     }
 ))
 

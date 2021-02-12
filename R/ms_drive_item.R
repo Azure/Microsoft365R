@@ -112,6 +112,8 @@ public=list(
     list_items=function(path="", info=c("partial", "name", "all"), full_names=FALSE, pagesize=1000)
     {
         private$assert_is_folder()
+        if(path == "/")
+            path <- ""
         info <- match.arg(info)
         opts <- switch(info,
             partial=list(`$select`="name,size,folder", `$top`=pagesize),

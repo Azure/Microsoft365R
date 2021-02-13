@@ -45,11 +45,17 @@ ms_list_item <- R6::R6Class("ms_list_item", inherit=ms_object,
 
 public=list(
 
-    initialize=function(token, tenant=NULL, properties=NULL)
+    site_id=NULL,
+    list_id=NULL,
+
+    initialize=function(token, tenant=NULL, properties=NULL, site_id=NULL, list_id=NULL)
     {
+        if(is.null(site_id) || is.null(list_id))
+            stop("Must supply parent site and list IDs", call.=FALSE)
         self$type <- "list item"
-        context <- parse_listitem_context(properties[["fields@odata.context"]])
-        private$api_type <- file.path("sites", context$site_id, "lists", context$list_id, "items")
+        self$site_id <- site_id
+        self$list_id <- list_id
+        private$api_type <- file.path("sites", self$site_id, "lists", self$list_id, "items")
         super$initialize(token, tenant, properties)
     },
 
@@ -64,14 +70,3 @@ public=list(
     }
 ))
 
-
-parse_listitem_context <- function(x)
-{
-    if(is.null(x))
-        stop("Unable to initialize list item object: no OData context", call.=FALSE)
-    x <- sub("^.+#sites\\('", "", x)
-    sid <- utils::URLdecode(sub("'\\).+$", "", x))
-    x <- sub("^.+lists\\('", "", x)
-    lid <- sub("'\\).+", "", x)
-    list(site_id=sid, list_id=lid)
-}

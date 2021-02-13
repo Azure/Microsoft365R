@@ -88,7 +88,9 @@ public=list(
         items <- self$do_operation("items", options=options, headers, simplify=as_data_frame)
         df <- private$get_paged_list(items, simplify=as_data_frame)
         if(!as_data_frame)
-            lapply(df, function(item) ms_list_item$new(self$token, self$tenant, item))
+            lapply(df, function(item) ms_list_item$new(self$token, self$tenant, item,
+                site_id=self$properties$parentReference$siteId,
+                list_id=self$properties$id))
         else if(!all_metadata)
             df$fields
         else df
@@ -98,13 +100,17 @@ public=list(
     {
         fields <- list(...)
         res <- self$do_operation("items", body=list(fields=fields), http_verb="POST")
-        invisible(ms_list_item$new(self$token, self$tenant, res))
+        invisible(ms_list_item$new(self$token, self$tenant, res,
+            site_id=self$properties$parentReference$siteId,
+            list_id=self$properties$id))
     },
 
     get_item=function(id)
     {
         res <- self$do_operation(file.path("items", id))
-        ms_list_item$new(self$token, self$tenant, res)
+        ms_list_item$new(self$token, self$tenant, res,
+            site_id=self$properties$parentReference$siteId,
+            list_id=self$properties$id)
     },
 
     update_item=function(id, ...)

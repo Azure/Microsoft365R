@@ -94,6 +94,7 @@ add_graph_methods <- function()
     ms_graph$set("public", "get_sharepoint_site", overwrite=TRUE,
     function(site_url=NULL, site_id=NULL)
     {
+        assert_one_arg <- get("assert_one_arg", getNamespace("Microsoft365R"))
         assert_one_arg(site_url, site_id, msg="Supply exactly one of site URL or ID")
         op <- if(!is.null(site_url))
         {

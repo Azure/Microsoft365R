@@ -48,42 +48,27 @@ Creating new objects of this class should be done via the \code{get_drive} metho
 
 \section{File and folder operations}{
 
-This class exposes methods for carrying out common operations on files and folders.
+This class exposes methods for carrying out common operations on files and folders. They call down to the corresponding methods for the \link{ms_drive_item} class. In this context, any paths to child items are relative to the root folder of the drive.
 
-\code{list_items(path, info, full_names, pagesize)} lists the items under the specified path. It is the analogue of base R's \code{dir}/\code{list.files}. Its arguments are
-\itemize{
-\item \code{path}: The path.
-\item \code{info}: The information to return: either "partial", "name" or "all". If "partial", a data frame is returned containing the name, size and whether the item is a file or folder. If "name", a vector of file/folder names is returned. If "all", a data frame is returned containing \emph{all} the properties for each item (this can be large).
-\item \code{full_names}: Whether to prefix the full path to the names of the items.
-\item \code{pagesize}: The number of results to return for each call to the REST endpoint. You can try reducing this argument below the default of 1000 if you are experiencing timeouts.
-}
+\code{open_item} opens the given file or folder in your browser. If the file has an unrecognised type, most browsers will attempt to download it.
+
+\code{list_items(path, info, full_names, pagesize)} lists the items under the specified path.
 
 \code{list_files} is a synonym for \code{list_items}.
 
-\code{download_file} and \code{upload_file} download and upload files from the local machine to the drive. For \code{upload_file}, the uploading is done in blocks of 32MB by default; you can change this by setting the \code{blocksize} argument. For technical reasons, the block size \href{https://docs.microsoft.com/en-us/graph/api/driveitem-createuploadsession?view=graph-rest-1.0#upload-bytes-to-the-upload-session}{must be a multiple of 320KB}.
+\code{download_file} and \code{upload_file} transfer files between the local machine and the drive.
 
 \code{create_folder} creates a folder with the specified path. Trying to create an already existing folder is an error.
 
-\code{open_item} opens the given file or folder in your browser.
-
-\code{create_share_link(path, type, expiry, password, scope)} returns a shareable link to the item. Its arguments are
-\itemize{
-\item \code{path}: The path.
-\item \code{type}: Either "view" for a read-only link, "edit" for a read-write link, or "embed" for a link that can be embedded in a web page. The last one is only available for personal OneDrive.
-\item \code{expiry}: How long the link is valid for. The default is 7 days; you can set an alternative like "15 minutes", "24 hours", "2 weeks", "3 months", etc. To leave out the expiry date, set this to NULL.
-\item \code{password}: An optional password to protect the link.
-\item \code{scope}: Optionally the scope of the link, either "anonymous" or "organization". The latter allows only users in your AAD tenant to access the link, and is only available for OneDrive for Business or SharePoint.
-}
-
-This function returns a URL to access the item, for \code{type="view"} or "\verb{type=edit"}. For \code{type="embed"}, it returns a list with components \code{webUrl} containing the URL, and \code{webHtml} containing a HTML fragment to embed the link in an IFRAME. The default is a viewable link, expiring in 7 days.
+\code{create_share_link(path, type, expiry, password, scope)} returns a shareable link to the item.
 
 \code{delete_item} deletes a file or folder. By default, it will ask for confirmation first.
 
-\code{get_item} returns an object of class \link{ms_drive_item}, containing the properties (metadata) for a given file or folder and methods for working with it.
+\code{get_item} retrieves the file or folder with the given path, as an  object of class \link{ms_drive_item}.
 
 \code{get_item_properties} is a convenience function that returns the properties of a file or folder as a list.
 
-\code{set_item_properties} sets the properties of a file or folder. The new properties should be specified as individual named arguments to the method. Any existing properties that aren't listed as arguments will retain their previous values or be recalculated based on changes to other properties, as appropriate.
+\code{set_item_properties} sets the properties of a file or folder. The new properties should be specified as individual named arguments to the method. Any existing properties that aren't listed as arguments will retain their previous values or be recalculated based on changes to other properties, as appropriate. You can also call the \code{update} method on the corresponding \code{ms_drive_item} object.
 }
 
 \examples{
@@ -100,8 +85,8 @@ site <- get_sharepoint_site("My site")
 drv <- site$get_drive()
 
 ## file/folder operationss
-drv$list_items()
-drv$list_items("path/to/folder", full_names=TRUE)
+drv$list_files()
+drv$list_files("path/to/folder", full_names=TRUE)
 
 # download a file -- default destination filename is taken from the source
 drv$download_file("path/to/folder/data.csv")

@@ -18,10 +18,11 @@
 #' - `send_message(body, content_type, attachments)`: Sends a new message to the channel. See below.
 #' - `list_messages(n=50)`: Retrieves the messages in the channel. By default, this is limited to the 50 most recent messages; set the `n` argument to change this.
 #' - `get_message(message_id)`: Retrieves a specific message in the channel.
-#' - `delete_message(message_id, confirm=TRUE)`: Deletes a message. By default, ask for confirmation first. You can only delete your own messages.
-#' - `list_files()`: List the files for the channel. See [ms_drive] for the arguments available.
+#' - `delete_message(message_id, confirm=TRUE)`: Deletes a message. Currently the Graph API does not support deleting Teams messages, so this method is disabled.
+#' - `list_files()`: List the files for the channel. See [ms_drive] for the arguments available for this and the file upload/download methods.
 #' - `upload_file()`: Uploads a file to the channel.
 #' - `download_file()`: Downloads a file from the channel.
+#' - `get_folder()`: Retrieves the files folder for the channel, as a [ms_drive_item] object
 #'
 #' @section Initialization:
 #' Creating new objects of this class should be done via the `get_channel` and `list_channels` methods of the [ms_team] class. Calling the `new()` method for this class only constructs the R object; it does not call the Microsoft Graph API to retrieve or create the actual channel.
@@ -60,6 +61,8 @@
 #'
 #' chan$upload_file("mydocument.docx")
 #'
+#' chan$list_files()
+#'
 #' }
 #' @format An R6 object of class `ms_channel`, inheriting from `ms_object`.
 #' @export
@@ -71,6 +74,8 @@ public=list(
 
     initialize=function(token, tenant=NULL, properties=NULL, team_id=NULL)
     {
+        if(is.null(team_id))
+            stop("Missing team ID", call.=FALSE)
         self$type <- "channel"
         self$team_id <- team_id
         private$api_type <- file.path("teams", self$team_id, "channels")
@@ -104,20 +109,24 @@ public=list(
 
     list_files=function(path="", ...)
     {
-        path <- sub("/$", "", file.path(self$properties$displayName, path))
-        private$get_drive()$list_files(path, ...)
+        self$get_folder()$list_files(path, ...)
     },
 
     download_file=function(src, dest=basename(src), ...)
     {
-        src <- file.path(self$properties$displayName, src)
-        private$get_drive()$download_file(src, dest, ...)
+        self$get_folder()$get_item(src)$download(dest, ...)
     },
 
     upload_file=function(src, dest=basename(src), ...)
     {
-        dest <- file.path(self$properties$displayName, dest)
-        private$get_drive()$upload_file(src, dest, ...)
+        self$get_folder()$upload(src, dest, ...)
+    },
+
+    get_folder=function()
+    {
+        if(is.null(private$folder))
+            private$folder <- ms_drive_item$new(self$token, self$tenant, self$do_operation("filesFolder"))
+        private$folder
     },
 
     print=function(...)
@@ -133,22 +142,5 @@ public=list(
 
 private=list(
 
-    get_drive=function(drive_id=NULL)
-    {
-        op <- if(is.null(drive_id))
-            "drive"
-        else file.path("drives", drive_id)
-        ms_drive$new(self$token, self$tenant, private$do_group_operation(op))
-    },
-
-    get_group=function()
-    {
-        az_group$new(self$token, self$tenant, private$do_group_operation())
-    },
-
-    do_group_operation=function(op="", ...)
-    {
-        op <- sub("/$", "", file.path("groups", self$team_id, op))
-        call_graph_endpoint(self$token, op, ...)
-    }
+    folder=NULL
 ))

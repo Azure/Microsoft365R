@@ -33,6 +33,7 @@ Class representing a SharePoint site.
 \item \code{list_subsites()}: List the subsites of this site.
 \item \code{get_lists()}: Returns the lists that are part of this site.
 \item \code{get_list(list_name, list_id)}: Returns a specific list, either by name or ID.
+\item \code{get_group()}: Retrieve the Microsoft 365 group associated with the site, if it exists. A site that backs a private Teams channel will not have a group associated with it.
 }
 }
 

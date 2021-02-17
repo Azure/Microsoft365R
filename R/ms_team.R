@@ -16,10 +16,12 @@
 #' - `sync_fields()`: Synchronise the R object with the team metadata in Microsoft Graph.
 #' - `list_channels(filter=NULL)`: List the channels for this team. Optionally, supply an OData expression to filter the list.
 #' - `get_channel(channel_name, channel_id)`: Retrieve a channel. If the name and ID are not specified, returns the primary channel.
+#' - `create_channel(channel_name, description, membership)`: Create a new channel. Optionally, you can specify a short text description of the channel, and the type of membership: either standard or private (invitation-only).
+#' - `delete_channel(channel_name, channel_id, confirm=TRUE)`: Delete a channel; by default, ask for confirmation first. You cannot delete the primary channel of a team.
 #' - `list_drives()`: List the drives (shared document libraries) associated with this team.
 #' - `get_drive(drive_id)`: Retrieve a shared document library for this team. If the ID is not specified, this returns the default document library.
 #' - `get_sharepoint_site()`: Get the SharePoint site associated with the team.
-#' - `get_group()`: Get the Azure Active Directory group associated with the team.
+#' - `get_group()`: Retrieve the Microsoft 365 group associated with the team.
 #'
 #' @section Initialization:
 #' Creating new objects of this class should be done via the `get_team` and `list_teams` methods of the [ms_graph], [az_user] or [az_group] classes. Calling the `new()` method for this class only constructs the R object; it does not call the Microsoft Graph API to retrieve or create the actual team.
@@ -37,6 +39,9 @@
 #' myteam$list_channels()
 #' myteam$get_channel()
 #' myteam$get_drive()
+#'
+#' myteam$create_channel("Test channel", description="A channel for testing")
+#' myteam$delete_channel("Test channel")
 #'
 #' }
 #' @format An R6 object of class `ms_team`, inheriting from `ms_object`.
@@ -75,6 +80,24 @@ public=list(
             file.path("channels", channel_id)
         else stop("Do not supply both the channel name and ID", call.=FALSE)
         ms_channel$new(self$token, self$tenant, self$do_operation(op), team_id=self$properties$id)
+    },
+
+    create_channel=function(channel_name, description="", membership=c("standard", "private"))
+    {
+        membership <- match.arg(membership)
+        body <- list(
+            displayName=channel_name,
+            description=description,
+            membershipType=membership
+        )
+        ms_channel$new(self$token, self$tenant, self$do_operation("channels", body=body, http_verb="POST"),
+                       team_id=self$properties$id)
+    },
+
+    delete_channel=function(channel_name=NULL, channel_id=NULL, confirm=TRUE)
+    {
+        assert_one_arg(channel_name, channel_id, msg="Supply exactly one of channel name or ID")
+        self$get_channel(channel_name, channel_id)$delete(confirm=confirm)
     },
 
     list_drives=function()

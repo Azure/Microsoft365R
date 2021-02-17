@@ -2,11 +2,12 @@ tenant <- Sys.getenv("AZ_TEST_TENANT_ID")
 app <- Sys.getenv("AZ_TEST_NATIVE_APP_ID")
 team_name <- Sys.getenv("AZ_TEST_TEAM_NAME")
 team_id <- Sys.getenv("AZ_TEST_TEAM_ID")
-channel_name <- Sys.getenv("AZ_TEST_CHANNEL_NAME")
-channel_id <- Sys.getenv("AZ_TEST_CHANNEL_ID")
 
-if(tenant == "" || app == "" || team_name == "" || team_id == "" || channel_name == "" || channel_id == "")
+if(tenant == "" || app == "" || team_name == "" || team_id == "")
     skip("Channel tests skipped: Microsoft Graph credentials not set")
+
+if(Sys.getenv("AZ_TEST_CHANNEL_FLAG") == "")
+    skip("Channel tests skipped: flag not set")
 
 if(!interactive())
     skip("Channel tests skipped: must be in interactive session")
@@ -25,12 +26,19 @@ test_that("Channel methods work",
     team <- get_team(team_id=team_id, tenant=tenant, app=app)
     expect_is(team, "ms_team")
 
-    chan <- team$get_channel(channel_name=channel_name)
+    channel_name <- sprintf("Test channel %s", make_name(10))
+    expect_error(team$get_channel(channel_name=channel_name))
+
+    chan <- team$create_channel(channel_name, description="Temporary testing channel")
     expect_is(chan, "ms_channel")
+    expect_false(inherits(chan$properties, "xml_document"))
+
+    folder <- chan$get_folder()
+    expect_is(folder, "ms_drive_item")
 
     lst <- chan$list_messages()
     expect_is(lst, "list")
-    expect_true(all(sapply(lst, inherits, "ms_chat_message")))
+    expect_identical(length(lst), 0L)
 
     msg_body <- sprintf("Test message: %s", make_name(5))
     msg <- chan$send_message(msg_body)
@@ -46,11 +54,11 @@ test_that("Channel methods work",
     expect_is(msg3, "ms_chat_message")
     expect_true(nzchar(msg3$properties$attachments[[1]]$contentUrl))
 
-    # repl_body <- sprintf("Test reply: %s", make_name(5))
-    # repl <- msg$send_reply(repl_body)
-    # expect_is(repl, "ms_chat_message")
+    repl_body <- sprintf("Test reply: %s", make_name(5))
+    repl <- msg$send_reply(repl_body)
+    expect_is(repl, "ms_chat_message")
 
-    # expect_error(repl$send_reply("Reply to reply"))
+    expect_error(repl$send_reply("Reply to reply"))
 
     # expect_silent(msg$delete(confirm=FALSE))
     # expect_silent(chan$delete_message(msg2$properties$id, confirm=FALSE))
@@ -68,9 +76,10 @@ test_that("Channel methods work",
     expect_silent(chan$download_file(basename(f1), f_dl))
     expect_true(files_identical(f1, f_dl))
 
+    expect_silent(chan$delete(confirm=FALSE))
+
     drv <- team$get_drive()
-    itempath0 <- file.path(channel_name, basename(f0))
-    itempath1 <- file.path(channel_name, basename(f1))
-    expect_silent(drv$delete_item(itempath0, confirm=FALSE))
-    expect_silent(drv$delete_item(itempath1, confirm=FALSE))
+    flist2 <- drv$list_files(channel_name, info="name", full_names=TRUE)
+    lapply(flist2, function(f) drv$delete_item(f, confirm=FALSE))
+    drv$delete_item(channel_name, confirm=FALSE)
 })

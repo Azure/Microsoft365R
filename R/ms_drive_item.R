@@ -207,6 +207,7 @@ public=list(
         on.exit(close(con))
 
         op <- paste0(private$make_absolute_path(dest), ":/createUploadSession")
+        # print(op)
         upload_dest <- call_graph_endpoint(self$token, op, http_verb="POST")$uploadUrl
 
         size <- file.size(src)
@@ -274,8 +275,15 @@ private=list(
         name <- self$properties$name
         op <- if(name == "root")
             file.path("drives", parent$driveId, "root:")
-        else file.path(parent$path, name)
-        file.path(op, enc2utf8(dest))
+        else
+        {
+            # have to infer the parent path if we got this item as a Teams channel folder
+            # in this case, assume the parent is the root folder
+            if(is.null(parent$path))
+                parent$path <- sprintf("/drives/%s/root:", parent$driveId)
+            file.path(parent$path, name)
+        }
+        utils::URLencode(enc2utf8(file.path(op, dest)))
     },
 
     assert_is_folder=function()

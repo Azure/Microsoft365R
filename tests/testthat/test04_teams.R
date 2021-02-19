@@ -68,9 +68,20 @@ test_that("Teams methods work",
 
     chan0 <- team$get_channel()
     expect_is(chan0, "ms_channel")
+    f0 <- chan0$get_folder()
+    expect_is(f0, "ms_drive_item")
+    expect_is(f0$list_files(), "data.frame")
 
     chan1 <- team$get_channel(channel_name=channel_name)
     expect_is(chan1, "ms_channel")
+    f1 <- chan1$get_folder()
+    expect_is(f1, "ms_drive_item")
+    expect_is(f1$list_files(), "data.frame")
+
+    src <- write_file()
+    it <- chan1$upload_file(src)
+    expect_is(it, "ms_drive_item")
+    expect_silent(it$delete(confirm=FALSE))
 
     chan2 <- team$get_channel(channel_id=channel_id)
     expect_is(chan2, "ms_channel")

@@ -37,7 +37,7 @@
 #'
 #' `list_files` is a synonym for `list_items`.
 #'
-#' `download_file` and `upload_file` transfer files between the local machine and the drive.
+#' `download_file` and `upload_file` transfer files between the local machine and the drive. For `download_file`, the default destination folder is the current (working) directory of your R session. For `upload_file`, there is no default destination folder; make sure you specify the destination explicitly.
 #'
 #' `create_folder` creates a folder with the specified path. Trying to create an already existing folder is an error.
 #'

@@ -129,3 +129,17 @@ test_that("Drive item methods work",
     expect_silent(folder1$delete(confirm=FALSE))
     expect_silent(file1$delete(confirm=FALSE))
 })
+
+
+test_that("Methods work with filenames with special characters",
+{
+    od <- get_business_onedrive(tenant=tenant)
+
+    test_name <- paste(make_name(5), "plus spaces and áccénts")
+    src <- write_file(fname=file.path(tempdir(), test_name))
+
+    expect_silent(od$upload_file(src, basename(src)))
+    expect_silent(item <- od$get_item(basename(test_name)))
+    expect_true(item$properties$name == basename(test_name))
+    expect_silent(item$delete(confirm=FALSE))
+})

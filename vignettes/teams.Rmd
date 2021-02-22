@@ -47,7 +47,7 @@ drv$list_files()
 drv$upload_file("myfile.csv", "General/myfile.csv")
 ```
 
-Note that the drives mentioned here are actually part by an underlying SharePoint site: you can think of Teams as simply an alternative interface to functionality provided by SharePoint. The `ms_team` class in fact has a `get_sharepoint_site()` method to retrieve the backing site; you can access the same files via the site's drive:
+Note that the drives mentioned here are actually the document libraries of an underlying SharePoint site: as far as file access is concerned, you can think of Teams as simply an alternative interface to functionality provided by SharePoint. The `ms_team` class in fact has a `get_sharepoint_site()` method to retrieve the backing site, and you can access the same files via the site's drive.
 
 ```r
 site <- team$get_sharepoint_site()
@@ -80,7 +80,7 @@ msg <- chan$get_message(msgs[[1]]$properties$id)
 msg$properties$body
 ```
 
-You can send a message to a channel as plain text (the default) or HTML. Teams imposes security restrictions on which HTML tags are supported: you should limit your message to contain only basic formatting and no embedded scripts.
+You can send a message to a channel as plain text (the default) or HTML. For the latter, Teams imposes security restrictions on which HTML tags are allowed; you should limit your message to contain only basic formatting and no embedded scripts.
 
 ```r
 chan$send_message("Hello from R")
@@ -88,18 +88,17 @@ chan$send_message("Hello from R")
 chan$send_message("<body>Hello from <em>R</em></body>", content_type="html")
 
 # send attachments by including a vector of filenames
-chan$send_message("Hello with an attachment", attachments="myfile.csv")
+chan$send_message("Hello with attachments", attachments=c("intro.md", "myfile.csv"))
 ```
 
 Uploading a file to a channel will place it in the channel's folder. Note that message attachments are actually uploaded to the channel's folder and the message then includes a link to the uploaded file.
 
-The channel `get_folder()` method returns the file folder for the channel, and contains general methods for working with files. The channel object itself has convenience functions to list, upload and download files.
+The channel object itself provides convenience functions to list, upload and download files. It also provides a `get_folder()` method to retrieve the file folder for the channel, as an `ms_drive_item` object; this object contains more general methods for working with files.
 
 ```r
 chan$upload_file("myfile.docx")
 chan$list_files()
 
-# see the OneDrive/SharePoint vignette for more info on the get_item() method
 chan_folder <- chan$get_folder()
 
 # open the uploaded document for editing in Word Online

@@ -27,5 +27,5 @@ Suggests:
     knitr,
     rmarkdown,
     testthat
-Roxygen: list(markdown=TRUE, r6=FALSE, old_usage=TRUE)
+Roxygen: list(markdown=TRUE, r6=FALSE)
 RoxygenNote: 7.1.1

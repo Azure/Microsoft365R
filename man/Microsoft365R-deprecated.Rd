@@ -7,15 +7,27 @@
 \alias{sharepoint_site}
 \title{Deprecated client functions}
 \usage{
-personal_onedrive(app = .microsoft365r_app_id,
-  scopes = c("Files.ReadWrite.All", "User.Read"), ...)
+personal_onedrive(
+  app = .microsoft365r_app_id,
+  scopes = c("Files.ReadWrite.All", "User.Read"),
+  ...
+)
 
-business_onedrive(tenant = Sys.getenv("CLIMICROSOFT365_TENANT", "common"),
-  app = Sys.getenv("CLIMICROSOFT365_AADAPPID"), scopes = ".default", ...)
-
-sharepoint_site(site_url = NULL, site_id = NULL,
+business_onedrive(
   tenant = Sys.getenv("CLIMICROSOFT365_TENANT", "common"),
-  app = Sys.getenv("CLIMICROSOFT365_AADAPPID"), scopes = ".default", ...)
+  app = Sys.getenv("CLIMICROSOFT365_AADAPPID"),
+  scopes = ".default",
+  ...
+)
+
+sharepoint_site(
+  site_url = NULL,
+  site_id = NULL,
+  tenant = Sys.getenv("CLIMICROSOFT365_TENANT", "common"),
+  app = Sys.getenv("CLIMICROSOFT365_AADAPPID"),
+  scopes = ".default",
+  ...
+)
 }
 \arguments{
 \item{app}{A custom app registration ID to use for authentication. For \code{personal_onedrive}, the default is to use Microsoft365R's internal app ID. For \code{business_onedrive} and \code{sharepoint_site}, see below.}

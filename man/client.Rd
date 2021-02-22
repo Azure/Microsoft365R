@@ -9,27 +9,51 @@
 \alias{list_teams}
 \title{Login clients for Microsoft 365}
 \usage{
-get_personal_onedrive(app = .microsoft365r_app_id,
-  scopes = c("Files.ReadWrite.All", "User.Read"), ...)
+get_personal_onedrive(
+  app = .microsoft365r_app_id,
+  scopes = c("Files.ReadWrite.All", "User.Read"),
+  ...
+)
 
-get_business_onedrive(tenant = Sys.getenv("CLIMICROSOFT365_TENANT",
-  "common"), app = Sys.getenv("CLIMICROSOFT365_AADAPPID"),
-  scopes = ".default", ...)
-
-get_sharepoint_site(site_name = NULL, site_url = NULL, site_id = NULL,
+get_business_onedrive(
   tenant = Sys.getenv("CLIMICROSOFT365_TENANT", "common"),
-  app = Sys.getenv("CLIMICROSOFT365_AADAPPID"), scopes = ".default", ...)
+  app = Sys.getenv("CLIMICROSOFT365_AADAPPID"),
+  scopes = ".default",
+  ...
+)
 
-list_sharepoint_sites(tenant = Sys.getenv("CLIMICROSOFT365_TENANT",
-  "common"), app = Sys.getenv("CLIMICROSOFT365_AADAPPID"),
-  scopes = ".default", ...)
-
-get_team(team_name = NULL, team_id = NULL,
+get_sharepoint_site(
+  site_name = NULL,
+  site_url = NULL,
+  site_id = NULL,
   tenant = Sys.getenv("CLIMICROSOFT365_TENANT", "common"),
-  app = Sys.getenv("CLIMICROSOFT365_AADAPPID"), scopes = ".default", ...)
+  app = Sys.getenv("CLIMICROSOFT365_AADAPPID"),
+  scopes = ".default",
+  ...
+)
 
-list_teams(tenant = Sys.getenv("CLIMICROSOFT365_TENANT", "common"),
-  app = Sys.getenv("CLIMICROSOFT365_AADAPPID"), scopes = ".default", ...)
+list_sharepoint_sites(
+  tenant = Sys.getenv("CLIMICROSOFT365_TENANT", "common"),
+  app = Sys.getenv("CLIMICROSOFT365_AADAPPID"),
+  scopes = ".default",
+  ...
+)
+
+get_team(
+  team_name = NULL,
+  team_id = NULL,
+  tenant = Sys.getenv("CLIMICROSOFT365_TENANT", "common"),
+  app = Sys.getenv("CLIMICROSOFT365_AADAPPID"),
+  scopes = ".default",
+  ...
+)
+
+list_teams(
+  tenant = Sys.getenv("CLIMICROSOFT365_TENANT", "common"),
+  app = Sys.getenv("CLIMICROSOFT365_AADAPPID"),
+  scopes = ".default",
+  ...
+)
 }
 \arguments{
 \item{app}{A custom app registration ID to use for authentication. For \code{personal_onedrive}, the default is to use Microsoft365R's internal app ID. For \code{get_business_onedrive} and \code{get_sharepoint_site}, see below.}

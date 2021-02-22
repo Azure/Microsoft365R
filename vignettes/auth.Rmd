@@ -3,12 +3,12 @@ title: "Authenticating to Microsoft 365"
 author: Hong Ooi
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{auth}
+  %\VignetteIndexEntry{Authentication}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{utf8}
 ---
 
-## authentication
+## Authentication
 
 The first time you call one of the Microsoft365R client functions, it will use your Internet browser to authenticate you with Azure Active Directory, in a similar manner to other web apps. You will get a dialog box asking for permission to access your information. Your login information is saved, so you should only have to authenticate once.
 

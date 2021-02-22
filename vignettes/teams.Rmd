@@ -1,0 +1,111 @@
+---
+title: "Teams"
+author: Hong Ooi
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Teams}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{utf8}
+---
+
+Microsoft365R is a simple yet powerful R interface to [Microsoft 365](https://www.microsoft.com/en-us/microsoft-365) (formerly known as Office 365), leveraging the facilities provided by the [AzureGraph](https://cran.r-project.org/package=AzureGraph) package. This vignette describes how to interact with [Microsoft Teams](https://www.microsoft.com/en-au/microsoft-teams/group-chat-software), including sending messages and transferring files.
+
+See the "Authenticating to Microsoft 365" vignette for more details on authentication if required.
+
+## Teams
+
+To access a team in Microsoft Teams, use the `get_team()` function and provide the team name or ID. You can also list the teams you're in with `list_teams()`. These return objects of R6 class `ms_team`.
+
+```r
+list_teams()
+team <- get_team("My team")
+```
+
+The `ms_team` class has methods for working with channels and drives. Each team will generally have at least one drive, and possibly two: the default "Documents" drive, which is where uploaded files will be stored, and the "Teams Wiki Data" drive, if the team has a wiki. Each team channel will have an associated folder in each drive, if at least one file has been uploaded to it.
+
+```r
+team$list_channels()
+
+# get the primary channel for a team
+team$get_channel()
+
+# get a specific channel
+team$get_channel("My channel")
+
+# drives for a team
+team$list_drives()
+team$get_drive()
+```
+
+A drive is an `ms_drive` object, so the same methods apply as for OneDrives and SharePoint document libraries --- see the "OneDrive and SharePoint" vignette for more information.
+
+```r
+drv <- team$get_drive()
+drv$list_files()
+
+# if the team has a "General" channel, this upload will appear in that channel's "Files" tab
+drv$upload_file("myfile.csv", "General/myfile.csv")
+```
+
+Note that the drives mentioned here are actually part by an underlying SharePoint site: you can think of Teams as simply an alternative interface to functionality provided by SharePoint. The `ms_team` class in fact has a `get_sharepoint_site()` method to retrieve the backing site; you can access the same files via the site's drive:
+
+```r
+site <- team$get_sharepoint_site()
+site_drv <- site$get_drive()
+
+# the previous upload will also appear in this file listing
+site_drv$list_files("General")
+```
+
+## Channels
+
+A team object has methods for listing, retrieving, creating and deleting channels. However you should not create and delete channels unnecessarily, since Teams tracks all channels ever created, even after you delete them.
+
+In turn, a channel object has methods for listing and sending messages, and uploading and deleting files.
+
+```r
+chan <- team$get_channel()
+
+# by default, retrieve only the 50 most recent messages
+msgs <- chan$list_messages()
+
+# retrieve the 100 most recent messages
+chan$list_messages(n=100)
+
+# retrieve all messages: set n = infinity
+chan$list_messages(n=Inf)
+
+# get a message by ID and view the message body
+msg <- chan$get_message(msgs[[1]]$properties$id)
+msg$properties$body
+```
+
+You can send a message to a channel as plain text (the default) or HTML. Teams imposes security restrictions on which HTML tags are supported: you should limit your message to contain only basic formatting and no embedded scripts.
+
+```r
+chan$send_message("Hello from R")
+
+chan$send_message("<body>Hello from <em>R</em></body>", content_type="html")
+
+# send attachments by including a vector of filenames
+chan$send_message("Hello with an attachment", attachments="myfile.csv")
+```
+
+Uploading a file to a channel will place it in the channel's folder. Note that message attachments are actually uploaded to the channel's folder and the message then includes a link to the uploaded file.
+
+The channel `get_folder()` method returns the file folder for the channel, and contains general methods for working with files. The channel object itself has convenience functions to list, upload and download files.
+
+```r
+chan$upload_file("myfile.docx")
+chan$list_files()
+
+# see the OneDrive/SharePoint vignette for more info on the get_item() method
+chan_folder <- chan$get_folder()
+
+# open the uploaded document for editing in Word Online
+item <- chan_folder$get_item("myfile.docx")
+item$open()
+
+# download the edited document
+chan$download_file("myfile.docx", overwrite=TRUE)
+```

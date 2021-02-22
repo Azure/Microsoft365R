@@ -1,22 +1,16 @@
 ---
-title: "Microsoft365R: Interface to Microsoft 365"
+title: "OneDrive and SharePoint"
 author: Hong Ooi
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Microsoft365R}
+  %\VignetteIndexEntry{OneDrive and SharePoint}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{utf8}
 ---
 
-Microsoft365R is intended to be a simple yet powerful R interface to [Microsoft 365](https://www.microsoft.com/en-us/microsoft-365) (formerly known as Office 365), leveraging the facilities provided by the [AzureGraph](https://cran.r-project.org/package=AzureGraph) package. Currently it enables access to data stored in [SharePoint Online](https://www.microsoft.com/en-au/microsoft-365/sharepoint/collaboration) sites and [OneDrive](https://www.microsoft.com/en-au/microsoft-365/onedrive/online-cloud-storage). Both personal OneDrive and OneDrive for Business are supported. Future versions may add support for Teams, Outlook and other Microsoft 365 services.
+Microsoft365R is a simple yet powerful R interface to [Microsoft 365](https://www.microsoft.com/en-us/microsoft-365) (formerly known as Office 365), leveraging the facilities provided by the [AzureGraph](https://cran.r-project.org/package=AzureGraph) package. This vignette describes how to access data stored in [SharePoint Online](https://www.microsoft.com/en-au/microsoft-365/sharepoint/collaboration) sites and [OneDrive](https://www.microsoft.com/en-au/microsoft-365/onedrive/online-cloud-storage). Both personal OneDrive and OneDrive for Business are supported. 
 
-## Authentication details
-
-The first time you call one of the Microsoft365R functions (see below), it will use your Internet browser to authenticate you with Azure Active Directory, in a similar manner to other web apps. You will get a dialog box asking for permission to access your information.
-
-For authentication purposes, the package is registered as an app in the 'aicatr' AAD tenant; depending on your organisation's security policy, you may have to get an admin to grant it access to your tenant. Alternatively, if the environment variable `CLIMICROSOFT365_AADAPPID` is set, Microsoft365R will use its value as the app ID for authenticating to the Microsoft 365 Business services (SharePoint and OneDrive for Business). You can also specify the app ID as an argument when calling the functions below.
-
-If creating your own app registration is impractical, it's possible to work around access issues by piggybacking on the [CLI for Microsoft365](https://pnp.github.io/cli-microsoft365/). By setting the R option `microsoft365r_use_cli_app_id` to a non-NULL value, authentication will be done using the CLI's app ID. Technically this app still requires admin approval, but it is in widespread use and so may already be allowed in your organisation. Be warned that this solution may draw the attention of your admin!
+See the "Authenticating to Microsoft 365" vignette for more details on authentication if required.
 
 ## OneDrive
 
@@ -24,9 +18,6 @@ To access your personal OneDrive, call the `get_personal_onedrive()` function. T
 
 ```r
 od <- get_personal_onedrive()
-
-# or if you don't have a browser
-od <- get_personal_onedrive(auth_type="device_code")
 
 # list files and folders
 od$list_items()
@@ -76,10 +67,6 @@ To access OneDrive for Business call `get_business_onedrive()`. This also return
 
 ```r
 # by default, authenticate with the Microsoft365R internal app ID
-odb <- get_business_onedrive()
-
-# authenticating with the CLI for Microsoft 365 app ID: set a global option
-options(microsoft365r_use_cli_app_id=TRUE)
 odb <- get_business_onedrive()
 
 odb$list_items()
@@ -149,25 +136,5 @@ In addition to the client functions given above, Microsoft365R enhances the `az_
 
 `az_user` gains `list_drives()` and `get_drive()` methods. The first shows all the drives that the user has access to, including those that are shared from other users. The second retrieves a specific drive, by default the user's OneDrive. Whether these are personal or business drives depends on the tenant that was specified in `AzureGraph::get_graph_login()`/`create_graph_login()`: if the tenant was "consumers", it will be the personal OneDrive.
 
-`az_group` gains `list_drives()`, `get_drive()` and `get_get_sharepoint_site()` methods. The first two do the same as for `az_user`: they retrieve the drive(s) for the group. The third method retrieves the SharePoint site associated with the group, if one exists.
-
-## Authentication troubleshooting
-
-Microsoft365R's default authentication flow leverages your Internet browser to provide the same login experience as other web apps. This may be a problem if your R session is taking place in a context where a browser is unavailable, for example in a text-only terminal in a VM or container. If so, you can switch to the device code flow, by adding `auth_type="device_code"` as an argument:
-
-```r
-get_personal_onedrive(auth_type="device_code")
-
-get_business_onedrive(auth_type="device_code")
-
-get_sharepoint_site("https://site-url", auth_type="device_code")
-```
-
-When authenticating for SharePoint and OneDrive for Business, by default Microsoft365R will detect your Azure Active Directory tenant from your logged-in credentials in the browser. If this doesn't work, specify your tenant name with the `tenant` argument:
-
-```r
-get_business_onedrive(tenant="myaadtenant")
-
-get_sharepoint_site("https://site-url", tenant="myaadtenant")
-```
+`az_group` gains `list_drives()`, `get_drive()` and `get_sharepoint_site()` methods. The first two do the same as for `az_user`: they retrieve the drive(s) for the group. The third method retrieves the SharePoint site associated with the group, if one exists.
 

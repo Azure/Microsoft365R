@@ -56,7 +56,7 @@ This class exposes methods for carrying out common operations on files and folde
 
 \code{list_files} is a synonym for \code{list_items}.
 
-\code{download_file} and \code{upload_file} transfer files between the local machine and the drive.
+\code{download_file} and \code{upload_file} transfer files between the local machine and the drive. For \code{download_file}, the default destination folder is the current (working) directory of your R session. For \code{upload_file}, there is no default destination folder; make sure you specify the destination explicitly.
 
 \code{create_folder} creates a folder with the specified path. Trying to create an already existing folder is an error.
 

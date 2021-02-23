@@ -149,12 +149,3 @@ list$delete_item(iid)
 Finally, you can retrieve subsites with `list_subsites()` and `get_subsite()`. These also return SharePoint site objects, so all the methods above are available for a subsite.
 
 Currently, Microsoft365R only supports SharePoint Online, the cloud-hosted version of the product. Support for SharePoint Server (the on-premises version) may come at a later stage.
-
-## Integration with AzureGraph
-
-In addition to the client functions given above, Microsoft365R enhances the `az_user` and `az_group` classes that are part of AzureGraph, to let you access drives and sites directly from a user or group object.
-
-`az_user` gains `list_drives()` and `get_drive()` methods. The first shows all the drives that the user has access to, including those that are shared from other users. The second retrieves a specific drive, by default the user's OneDrive. Whether these are personal or business drives depends on the tenant that was specified in `AzureGraph::get_graph_login()`/`create_graph_login()`: if the tenant was "consumers", it will be the personal OneDrive.
-
-`az_group` gains `list_drives()`, `get_drive()` and `get_sharepoint_site()` methods. The first two do the same as for `az_user`: they retrieve the drive(s) for the group. The third method retrieves the SharePoint site associated with the group, if one exists.
-

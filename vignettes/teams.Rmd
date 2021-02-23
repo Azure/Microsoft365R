@@ -21,9 +21,10 @@ list_teams()
 team <- get_team("My team")
 ```
 
-The `ms_team` class has methods for working with channels and drives. Each team will generally have at least one drive, and possibly two: the default "Documents" drive, which is where uploaded files will be stored, and the "Teams Wiki Data" drive, if the team has a wiki. Each team channel will have an associated folder in each drive, if at least one file has been uploaded to it.
+The `ms_team` class has methods for working with channels and drives. Each team will generally have at least one drive, and possibly two: the default "Documents" drive, which is where uploaded files are stored, and the "Teams Wiki Data" drive, if the team has a wiki. Each team channel will have an associated folder in each drive, if at least one file has been uploaded to it.
 
 ```r
+# list the channels in a team (including private channels you're a member of)
 team$list_channels()
 
 # get the primary channel for a team
@@ -37,17 +38,19 @@ team$list_drives()
 team$get_drive()
 ```
 
-A drive is an `ms_drive` object, so the same methods apply as for OneDrives and SharePoint document libraries --- see the "OneDrive and SharePoint" vignette for more information.
+A drive is an `ms_drive` object, so the same methods apply as for OneDrives and SharePoint document libraries---see the "OneDrive and SharePoint" vignette for more information.
 
 ```r
 drv <- team$get_drive()
+
+# this will show one folder for each channel that has uploaded files
 drv$list_files()
 
 # if the team has a "General" channel, this upload will appear in that channel's "Files" tab
 drv$upload_file("myfile.csv", "General/myfile.csv")
 ```
 
-Note that the drives mentioned here are actually the document libraries of an underlying SharePoint site: as far as file access is concerned, you can think of Teams as simply an alternative interface to functionality provided by SharePoint. The `ms_team` class in fact has a `get_sharepoint_site()` method to retrieve the backing site, and you can access the same files via the site's drive.
+Note that the drives mentioned here are actually the document libraries of an underlying SharePoint site: as far as file storage is concerned, you can think of Teams as simply an alternative interface to functionality provided by SharePoint. The `ms_team` class in fact has a `get_sharepoint_site()` method to retrieve the backing site, and you can access the same files via the site's drive.
 
 ```r
 site <- team$get_sharepoint_site()
@@ -75,12 +78,11 @@ chan$list_messages(n=100)
 # retrieve all messages: set n = infinity
 chan$list_messages(n=Inf)
 
-# get a message by ID and view the message body
+# get a message by ID
 msg <- chan$get_message(msgs[[1]]$properties$id)
-msg$properties$body
 ```
 
-You can send a message to a channel as plain text (the default) or HTML. For the latter, Teams imposes security restrictions on which HTML tags are allowed; you should limit your message to contain only basic formatting and no embedded scripts.
+You can send a message to a channel as plain text (the default) or HTML. For the latter, Teams imposes security restrictions on which HTML tags are allowed; you should limit your message to contain only basic formatting and no embedded scripts. See "Channel messages" below for more about the chat message object itself.
 
 ```r
 chan$send_message("Hello from R")
@@ -108,3 +110,33 @@ item$open()
 # download the edited document
 chan$download_file("myfile.docx", overwrite=TRUE)
 ```
+
+### Private channels
+
+Private channels function much the same way as regular public channels, and the methods described above should also work with them. The main difference is that a private channel's files are stored in a separate SharePoint site to the public channels, so any files you upload to the private channel won't appear in the file listings for the main site.
+
+## Channel messages
+
+Teams channels are semi-threaded. Getting the list of messages for a channel retrieves only the top-level messages; to get the replies in a thread, you get the root message and then retrieve the replies to it.
+
+A message object is of class `ms_chat_message`, and has custom methods to get replies, list all replies, and send a reply. Note that Teams doesn't have nested replies, so any methods dealing with replies will fail if the message object is itself a reply. The message body is part of the list of properties returned from the host, and can be found in the `properties` field along with other metadata.
+
+```r
+# get the most recent message
+msg_list <- chan$list_messages()
+msg_latest <- msg_list[[1]]
+
+# body of message
+msg_latest$properties$body
+
+# 10 most recent replies
+repl_list <- msg_latest$list_replies()
+
+# send a reply
+msg_latest$send_reply("Reply from R")
+
+# send a reply with an attachment
+msg_latest$send_reply("See attached file", attachments="reply.md")
+```
+
+Currently, Microsoft365R only supports messaging in channels. Support for chats between individuals may come later.

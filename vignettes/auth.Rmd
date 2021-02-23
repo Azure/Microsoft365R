@@ -44,9 +44,9 @@ Once the app has been registered, you can pass the app ID to Microsoft365R in a 
 
 - The client functions can accept the app ID as the `app` argument:
 
-```r
-get_business_onedrive(app="myappid")
-```
+  ```r
+  get_business_onedrive(app="myappid")
+  ```
 
 - Alternatively, if the environment variable `CLIMICROSOFT365_AADAPPID` is set, Microsoft365R will use its value as the app ID for authenticating to the Microsoft 365 Business services (Teams, SharePoint and OneDrive for Business). This environment variable is defined by the [CLI for Microsoft365](https://pnp.github.io/cli-microsoft365/), an open source tool for managing Microsoft 365 accounts; you thus can reuse the same app ID for both the CLI and Microsoft365R.
 
@@ -56,16 +56,16 @@ The above methods are the **recommended solutions** to dealing with access restr
 
 - By setting the R option `microsoft365r_use_cli_app_id` to a non-NULL value, Microsoft365R will authenticate using the app ID for the CLI for Microsoft 365---effectively pretending to be the CLI itself. Technically this app still requires admin approval, but it is in widespread use and is maintained by Microsoft employees, and so may already be allowed in your organisation. The CLI supports most Microsoft 365 services except for personal OneDrive.
 
-```r
-options(microsoft365r_use_cli_app_id=TRUE)
-get_team("My team")
-```
+  ```r
+  options(microsoft365r_use_cli_app_id=TRUE)
+  get_team("My team")
+  ```
 
 - You can authenticate using the Azure CLI's app ID: `04b07795-8ddb-461a-bbee-02f9e1bf7b46`. This is a first-party Microsoft app, and hence can be used in any tenant. It is not intended for use with Microsoft 365, so not all functionality may be supported; however it should be possible to access Teams and SharePoint sites (but not personal OneDrive or OneDrive for Business).
 
-```r
-get_sharepoint_site("My site", app="04b07795-8ddb-461a-bbee-02f9e1bf7b46")
-```
+  ```r
+  get_sharepoint_site("My site", app="04b07795-8ddb-461a-bbee-02f9e1bf7b46")
+  ```
 
 Be warned that these workarounds may draw the attention of your admin!
 

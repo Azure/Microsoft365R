@@ -32,6 +32,7 @@
 #' - `body`: The body of the message. This should be a character vector, which will be concatenated into a single string with newline separators. The body can be either plain text or HTML formatted.
 #' - `content_type`: Either "text" (the default) or "html".
 #' - `attachments`: Optional vector of filenames.
+#' - `inline`: Optional vector of filenames (typically images) that will be inserted into the body of the message. The `content_type` must be "html" to include inline content.
 #'
 #' Note that message attachments are actually uploaded to the channel's file listing (a directory in the team's primary shared document folder). Support for attachments is somewhat experimental, so if you want to be sure that it works, upload the file separately using the `upload_file()` method.
 #'
@@ -59,6 +60,9 @@
 #' )
 #' chan$send_message(msg_text, attachments="myfile.csv")
 #'
+#' # sending an inline image
+#' chan$send_message("", content_type="html", inline="graph.png")
+#'
 #' chan$upload_file("mydocument.docx")
 #'
 #' chan$list_files()
@@ -82,10 +86,10 @@ public=list(
         super$initialize(token, tenant, properties)
     },
 
-    send_message=function(body, content_type=c("text", "html"), attachments=NULL)
+    send_message=function(body, content_type=c("text", "html"), attachments=NULL, inline=NULL)
     {
         content_type <- match.arg(content_type)
-        call_body <- build_chatmessage_body(self, body, content_type, attachments)
+        call_body <- build_chatmessage_body(self, body, content_type, attachments, inline)
         res <- self$do_operation("messages", body=call_body, http_verb="POST")
         ms_chat_message$new(self$token, self$tenant, res)
     },

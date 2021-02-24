@@ -91,6 +91,9 @@ chan$send_message("<body>Hello from <em>R</em></body>", content_type="html")
 
 # send attachments by including a vector of filenames
 chan$send_message("Hello with attachments", attachments=c("intro.md", "myfile.csv"))
+
+# images can also be sent inline rather than as attachments
+chan$send_message("", content_type="html", inline="graph.png")
 ```
 
 Uploading a file to a channel will place it in the channel's folder. Note that message attachments are actually uploaded to the channel's folder and the message then includes a link to the uploaded file.

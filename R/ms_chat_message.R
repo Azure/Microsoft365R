@@ -27,6 +27,7 @@
 #' - `body`: The body of the message. This should be a character vector, which will be concatenated into a single string with newline separators. The body can be either plain text or HTML formatted.
 #' - `content_type`: Either "text" (the default) or "html".
 #' - `attachments`: Optional vector of filenames.
+#' - `inline`: Optional vector of filenames (typically images) that will be inserted into the body of the message. The `content_type` must be "html" to include inline content.
 #'
 #' Teams channels don't support nested replies, so any methods dealing with replies will fail if the message object is itself a reply.
 #'
@@ -65,11 +66,11 @@ public=list(
         super$initialize(token, tenant, properties)
     },
 
-    send_reply=function(body, content_type=c("text", "html"), attachments=NULL)
+    send_reply=function(body, content_type=c("text", "html"), attachments=NULL, inline=NULL)
     {
         private$assert_not_nested_reply()
         content_type <- match.arg(content_type)
-        call_body <- build_chatmessage_body(private$get_channel(), body, content_type, attachments)
+        call_body <- build_chatmessage_body(private$get_channel(), body, content_type, attachments, inline)
         res <- self$do_operation("replies", body=call_body, http_verb="POST")
         ms_chat_message$new(self$token, self$tenant, res)
     },
@@ -129,7 +130,7 @@ private=list(
 ))
 
 
-build_chatmessage_body <- function(channel, body, content_type, attachments)
+build_chatmessage_body <- function(channel, body, content_type, attachments, inline)
 {
     call_body <- list(body=list(content=paste(body, collapse="\n"), contentType=content_type))
     if(!is_empty(attachments))
@@ -137,8 +138,9 @@ build_chatmessage_body <- function(channel, body, content_type, attachments)
         call_body$attachments <- lapply(attachments, function(f)
         {
             att <- channel$upload_file(f, dest=basename(f))
+            et <- att$properties$eTag
             list(
-                id=uuid::UUIDgenerate(),
+                id=regmatches(et, regexpr("[A-Za-z0-9\\-]{10,}", et)),
                 name=att$properties$name,
                 contentUrl=att$properties$webUrl,
                 contentType="reference"
@@ -147,6 +149,28 @@ build_chatmessage_body <- function(channel, body, content_type, attachments)
         att_tags <- lapply(call_body$attachments,
             function(att) paste0('<attachment id="', att$id, '"></attachment>'))
         call_body$body$content <- paste(call_body$body$content, paste(att_tags, collapse=""))
+    }
+    if(!is_empty(inline))
+    {
+        if(call_body$content_type != "html")
+            stop("Content type must be 'html' to include inline content", call=.FALSE)
+
+        call_body$hostedContents <- lapply(seq_along(inline), function(i)
+        {
+            f <- inline[i]
+            cont <- openssl::base64_encode(readBin(f, "raw", file.size(f)))
+            list(
+                `@microsoft.graph.temporaryId`=as.character(i),
+                contentBytes=cont,
+                contentType=mime::guess_type(f)
+            )
+        })
+        inline_tags <- lapply(seq_along(inline), function(i)
+        {
+            sprintf('<div><span><img src="../hostedContents/%d/$value" style="vertical-align:bottom"></span>\n</div>',
+                    i)
+        })
+        call_body$body$content <- paste(call_body$body$content, paste(inline_tags, collapse=""))
     }
     call_body
 }

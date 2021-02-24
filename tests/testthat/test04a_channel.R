@@ -33,6 +33,7 @@ test_that("Channel methods work",
     expect_is(chan, "ms_channel")
     expect_false(inherits(chan$properties, "xml_document"))
 
+    Sys.sleep(5)
     folder <- chan$get_folder()
     expect_is(folder, "ms_drive_item")
 
@@ -53,6 +54,11 @@ test_that("Channel methods work",
     msg3 <- chan$send_message(msg3_body, attachments=f0)
     expect_is(msg3, "ms_chat_message")
     expect_true(nzchar(msg3$properties$attachments[[1]]$contentUrl))
+
+    msg4_body <- sprintf("Test message with inline image: %s", make_name(5))
+    expect_error(chan$send_message(msg4_body, inline="../resources/logo_small.jpg"))
+    msg4 <- chan$send_message(msg4_body, content_type="html", inline="../resources/logo_small.jpg")
+    expect_is(msg4, "ms_chat_message")
 
     repl_body <- sprintf("Test reply: %s", make_name(5))
     repl <- msg$send_reply(repl_body)

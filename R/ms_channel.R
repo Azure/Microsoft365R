@@ -32,7 +32,7 @@
 #' - `body`: The body of the message. This should be a character vector, which will be concatenated into a single string with newline separators. The body can be either plain text or HTML formatted.
 #' - `content_type`: Either "text" (the default) or "html".
 #' - `attachments`: Optional vector of filenames.
-#' - `inline`: Optional vector of filenames (typically images) that will be inserted into the body of the message. The `content_type` must be "html" to include inline content.
+#' - `inline`: Optional vector of image filenames that will be inserted into the body of the message. The images must be PNG or JPEG, and the `content_type` argument must be "html" to include inline content.
 #'
 #' Note that message attachments are actually uploaded to the channel's file listing (a directory in the team's primary shared document folder). Support for attachments is somewhat experimental, so if you want to be sure that it works, upload the file separately using the `upload_file()` method.
 #'

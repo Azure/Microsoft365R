@@ -27,7 +27,7 @@
 #' - `body`: The body of the message. This should be a character vector, which will be concatenated into a single string with newline separators. The body can be either plain text or HTML formatted.
 #' - `content_type`: Either "text" (the default) or "html".
 #' - `attachments`: Optional vector of filenames.
-#' - `inline`: Optional vector of filenames (typically images) that will be inserted into the body of the message. The `content_type` must be "html" to include inline content.
+#' - `inline`: Optional vector of image filenames that will be inserted into the body of the message. The images must be PNG or JPEG, and the `content_type` argument must be "html" to include inline content.
 #'
 #' Teams channels don't support nested replies, so any methods dealing with replies will fail if the message object is itself a reply.
 #'
@@ -152,7 +152,7 @@ build_chatmessage_body <- function(channel, body, content_type, attachments, inl
     }
     if(!is_empty(inline))
     {
-        if(call_body$content_type != "html")
+        if(call_body$body$contentType != "html")
             stop("Content type must be 'html' to include inline content", call=.FALSE)
 
         call_body$hostedContents <- lapply(seq_along(inline), function(i)

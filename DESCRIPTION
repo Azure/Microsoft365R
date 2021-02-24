@@ -1,11 +1,11 @@
 Package: Microsoft365R
 Title: Interface to the 'Microsoft 365' Suite of Cloud Services
-Version: 1.0.0.9000
+Version: 2.0.0
 Authors@R: c(
     person("Hong", "Ooi", , "hongooi73@gmail.com", role = c("aut", "cre")),
     person("Microsoft", role="cph")
     )
-Description: An interface to the 'Microsoft 365' (formerly known as 'Office 365') suite of cloud services, building on the framework supplied by the 'AzureGraph' package. Enables access from R to data stored in 'Teams', 'SharePoint Online' and 'OneDrive', including the ability to list drive folder contents, upload and download files, and retrieve data lists. Both personal 'OneDrive' and 'OneDrive for Business' accounts are supported.
+Description: An interface to the 'Microsoft 365' (formerly known as 'Office 365') suite of cloud services, building on the framework supplied by the 'AzureGraph' package. Enables access from R to data stored in 'Teams', 'SharePoint Online' and 'OneDrive', including the ability to list drive folder contents, upload and download files, send messages, and retrieve data lists.
 URL: https://github.com/Azure/Microsoft365R https://github.com/Azure/AzureR
 BugReports: https://github.com/Azure/Microsoft365R/issues
 License: MIT + file LICENSE

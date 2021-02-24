@@ -1,4 +1,4 @@
-# Microsoft365R 1.0.0.9000
+# Microsoft365R 2.0.0
 
 ## Major user-facing changes
 

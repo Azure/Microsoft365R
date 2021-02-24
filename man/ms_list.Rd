@@ -40,7 +40,7 @@ Class representing a list in a SharePoint site.
 
 \section{Initialization}{
 
-Creating new objects of this class should be done via the \code{get_list} method of the \link{ms_site} class. Calling the \code{new()} method for this class only constructs the R object; it does not call the Microsoft Graph API to retrieve or create the actual item.
+Creating new objects of this class should be done via the \code{get_list} method of the \code{\link{ms_site}} class. Calling the \code{new()} method for this class only constructs the R object; it does not call the Microsoft Graph API to retrieve or create the actual item.
 }
 
 \section{List querying}{
@@ -82,7 +82,7 @@ lst$bulk_import(df)
 }
 }
 \seealso{
-\link{get_sharepoint_site}, \link{ms_site}, \link{ms_list_item}
+\code{\link{get_sharepoint_site}}, \code{\link{ms_site}}, \code{\link{ms_list_item}}
 
 \href{https://docs.microsoft.com/en-us/graph/overview}{Microsoft Graph overview},
 \href{https://docs.microsoft.com/en-us/graph/api/resources/sharepoint?view=graph-rest-1.0}{SharePoint sites API reference}

@@ -43,12 +43,12 @@ Class representing a personal OneDrive or SharePoint document library.
 
 \section{Initialization}{
 
-Creating new objects of this class should be done via the \code{get_drive} methods of the \link{ms_graph}, \link{az_user} or \link{ms_site} classes. Calling the \code{new()} method for this class only constructs the R object; it does not call the Microsoft Graph API to retrieve or create the actual drive.
+Creating new objects of this class should be done via the \code{get_drive} methods of the \code{\link{ms_graph}}, \code{\link{az_user}} or \code{\link{ms_site}} classes. Calling the \code{new()} method for this class only constructs the R object; it does not call the Microsoft Graph API to retrieve or create the actual drive.
 }
 
 \section{File and folder operations}{
 
-This class exposes methods for carrying out common operations on files and folders. They call down to the corresponding methods for the \link{ms_drive_item} class. In this context, any paths to child items are relative to the root folder of the drive.
+This class exposes methods for carrying out common operations on files and folders. They call down to the corresponding methods for the \code{\link{ms_drive_item}} class. In this context, any paths to child items are relative to the root folder of the drive.
 
 \code{open_item} opens the given file or folder in your browser. If the file has an unrecognised type, most browsers will attempt to download it.
 
@@ -64,7 +64,7 @@ This class exposes methods for carrying out common operations on files and folde
 
 \code{delete_item} deletes a file or folder. By default, it will ask for confirmation first.
 
-\code{get_item} retrieves the file or folder with the given path, as an  object of class \link{ms_drive_item}.
+\code{get_item} retrieves the file or folder with the given path, as an  object of class \code{\link{ms_drive_item}}.
 
 \code{get_item_properties} is a convenience function that returns the properties of a file or folder as a list.
 
@@ -105,7 +105,7 @@ drv$set_item_properties("myfile", name="newname")
 }
 }
 \seealso{
-\link{get_personal_onedrive}, \link{get_business_onedrive}, \link{ms_site}, \link{ms_drive_item}
+\code{\link{get_personal_onedrive}}, \code{\link{get_business_onedrive}}, \code{\link{ms_site}}, \code{\link{ms_drive_item}}
 
 \href{https://docs.microsoft.com/en-us/graph/overview}{Microsoft Graph overview},
 \href{https://docs.microsoft.com/en-us/graph/api/resources/onedrive?view=graph-rest-1.0}{OneDrive API reference}

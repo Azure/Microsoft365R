@@ -39,7 +39,7 @@ Class representing a SharePoint site.
 
 \section{Initialization}{
 
-Creating new objects of this class should be done via the \code{get_sharepoint_site} method of the \link{ms_graph} or \link{az_group} classes. Calling the \code{new()} method for this class only constructs the R object; it does not call the Microsoft Graph API to retrieve or create the actual site.
+Creating new objects of this class should be done via the \code{get_sharepoint_site} method of the \code{\link{ms_graph}} or \code{\link{az_group}} classes. Calling the \code{new()} method for this class only constructs the R object; it does not call the Microsoft Graph API to retrieve or create the actual site.
 }
 
 \examples{
@@ -52,7 +52,7 @@ site$get_drive()
 }
 }
 \seealso{
-\link{ms_graph}, \link{ms_drive}, \link{az_user}
+\code{\link{ms_graph}}, \code{\link{ms_drive}}, \code{\link{az_user}}
 
 \href{https://docs.microsoft.com/en-us/graph/overview}{Microsoft Graph overview},
 \href{https://docs.microsoft.com/en-us/graph/api/resources/sharepoint?view=graph-rest-1.0}{SharePoint sites API reference}

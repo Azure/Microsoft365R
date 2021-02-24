@@ -2,7 +2,7 @@
 
 #' Microsoft 365 object accessor methods
 #'
-#' Methods for the [AzureGraph::ms_graph], [AzureGraph::az_user] and [AzureGraph::az_group] classes.
+#' Methods for the [`AzureGraph::ms_graph`], [`AzureGraph::az_user`] and [`AzureGraph::az_group`] classes.
 #'
 #' @rdname add_methods
 #' @name add_methods
@@ -62,7 +62,7 @@
 #'
 #' For `get_team`, an object of class `ms_team`. For `list_teams`, a list of `ms_team` objects.
 #' @seealso
-#' [ms_site], [ms_drive], [az_user], [az_group]
+#' [`ms_site`], [`ms_drive`], [`az_user`], [`az_group`]
 #' @examples
 #' \dontrun{
 #'

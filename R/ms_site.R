@@ -22,10 +22,10 @@
 #' - `get_group()`: Retrieve the Microsoft 365 group associated with the site, if it exists. A site that backs a private Teams channel will not have a group associated with it.
 #'
 #' @section Initialization:
-#' Creating new objects of this class should be done via the `get_sharepoint_site` method of the [ms_graph] or [az_group] classes. Calling the `new()` method for this class only constructs the R object; it does not call the Microsoft Graph API to retrieve or create the actual site.
+#' Creating new objects of this class should be done via the `get_sharepoint_site` method of the [`ms_graph`] or [`az_group`] classes. Calling the `new()` method for this class only constructs the R object; it does not call the Microsoft Graph API to retrieve or create the actual site.
 #'
 #' @seealso
-#' [ms_graph], [ms_drive], [az_user]
+#' [`ms_graph`], [`ms_drive`], [`az_user`]
 #'
 #' [Microsoft Graph overview](https://docs.microsoft.com/en-us/graph/overview),
 #' [SharePoint sites API reference](https://docs.microsoft.com/en-us/graph/api/resources/sharepoint?view=graph-rest-1.0)

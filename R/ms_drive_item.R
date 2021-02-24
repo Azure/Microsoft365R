@@ -24,7 +24,7 @@
 #' - `is_folder()`: Information function, returns TRUE if this item is a folder.
 #'
 #' @section Initialization:
-#' Creating new objects of this class should be done via the `get_item` method of the [ms_drive] class. Calling the `new()` method for this class only constructs the R object; it does not call the Microsoft Graph API to retrieve or create the actual item.
+#' Creating new objects of this class should be done via the `get_item` method of the [`ms_drive`] class. Calling the `new()` method for this class only constructs the R object; it does not call the Microsoft Graph API to retrieve or create the actual item.
 #'
 #' @section File and folder operations:
 #' This class exposes methods for carrying out common operations on files and folders. Note that for the methods below, any paths to child items are relative to the folder's own path.
@@ -59,7 +59,7 @@
 #' This method returns a URL to access the item, for `type="view"` or "`type=edit"`. For `type="embed"`, it returns a list with components `webUrl` containing the URL, and `webHtml` containing a HTML fragment to embed the link in an IFRAME. The default is a viewable link, expiring in 7 days.
 #'
 #' @seealso
-#' [ms_graph], [ms_site], [ms_drive]
+#' [`ms_graph`], [`ms_site`], [`ms_drive`]
 #'
 #' [Microsoft Graph overview](https://docs.microsoft.com/en-us/graph/overview),
 #' [OneDrive API reference](https://docs.microsoft.com/en-us/graph/api/resources/onedrive?view=graph-rest-1.0)

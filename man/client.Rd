@@ -56,11 +56,11 @@ list_teams(
 )
 }
 \arguments{
-\item{app}{A custom app registration ID to use for authentication. For \code{personal_onedrive}, the default is to use Microsoft365R's internal app ID. For \code{get_business_onedrive} and \code{get_sharepoint_site}, see below.}
+\item{app}{A custom app registration ID to use for authentication. See below.}
 
-\item{scopes}{The Microsoft Graph scopes (permissions) to obtain.}
+\item{scopes}{The Microsoft Graph scopes (permissions) to obtain. It should never be necessary to change these.}
 
-\item{...}{Optional arguments to be passed to \code{AzureGraph::create_graph_login}.}
+\item{...}{Optional arguments that will ultimately be passed to \code{\link[AzureAuth:get_azure_token]{AzureAuth::get_azure_token}}.}
 
 \item{tenant}{For \code{get_business_onedrive}, \code{get_sharepoint_site} and \code{get_team}, the name of your Azure Active Directory (AAD) tenant. If not supplied, use the value of the \code{CLIMICROSOFT365_TENANT} environment variable, or "common" if that is unset.}
 
@@ -69,17 +69,17 @@ list_teams(
 \item{team_name, team_id}{For \code{get_team}, either the name or ID of the team to retrieve. Supply exactly one of these.}
 }
 \value{
-For \code{get_personal_onedrive} and \code{get_business_onedrive}, an object of class \code{ms_drive}.
+For \code{get_personal_onedrive} and \code{get_business_onedrive}, an R6 object of class \code{ms_drive}.
 
-For \code{get_sharepoint_site}, an object of class \code{ms_site}; for \code{list_sharepoint_sites}, a list of such objects.
+For \code{get_sharepoint_site}, an R6 object of class \code{ms_site}; for \code{list_sharepoint_sites}, a list of such objects.
 
-For \code{get_team}, an object of class \code{ms_team}; for \code{list_teams}, a list of such objects.
+For \code{get_team}, an R6 object of class \code{ms_team}; for \code{list_teams}, a list of such objects.
 }
 \description{
 Microsoft365R provides functions for logging into each Microsoft 365 service.
 }
 \details{
-These functions provide easy access to the various collaboration services that are part of Microsoft 365. On first use, they will call your web browser to authenticate with Azure Active Directory, in a similar manner to other web apps. You will get a dialog box asking for permission to access your information. You only have to authenticate once per client; your credentials will be saved and reloaded in subsequent sessions.
+These functions provide easy access to the various collaboration services that are part of Microsoft 365. On first use, they will call your web browser to authenticate with Azure Active Directory, in a similar manner to other web apps. You will get a dialog box asking for permission to access your information. You only have to authenticate once; your credentials will be saved and reloaded in subsequent sessions.
 
 When authenticating, you can pass optional arguments in \code{...} which will ultimately be received by \code{AzureAuth::get_azure_token}. In particular, if your machine doesn't have a web browser available to authenticate with (for example if you are in a remote RStudio Server session), pass \code{auth_type="device_code"} which is intended for such scenarios.
 }
@@ -89,9 +89,7 @@ Authenticating to Microsoft 365 Business services (Teams, SharePoint and OneDriv
 
 The default "common" tenant for \code{get_team}, \code{get_business_onedrive} and \code{get_sharepoint_site} attempts to detect your actual tenant from your saved credentials in your browser. This may not always succeed, for example if you have a personal account that is also a guest account in a tenant. In this case, supply the actual tenant name, either in the \code{tenant} argument or in the \code{CLIMICROSOFT365_TENANT} environment variable. The latter allows sharing authentication details with the \href{https://pnp.github.io/cli-microsoft365/}{CLI for Microsoft 365}.
 
-The default when authenticating to these services is for Microsoft365R to use its own internal app ID. Depending on your organisation's security policy, you may have to get an admin to grant it access to your tenant. As an alternative to the default app ID, you (or your admin) can create your own app registration: it should have a native redirect URI of \verb{http://localhost:1410}, and the "public client" option should be enabled if you want to use the device code authentication flow. You can supply your app ID either via the \code{app} argument, or in the environment variable \code{CLIMICROSOFT365_AADAPPID}.
-
-If creating your own app registration is impractical, it's possible to work around access issues by piggybacking on the CLI for Microsoft365. By setting the R option \code{microsoft365r_use_cli_app_id} to a non-NULL value, authentication will be done using the CLI's app ID. Technically this app still requires admin approval, but it is in widespread use and so may already be allowed in your organisation. Be warned that this solution may draw the attention of your admin!
+The default when authenticating to these services is for Microsoft365R to use its own internal app ID. As an alternative, you (or your admin) can create your own app registration in Azure: it should have a native redirect URI of \verb{http://localhost:1410}, and the "public client" option should be enabled if you want to use the device code authentication flow. You can supply your app ID either via the \code{app} argument, or in the environment variable \code{CLIMICROSOFT365_AADAPPID}.
 }
 
 \examples{
@@ -126,9 +124,11 @@ get_team("My team")
 }
 }
 \seealso{
-\link{ms_drive}, \link{ms_site}, \link{ms_team}, \link[AzureGraph:graph_login]{AzureGraph::create_graph_login}, \link[AzureAuth:get_azure_token]{AzureAuth::get_azure_token}
+\code{\link{ms_drive}}, \code{\link{ms_site}}, \code{\link{ms_team}}
 
-\link{add_methods} for the associated methods that this package adds to the base AzureGraph classes
+\code{\link{add_methods}} for the associated methods that this package adds to the base AzureGraph classes.
+
+The "Authentication" vignette has more details on the authentication process, including troubleshooting and fixes for common problems.
 
 \href{https://pnp.github.io/cli-microsoft365/}{CLI for Microsoft 365} -- a commandline tool for managing Microsoft 365
 }

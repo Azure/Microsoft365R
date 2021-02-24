@@ -44,5 +44,5 @@ sharepoint_site(
 Deprecated client functions
 }
 \details{
-These functions have been replaced by \link{get_personal_onedrive}, \link{get_business_onedrive} and \link{get_sharepoint_site}. They will be removed in a later version of the package.
+These functions have been replaced by \code{\link{get_personal_onedrive}}, \code{\link{get_business_onedrive}} and \code{\link{get_sharepoint_site}}. They will be removed in a later version of the package.
 }

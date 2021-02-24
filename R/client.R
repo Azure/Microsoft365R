@@ -3,13 +3,13 @@
 #' Microsoft365R provides functions for logging into each Microsoft 365 service.
 #'
 #' @param tenant For `get_business_onedrive`, `get_sharepoint_site` and `get_team`, the name of your Azure Active Directory (AAD) tenant. If not supplied, use the value of the `CLIMICROSOFT365_TENANT` environment variable, or "common" if that is unset.
-#' @param app A custom app registration ID to use for authentication. For `personal_onedrive`, the default is to use Microsoft365R's internal app ID. For `get_business_onedrive` and `get_sharepoint_site`, see below.
-#' @param scopes The Microsoft Graph scopes (permissions) to obtain.
+#' @param app A custom app registration ID to use for authentication. See below.
+#' @param scopes The Microsoft Graph scopes (permissions) to obtain. It should never be necessary to change these.
 #' @param site_name,site_url,site_id For `get_sharepoint_site`, either the name, web URL or ID of the SharePoint site to retrieve. Supply exactly one of these.
 #' @param team_name,team_id For `get_team`, either the name or ID of the team to retrieve. Supply exactly one of these.
-#' @param ... Optional arguments to be passed to `AzureGraph::create_graph_login`.
+#' @param ... Optional arguments that will ultimately be passed to [`AzureAuth::get_azure_token`].
 #' @details
-#' These functions provide easy access to the various collaboration services that are part of Microsoft 365. On first use, they will call your web browser to authenticate with Azure Active Directory, in a similar manner to other web apps. You will get a dialog box asking for permission to access your information. You only have to authenticate once per client; your credentials will be saved and reloaded in subsequent sessions.
+#' These functions provide easy access to the various collaboration services that are part of Microsoft 365. On first use, they will call your web browser to authenticate with Azure Active Directory, in a similar manner to other web apps. You will get a dialog box asking for permission to access your information. You only have to authenticate once; your credentials will be saved and reloaded in subsequent sessions.
 #'
 #' When authenticating, you can pass optional arguments in `...` which will ultimately be received by `AzureAuth::get_azure_token`. In particular, if your machine doesn't have a web browser available to authenticate with (for example if you are in a remote RStudio Server session), pass `auth_type="device_code"` which is intended for such scenarios.
 #'
@@ -18,20 +18,20 @@
 #'
 #' The default "common" tenant for `get_team`, `get_business_onedrive` and `get_sharepoint_site` attempts to detect your actual tenant from your saved credentials in your browser. This may not always succeed, for example if you have a personal account that is also a guest account in a tenant. In this case, supply the actual tenant name, either in the `tenant` argument or in the `CLIMICROSOFT365_TENANT` environment variable. The latter allows sharing authentication details with the [CLI for Microsoft 365](https://pnp.github.io/cli-microsoft365/).
 #'
-#' The default when authenticating to these services is for Microsoft365R to use its own internal app ID. Depending on your organisation's security policy, you may have to get an admin to grant it access to your tenant. As an alternative to the default app ID, you (or your admin) can create your own app registration: it should have a native redirect URI of `http://localhost:1410`, and the "public client" option should be enabled if you want to use the device code authentication flow. You can supply your app ID either via the `app` argument, or in the environment variable `CLIMICROSOFT365_AADAPPID`.
-#'
-#' If creating your own app registration is impractical, it's possible to work around access issues by piggybacking on the CLI for Microsoft365. By setting the R option `microsoft365r_use_cli_app_id` to a non-NULL value, authentication will be done using the CLI's app ID. Technically this app still requires admin approval, but it is in widespread use and so may already be allowed in your organisation. Be warned that this solution may draw the attention of your admin!
+#' The default when authenticating to these services is for Microsoft365R to use its own internal app ID. As an alternative, you (or your admin) can create your own app registration in Azure: it should have a native redirect URI of `http://localhost:1410`, and the "public client" option should be enabled if you want to use the device code authentication flow. You can supply your app ID either via the `app` argument, or in the environment variable `CLIMICROSOFT365_AADAPPID`.
 #'
 #' @return
-#' For `get_personal_onedrive` and `get_business_onedrive`, an object of class `ms_drive`.
+#' For `get_personal_onedrive` and `get_business_onedrive`, an R6 object of class `ms_drive`.
 #'
-#' For `get_sharepoint_site`, an object of class `ms_site`; for `list_sharepoint_sites`, a list of such objects.
+#' For `get_sharepoint_site`, an R6 object of class `ms_site`; for `list_sharepoint_sites`, a list of such objects.
 #'
-#' For `get_team`, an object of class `ms_team`; for `list_teams`, a list of such objects.
+#' For `get_team`, an R6 object of class `ms_team`; for `list_teams`, a list of such objects.
 #' @seealso
-#' [ms_drive], [ms_site], [ms_team], [AzureGraph::create_graph_login], [AzureAuth::get_azure_token]
+#' [`ms_drive`], [`ms_site`], [`ms_team`]
 #'
-#' [add_methods] for the associated methods that this package adds to the base AzureGraph classes
+#' [`add_methods`] for the associated methods that this package adds to the base AzureGraph classes.
+#'
+#' The "Authentication" vignette has more details on the authentication process, including troubleshooting and fixes for common problems.
 #'
 #' [CLI for Microsoft 365](https://pnp.github.io/cli-microsoft365/) -- a commandline tool for managing Microsoft 365
 #' @examples

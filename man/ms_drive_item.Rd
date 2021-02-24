@@ -41,7 +41,7 @@ Class representing an item (file or folder) in a OneDrive or SharePoint document
 
 \section{Initialization}{
 
-Creating new objects of this class should be done via the \code{get_item} method of the \link{ms_drive} class. Calling the \code{new()} method for this class only constructs the R object; it does not call the Microsoft Graph API to retrieve or create the actual item.
+Creating new objects of this class should be done via the \code{get_item} method of the \code{\link{ms_drive}} class. Calling the \code{new()} method for this class only constructs the R object; it does not call the Microsoft Graph API to retrieve or create the actual item.
 }
 
 \section{File and folder operations}{
@@ -116,7 +116,7 @@ myfile$delete()
 }
 }
 \seealso{
-\link{ms_graph}, \link{ms_site}, \link{ms_drive}
+\code{\link{ms_graph}}, \code{\link{ms_site}}, \code{\link{ms_drive}}
 
 \href{https://docs.microsoft.com/en-us/graph/overview}{Microsoft Graph overview},
 \href{https://docs.microsoft.com/en-us/graph/api/resources/onedrive?view=graph-rest-1.0}{OneDrive API reference}

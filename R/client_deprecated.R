@@ -6,7 +6,7 @@
 #' @param site_url,site_id For `sharepoint_site`, the web URL and ID of the SharePoint site to retrieve. Supply one or the other, but not both.
 #' @param ... Optional arguments to be passed to `AzureGraph::create_graph_login`.
 #' @details
-#' These functions have been replaced by [get_personal_onedrive], [get_business_onedrive] and [get_sharepoint_site]. They will be removed in a later version of the package.
+#' These functions have been replaced by [`get_personal_onedrive`], [`get_business_onedrive`] and [`get_sharepoint_site`]. They will be removed in a later version of the package.
 #' @rdname Microsoft365R-deprecated
 #' @aliases client-deprecated
 #' @export

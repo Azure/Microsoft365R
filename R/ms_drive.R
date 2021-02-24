@@ -26,10 +26,10 @@
 #' - `set_item_properties(path, ...)`: Set the properties for a file or folder.
 #'
 #' @section Initialization:
-#' Creating new objects of this class should be done via the `get_drive` methods of the [ms_graph], [az_user] or [ms_site] classes. Calling the `new()` method for this class only constructs the R object; it does not call the Microsoft Graph API to retrieve or create the actual drive.
+#' Creating new objects of this class should be done via the `get_drive` methods of the [`ms_graph`], [`az_user`] or [`ms_site`] classes. Calling the `new()` method for this class only constructs the R object; it does not call the Microsoft Graph API to retrieve or create the actual drive.
 #'
 #' @section File and folder operations:
-#' This class exposes methods for carrying out common operations on files and folders. They call down to the corresponding methods for the [ms_drive_item] class. In this context, any paths to child items are relative to the root folder of the drive.
+#' This class exposes methods for carrying out common operations on files and folders. They call down to the corresponding methods for the [`ms_drive_item`] class. In this context, any paths to child items are relative to the root folder of the drive.
 #'
 #' `open_item` opens the given file or folder in your browser. If the file has an unrecognised type, most browsers will attempt to download it.
 #'
@@ -45,14 +45,14 @@
 #'
 #' `delete_item` deletes a file or folder. By default, it will ask for confirmation first.
 #'
-#' `get_item` retrieves the file or folder with the given path, as an  object of class [ms_drive_item].
+#' `get_item` retrieves the file or folder with the given path, as an  object of class [`ms_drive_item`].
 #'
 #' `get_item_properties` is a convenience function that returns the properties of a file or folder as a list.
 #'
 #' `set_item_properties` sets the properties of a file or folder. The new properties should be specified as individual named arguments to the method. Any existing properties that aren't listed as arguments will retain their previous values or be recalculated based on changes to other properties, as appropriate. You can also call the `update` method on the corresponding `ms_drive_item` object.
 #'
 #' @seealso
-#' [get_personal_onedrive], [get_business_onedrive], [ms_site], [ms_drive_item]
+#' [`get_personal_onedrive`], [`get_business_onedrive`], [`ms_site`], [`ms_drive_item`]
 #'
 #' [Microsoft Graph overview](https://docs.microsoft.com/en-us/graph/overview),
 #' [OneDrive API reference](https://docs.microsoft.com/en-us/graph/api/resources/onedrive?view=graph-rest-1.0)

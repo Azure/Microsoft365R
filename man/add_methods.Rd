@@ -4,7 +4,7 @@
 \alias{add_methods}
 \title{Microsoft 365 object accessor methods}
 \description{
-Methods for the \link[AzureGraph:ms_graph]{AzureGraph::ms_graph}, \link[AzureGraph:az_user]{AzureGraph::az_user} and \link[AzureGraph:az_group]{AzureGraph::az_group} classes.
+Methods for the \code{\link[AzureGraph:ms_graph]{AzureGraph::ms_graph}}, \code{\link[AzureGraph:az_user]{AzureGraph::az_user}} and \code{\link[AzureGraph:az_group]{AzureGraph::az_group}} classes.
 }
 \section{Usage}{
 \preformatted{## R6 method for class 'ms_graph'
@@ -98,5 +98,5 @@ grp$get_drive()
 }
 }
 \seealso{
-\link{ms_site}, \link{ms_drive}, \link{az_user}, \link{az_group}
+\code{\link{ms_site}}, \code{\link{ms_drive}}, \code{\link{az_user}}, \code{\link{az_group}}
 }

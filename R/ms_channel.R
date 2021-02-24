@@ -19,13 +19,13 @@
 #' - `list_messages(n=50)`: Retrieves the messages in the channel. By default, this is limited to the 50 most recent messages; set the `n` argument to change this.
 #' - `get_message(message_id)`: Retrieves a specific message in the channel.
 #' - `delete_message(message_id, confirm=TRUE)`: Deletes a message. Currently the Graph API does not support deleting Teams messages, so this method is disabled.
-#' - `list_files()`: List the files for the channel. See [ms_drive] for the arguments available for this and the file upload/download methods.
+#' - `list_files()`: List the files for the channel. See [`ms_drive`] for the arguments available for this and the file upload/download methods.
 #' - `upload_file()`: Uploads a file to the channel.
 #' - `download_file()`: Downloads a file from the channel.
-#' - `get_folder()`: Retrieves the files folder for the channel, as a [ms_drive_item] object
+#' - `get_folder()`: Retrieves the files folder for the channel, as a [`ms_drive_item`] object.
 #'
 #' @section Initialization:
-#' Creating new objects of this class should be done via the `get_channel` and `list_channels` methods of the [ms_team] class. Calling the `new()` method for this class only constructs the R object; it does not call the Microsoft Graph API to retrieve or create the actual channel.
+#' Creating new objects of this class should be done via the `get_channel` and `list_channels` methods of the [`ms_team`] class. Calling the `new()` method for this class only constructs the R object; it does not call the Microsoft Graph API to retrieve or create the actual channel.
 #'
 #' @section Messaging:
 #' To send a message to a channel, use the `send_message()` method. This has arguments:
@@ -36,7 +36,7 @@
 #' Note that message attachments are actually uploaded to the channel's file listing (a directory in the team's primary shared document folder). Support for attachments is somewhat experimental, so if you want to be sure that it works, upload the file separately using the `upload_file()` method.
 #'
 #' @seealso
-#' [ms_team], [ms_drive], [ms_chat_message]
+#' [`ms_team`], [`ms_drive`], [`ms_chat_message`]
 #'
 #' [Microsoft Graph overview](https://docs.microsoft.com/en-us/graph/overview),
 #' [Microsoft Teams API reference](https://docs.microsoft.com/en-us/graph/api/resources/teams-api-overview?view=graph-rest-1.0)

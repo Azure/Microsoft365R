@@ -20,7 +20,7 @@
 #' - `delete_reply(message_id, confirm=TRUE)`: Deletes a reply to the message. Currently the Graph API does not support deleting Teams messages, so this method is disabled.
 #'
 #' @section Initialization:
-#' Creating new objects of this class should be done via the `get_message` and `list_messages` method of the [ms_team] class. Calling the `new()` method for this class only constructs the R object; it does not call the Microsoft Graph API to retrieve or create the actual message.
+#' Creating new objects of this class should be done via the `get_message` and `list_messages` method of the [`ms_team`] class. Calling the `new()` method for this class only constructs the R object; it does not call the Microsoft Graph API to retrieve or create the actual message.
 #'
 #' @section Replying to a message:
 #' To reply to a message, use the `send_reply()` method. This has arguments:
@@ -33,7 +33,7 @@
 #' Note that message attachments are actually uploaded to the channel's file listing (a directory in the team's primary shared document folder). Support for attachments is somewhat experimental, so if you want to be sure that it works, upload the file separately using the channel's `upload_file()` method.
 #'
 #' @seealso
-#' [ms_team], [ms_channel]
+#' [`ms_team`], [`ms_channel`]
 #'
 #' [Microsoft Graph overview](https://docs.microsoft.com/en-us/graph/overview),
 #' [Microsoft Teams API reference](https://docs.microsoft.com/en-us/graph/api/resources/teams-api-overview?view=graph-rest-1.0)

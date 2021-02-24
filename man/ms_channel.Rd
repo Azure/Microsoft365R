@@ -33,16 +33,16 @@ Class representing a Microsoft Teams channel.
 \item \code{list_messages(n=50)}: Retrieves the messages in the channel. By default, this is limited to the 50 most recent messages; set the \code{n} argument to change this.
 \item \code{get_message(message_id)}: Retrieves a specific message in the channel.
 \item \code{delete_message(message_id, confirm=TRUE)}: Deletes a message. Currently the Graph API does not support deleting Teams messages, so this method is disabled.
-\item \code{list_files()}: List the files for the channel. See \link{ms_drive} for the arguments available for this and the file upload/download methods.
+\item \code{list_files()}: List the files for the channel. See \code{\link{ms_drive}} for the arguments available for this and the file upload/download methods.
 \item \code{upload_file()}: Uploads a file to the channel.
 \item \code{download_file()}: Downloads a file from the channel.
-\item \code{get_folder()}: Retrieves the files folder for the channel, as a \link{ms_drive_item} object
+\item \code{get_folder()}: Retrieves the files folder for the channel, as a \code{\link{ms_drive_item}} object.
 }
 }
 
 \section{Initialization}{
 
-Creating new objects of this class should be done via the \code{get_channel} and \code{list_channels} methods of the \link{ms_team} class. Calling the \code{new()} method for this class only constructs the R object; it does not call the Microsoft Graph API to retrieve or create the actual channel.
+Creating new objects of this class should be done via the \code{get_channel} and \code{list_channels} methods of the \code{\link{ms_team}} class. Calling the \code{new()} method for this class only constructs the R object; it does not call the Microsoft Graph API to retrieve or create the actual channel.
 }
 
 \section{Messaging}{
@@ -82,7 +82,7 @@ chan$list_files()
 }
 }
 \seealso{
-\link{ms_team}, \link{ms_drive}, \link{ms_chat_message}
+\code{\link{ms_team}}, \code{\link{ms_drive}}, \code{\link{ms_chat_message}}
 
 \href{https://docs.microsoft.com/en-us/graph/overview}{Microsoft Graph overview},
 \href{https://docs.microsoft.com/en-us/graph/api/resources/teams-api-overview?view=graph-rest-1.0}{Microsoft Teams API reference}

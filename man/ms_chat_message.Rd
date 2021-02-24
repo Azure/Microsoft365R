@@ -37,7 +37,7 @@ Class representing a message in a Teams channel. Currently Microsoft365R only su
 
 \section{Initialization}{
 
-Creating new objects of this class should be done via the \code{get_message} and \code{list_messages} method of the \link{ms_team} class. Calling the \code{new()} method for this class only constructs the R object; it does not call the Microsoft Graph API to retrieve or create the actual message.
+Creating new objects of this class should be done via the \code{get_message} and \code{list_messages} method of the \code{\link{ms_team}} class. Calling the \code{new()} method for this class only constructs the R object; it does not call the Microsoft Graph API to retrieve or create the actual message.
 }
 
 \section{Replying to a message}{
@@ -67,7 +67,7 @@ msg$send_reply("Reply from R")
 }
 }
 \seealso{
-\link{ms_team}, \link{ms_channel}
+\code{\link{ms_team}}, \code{\link{ms_channel}}
 
 \href{https://docs.microsoft.com/en-us/graph/overview}{Microsoft Graph overview},
 \href{https://docs.microsoft.com/en-us/graph/api/resources/teams-api-overview?view=graph-rest-1.0}{Microsoft Teams API reference}

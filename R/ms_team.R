@@ -24,10 +24,10 @@
 #' - `get_group()`: Retrieve the Microsoft 365 group associated with the team.
 #'
 #' @section Initialization:
-#' Creating new objects of this class should be done via the `get_team` and `list_teams` methods of the [ms_graph], [az_user] or [az_group] classes. Calling the `new()` method for this class only constructs the R object; it does not call the Microsoft Graph API to retrieve or create the actual team.
+#' Creating new objects of this class should be done via the `get_team` and `list_teams` methods of the [`ms_graph`], [`az_user`] or [`az_group`] classes. Calling the `new()` method for this class only constructs the R object; it does not call the Microsoft Graph API to retrieve or create the actual team.
 #'
 #' @seealso
-#' [ms_graph], [az_group], [ms_channel], [ms_site], [ms_drive]
+#' [`ms_graph`], [`az_group`], [`ms_channel`], [`ms_site`], [`ms_drive`]
 #'
 #' [Microsoft Graph overview](https://docs.microsoft.com/en-us/graph/overview),
 #' [Microsoft Teams API reference](https://docs.microsoft.com/en-us/graph/api/resources/teams-api-overview?view=graph-rest-1.0)

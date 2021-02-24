@@ -23,7 +23,7 @@
 #' - `bulk_import(data)`: Imports a data frame into the list.
 #'
 #' @section Initialization:
-#' Creating new objects of this class should be done via the `get_list` method of the [ms_site] class. Calling the `new()` method for this class only constructs the R object; it does not call the Microsoft Graph API to retrieve or create the actual item.
+#' Creating new objects of this class should be done via the `get_list` method of the [`ms_site`] class. Calling the `new()` method for this class only constructs the R object; it does not call the Microsoft Graph API to retrieve or create the actual item.
 #'
 #' @section List querying:
 #' `list_items` supports the following arguments to customise results returned by the query.
@@ -36,7 +36,7 @@
 #' For more information, see [Use query parameters](https://docs.microsoft.com/en-us/graph/query-parameters?view=graph-rest-1.0) at the Graph API reference.
 #'
 #' @seealso
-#' [get_sharepoint_site], [ms_site], [ms_list_item]
+#' [`get_sharepoint_site`], [`ms_site`], [`ms_list_item`]
 #'
 #' [Microsoft Graph overview](https://docs.microsoft.com/en-us/graph/overview),
 #' [SharePoint sites API reference](https://docs.microsoft.com/en-us/graph/api/resources/sharepoint?view=graph-rest-1.0)

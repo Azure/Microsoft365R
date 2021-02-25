@@ -52,6 +52,7 @@ To send a message to a channel, use the \code{send_message()} method. This has a
 \item \code{body}: The body of the message. This should be a character vector, which will be concatenated into a single string with newline separators. The body can be either plain text or HTML formatted.
 \item \code{content_type}: Either "text" (the default) or "html".
 \item \code{attachments}: Optional vector of filenames.
+\item \code{inline}: Optional vector of image filenames that will be inserted into the body of the message. The images must be PNG or JPEG, and the \code{content_type} argument must be "html" to include inline content.
 }
 
 Note that message attachments are actually uploaded to the channel's file listing (a directory in the team's primary shared document folder). Support for attachments is somewhat experimental, so if you want to be sure that it works, upload the file separately using the \code{upload_file()} method.
@@ -74,6 +75,9 @@ msg_text <- c(
     "message line 3"
 )
 chan$send_message(msg_text, attachments="myfile.csv")
+
+# sending an inline image
+chan$send_message("", content_type="html", inline="graph.png")
 
 chan$upload_file("mydocument.docx")
 

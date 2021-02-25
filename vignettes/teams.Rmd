@@ -43,11 +43,11 @@ A drive is an `ms_drive` object, so the same methods apply as for OneDrives and 
 ```r
 drv <- team$get_drive()
 
-# this will show one folder for each channel that has uploaded files
+# one folder per channel
 drv$list_files()
 
-# if the team has a "General" channel, this upload will appear in that channel's "Files" tab
-drv$upload_file("myfile.csv", "General/myfile.csv")
+# upload will appear in the Files tab of "My channel" in the Teams client
+drv$upload_file("myfile.csv", "My channel/myfile.csv")
 ```
 
 Note that the drives mentioned here are actually the document libraries of an underlying SharePoint site: as far as file storage is concerned, you can think of Teams as simply an alternative interface to functionality provided by SharePoint. The `ms_team` class in fact has a `get_sharepoint_site()` method to retrieve the backing site, and you can access the same files via the site's drive.
@@ -57,14 +57,18 @@ site <- team$get_sharepoint_site()
 site_drv <- site$get_drive()
 
 # the previous upload will also appear in this file listing
-site_drv$list_files("General")
+site_drv$list_files("My channel")
 ```
 
 ## Channels
 
-A team object has methods for listing, retrieving, creating and deleting channels. However you should not create and delete channels unnecessarily, since Teams tracks all channels ever created, even after you delete them.
+A team object has methods for listing, retrieving, creating and deleting channels. However you should not create and delete channels unnecessarily, since Teams tracks all channels ever created, even after you delete them. In turn, a channel object has methods for listing and sending messages, and uploading and deleting files.
 
-In turn, a channel object has methods for listing and sending messages, and uploading and deleting files.
+### Channel messages
+
+Teams channels are semi-threaded. Getting the list of messages for a channel retrieves only the first message in each thread; to get an entire thread, you get the starting message and then retrieve the replies to it. Note that channels don't have nested replies, so you can't reply to a reply---only to the starting message.
+
+The body of a message is part of the list of properties returned from the host, and can be found in the `properties` field of the object. Other properties include metadata such as the author, date, list of attachments, etc.
 
 ```r
 chan <- team$get_channel()
@@ -78,65 +82,65 @@ chan$list_messages(n=100)
 # retrieve all messages: set n = infinity
 chan$list_messages(n=Inf)
 
-# get a message by ID
+# get the latest message by ID
 msg <- chan$get_message(msgs[[1]]$properties$id)
+
+# body of the message
+msg$properties$body
+
+# 10 most recent replies
+repl_list <- msg$list_replies(n=10)
+
+# body of an individual reply
+repl_list[[1]]$properties$body
 ```
 
-You can send a message to a channel as plain text (the default) or HTML. For the latter, Teams imposes security restrictions on which HTML tags are allowed; you should limit your message to contain only basic formatting and no embedded scripts. See "Channel messages" below for more about the chat message object itself.
+You can send a message to a channel as plain text (the default) or HTML. For the latter, Teams imposes security restrictions on which HTML tags are allowed; you should limit your message to contain only basic formatting and no embedded scripts. You can also include files as attachments, or as inline images (JPEG or PNG only). For the latter, the message must be HTML and not plain text.
 
 ```r
+# sending messages to a channel
 chan$send_message("Hello from R")
-
-chan$send_message("<body>Hello from <em>R</em></body>", content_type="html")
+chan$send_message("<div>Hello from <em>R</em></div>", content_type="html")
 
 # send attachments by including a vector of filenames
 chan$send_message("Hello with attachments", attachments=c("intro.md", "myfile.csv"))
+
+# images can be sent inline rather than as attachments: set content_type to 'html'
+chan$send_message("", content_type="html", inline="graph.png")
+
+# send a reply to a message
+msg <- chan$send_message("Starting a new thread in R")
+msg$send_reply("Reply from R")
+
+# send a reply with an attachment
+msg$send_reply("See attached file", attachments="reply.md")
 ```
 
-Uploading a file to a channel will place it in the channel's folder. Note that message attachments are actually uploaded to the channel's folder and the message then includes a link to the uploaded file.
+Currently, Microsoft365R only supports messaging in channels. Support for chats between individuals may come later.
 
-The channel object itself provides convenience functions to list, upload and download files. It also provides a `get_folder()` method to retrieve the file folder for the channel, as an `ms_drive_item` object; this object contains more general methods for working with files.
+### Channel files
+
+Uploading a file to a channel will place it in the channel's drive folder. Note that message attachments are actually uploaded to the channel's folder with the message then including a link to the uploaded file.
+
+The channel object itself provides convenience functions to list, upload and download files. It also provides a `get_folder()` method to retrieve the folder for the channel, as an `ms_drive_item` object; this object has more general methods for working with files. Again, see the "OneDrive and SharePoint" vignette for more information on drive item objects.
 
 ```r
-chan$upload_file("myfile.docx")
+# files for the channel
 chan$list_files()
 
-chan_folder <- chan$get_folder()
+# upload a file to the channel
+chan$upload_file("myfile.docx")
 
-# open the uploaded document for editing in Word Online
+# open the uploaded document for editing in Word Online, then download it again
+chan_folder <- chan$get_folder()
 item <- chan_folder$get_item("myfile.docx")
 item$open()
+item$download(overwrite=TRUE)
 
-# download the edited document
-chan$download_file("myfile.docx", overwrite=TRUE)
+# create a shareable link (read-only, expires in 7 days)
+item$create_share_link()
 ```
 
 ### Private channels
 
 Private channels function much the same way as regular public channels, and the methods described above should also work with them. The main difference is that a private channel's files are stored in a separate SharePoint site to the public channels, so any files you upload to the private channel won't appear in the file listings for the main site.
-
-## Channel messages
-
-Teams channels are semi-threaded. Getting the list of messages for a channel retrieves only the top-level messages; to get the replies in a thread, you get the root message and then retrieve the replies to it.
-
-A message object is of class `ms_chat_message`, and has custom methods to get replies, list all replies, and send a reply. Note that Teams doesn't have nested replies, so any methods dealing with replies will fail if the message object is itself a reply. The message body is part of the list of properties returned from the host, and can be found in the `properties` field along with other metadata.
-
-```r
-# get the most recent message
-msg_list <- chan$list_messages()
-msg_latest <- msg_list[[1]]
-
-# body of message
-msg_latest$properties$body
-
-# 10 most recent replies
-repl_list <- msg_latest$list_replies()
-
-# send a reply
-msg_latest$send_reply("Reply from R")
-
-# send a reply with an attachment
-msg_latest$send_reply("See attached file", attachments="reply.md")
-```
-
-Currently, Microsoft365R only supports messaging in channels. Support for chats between individuals may come later.

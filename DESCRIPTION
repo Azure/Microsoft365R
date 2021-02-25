@@ -21,7 +21,7 @@ Imports:
     jsonlite,
     R6,
     vctrs,
-    uuid
+    mime
 Suggests:
     openssl,
     knitr,

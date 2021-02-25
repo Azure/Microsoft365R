@@ -153,7 +153,7 @@ build_chatmessage_body <- function(channel, body, content_type, attachments, inl
     if(!is_empty(inline))
     {
         if(call_body$body$contentType != "html")
-            stop("Content type must be 'html' to include inline content", call=.FALSE)
+            stop("Content type must be 'html' to include inline content", .call=FALSE)
 
         call_body$hostedContents <- lapply(seq_along(inline), function(i)
         {

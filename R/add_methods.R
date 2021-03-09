@@ -186,4 +186,12 @@ add_group_methods <- function()
         op <- file.path("teams", self$properties$id)
         ms_team$new(self$token, self$tenant, call_graph_endpoint(self$token, op))
     })
+    
+    az_group$set("public", "list_plans", overwrite=TRUE,
+    function()
+    {
+     op <- "planner/plans"
+     res <- private$get_paged_list(self$do_operation(op))
+     private$init_list_objects(res, "plan")
+    })
 }

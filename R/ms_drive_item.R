@@ -191,12 +191,13 @@ public=list(
     create_folder=function(path)
     {
         private$assert_is_folder()
+        op <- paste0(private$make_absolute_path(dirname(path)), ":/children")
         body <- list(
-            name=enc2utf8(path),
+            name=enc2utf8(basename(path)),
             folder=named_list(),
             `@microsoft.graph.conflictBehavior`="fail"
         )
-        res <- self$do_operation("children", body=body, http_verb="POST")
+        res <- call_graph_endpoint(self$token, op, body=body, http_verb="POST")
         invisible(ms_drive_item$new(self$token, self$tenant, res))
     },
 

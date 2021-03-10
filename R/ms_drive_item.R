@@ -191,7 +191,7 @@ public=list(
     create_folder=function(path)
     {
         private$assert_is_folder()
-        op <- paste0(private$make_absolute_path(dirname(path)), ":/children")
+        op <- sub("::", "", paste0(private$make_absolute_path(dirname(path)), ":/children"))
         body <- list(
             name=enc2utf8(basename(path)),
             folder=named_list(),
@@ -272,6 +272,8 @@ private=list(
 
     make_absolute_path=function(dest)
     {
+        if(dest == ".")
+            dest <- ""
         parent <- self$properties$parentReference
         name <- self$properties$name
         op <- if(name == "root")

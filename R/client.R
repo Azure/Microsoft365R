@@ -166,7 +166,7 @@ get_personal_outlook <- function(app=.microsoft365r_app_id,
                                  scopes=c("Mail.Send", "Mail.ReadWrite", "User.Read"),
                                  ...)
 {
-    do_login("consumers", app, scopes, ...)$get_user()$as_outlook()
+    do_login("consumers", app, scopes, ...)$get_user()$get_outlook()
 }
 
 #' @rdname client
@@ -177,7 +177,7 @@ get_business_outlook <- function(tenant=Sys.getenv("CLIMICROSOFT365_TENANT", "co
                                  ...)
 {
     app <- choose_app(app)
-    do_login(tenant, app, scopes, ...)$get_user()$as_outlook()
+    do_login(tenant, app, scopes, ...)$get_user()$get_outlook()
 }
 
 

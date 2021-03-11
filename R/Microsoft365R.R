@@ -32,6 +32,9 @@ utils::globalVariables(c("self", "private"))
     register_graph_class("mailFolder", ms_outlook_folder,
         function(props) "unreadItemCount" %in% names(props))
 
+    register_graph_class("message", ms_outlook_email,
+        function(props) "bodyPreview" %in% names(props))
+
     add_graph_methods()
     add_user_methods()
     add_group_methods()

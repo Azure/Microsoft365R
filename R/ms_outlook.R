@@ -35,9 +35,7 @@ public=list(
             return(ms_email_folder$new(self$token, self$tenant, self$do_operation(op)))
         }
 
-        # special folders
-        specials <- c("inbox", "drafts", "outbox", "sentitems", "deleteditems", "junkemail", "archive", "clutter")
-        if(folder_name %in% specials)
+        if(folder_name %in% special_email_folders)
         {
             op <- file.path("mailFolders", folder_name)
             return(ms_email_folder$new(self$token, self$tenant, self$do_operation(op)))
@@ -50,6 +48,12 @@ public=list(
         else folders[[wch]]
     },
 
+    create_folder=function(folder_name)
+    {
+        res <- self$do_operation("mailFolders", body=list(displayName=folder_name), http_verb="POST")
+        ms_email_folder$new(self$token, self$tenant, res)
+    },
+
     delete_folder=function(folder_name=NULL, folder_id=NULL, confirm=TRUE)
     {
         self$get_folder(folder_name, folder_id)$delete(confirm=confirm)
@@ -60,8 +64,42 @@ public=list(
         self$get_folder("inbox")
     },
 
-    create_email=function(body, attachments=NULL, to=NULL, cc=NULL, bcc=NULL)
+    get_outbox=function()
     {
+        self$get_folder("outbox")
+    },
 
+    get_sent_items=function()
+    {
+        self$get_folder("sentitems")
+    },
+
+    get_drafts=function()
+    {
+        self$get_folder("drafts")
+    },
+
+    get_deleted_items=function()
+    {
+        self$get_folder("deleteditems")
+    },
+
+    create_email=function(body="", content_type=c("text", "html"), subject="", to=NULL, cc=NULL, bcc=NULL,
+                          attachments=NULL)
+    {
+        content_type <- match.arg(content_type)
+        req_body <- c(
+            list(body=build_email_body(body, content_type)),
+            add_email_recipients(to, cc, bcc)
+        )
+        res <- ms_email$new(self$token, self$tenant, self$do_operation("messages", body=req_body, http_verb="POST"))
+
+        if(!is_empty(attachments))
+            for(a in attachments)
+                res$add_attachments(a)
+        res
     }
 ))
+
+# special folders: assumed to exist in every account
+special_email_folders <- c("inbox", "drafts", "outbox", "sentitems", "deleteditems", "junkemail", "archive", "clutter")

@@ -24,17 +24,15 @@ public=list(
     },
 
     create_email=function(body="", content_type=c("text", "html"), subject="", to=NULL, cc=NULL, bcc=NULL,
-                          attachments=NULL)
+                          attachments=NULL, send_now=FALSE)
     {
         content_type <- match.arg(content_type)
-        req_body <- c(
-            list(body=build_email_body(body, content_type)),
-            add_email_recipients(to, cc, bcc)
-        )
-        res <- ms_email$new(self$token, self$tenant, self$do_operation("messages", body=req_body, http_verb="POST"))
+        req <- build_email_request(body, content_type, attachments, subject, to, cc, bcc)
+        res <- ms_outlook_email$new(self$token, self$tenant,
+            self$do_operation("messages", body=req, http_verb="POST"))
 
-        for(a in attachments)
-            res$add_attachments(a)
+        if(send_now)
+            res$send()
         res
     },
 

@@ -29,6 +29,9 @@ utils::globalVariables(c("self", "private"))
     register_graph_class("chatMessage", ms_chat_message,
         function(props) "body" %in% names(props) && "messageType" %in% names(props))
 
+    register_graph_class("mailFolder", ms_outlook_folder,
+        function(props) "unreadItemCount" %in% names(props))
+
     add_graph_methods()
     add_user_methods()
     add_group_methods()

@@ -1,6 +1,6 @@
-#' @format An R6 object of class `ms_outlook`, inheriting from `ms_object`.
+#' @format An R6 object of class `ms_outlook`, inheriting from `ms_outlook_object`, which in turn inherits from `ms_object`.
 #' @export
-ms_outlook <- R6::R6Class("ms_outlook", inherit=ms_object,
+ms_outlook <- R6::R6Class("ms_outlook", inherit=ms_outlook_object,
 
 public=list(
 
@@ -19,7 +19,7 @@ public=list(
     list_folders=function()
     {
         lst <- private$get_paged_list(self$do_operation("mailFolders"))
-        private$init_list_objects(lst, "ms_email_folder")
+        private$init_list_objects(lst, default_generator=ms_outlook_folder)
     },
 
     get_folder=function(folder_name=NULL, folder_id=NULL)
@@ -32,13 +32,13 @@ public=list(
         if(!is.null(folder_id))
         {
             op <- file.path("mailFolders", folder_id)
-            return(ms_email_folder$new(self$token, self$tenant, self$do_operation(op)))
+            return(ms_outlook_folder$new(self$token, self$tenant, self$do_operation(op)))
         }
 
         if(folder_name %in% special_email_folders)
         {
             op <- file.path("mailFolders", folder_name)
-            return(ms_email_folder$new(self$token, self$tenant, self$do_operation(op)))
+            return(ms_outlook_folder$new(self$token, self$tenant, self$do_operation(op)))
         }
 
         folders <- self$list_folders()
@@ -51,7 +51,7 @@ public=list(
     create_folder=function(folder_name)
     {
         res <- self$do_operation("mailFolders", body=list(displayName=folder_name), http_verb="POST")
-        ms_email_folder$new(self$token, self$tenant, res)
+        ms_outlook_folder$new(self$token, self$tenant, res)
     },
 
     delete_folder=function(folder_name=NULL, folder_id=NULL, confirm=TRUE)
@@ -87,17 +87,23 @@ public=list(
     create_email=function(body="", content_type=c("text", "html"), subject="", to=NULL, cc=NULL, bcc=NULL,
                           attachments=NULL)
     {
-        content_type <- match.arg(content_type)
-        req_body <- c(
-            list(body=build_email_body(body, content_type)),
-            add_email_recipients(to, cc, bcc)
-        )
-        res <- ms_email$new(self$token, self$tenant, self$do_operation("messages", body=req_body, http_verb="POST"))
+        # use a dummy drafts folder object
+        ms_outlook_folder$new(self$token, self$tenant, list(id="drafts"))$
+            create_email(body, content_type, subject, to, cc, bcc, attachments)
+    },
 
-        if(!is_empty(attachments))
-            for(a in attachments)
-                res$add_attachments(a)
-        res
+    print=function(...)
+    {
+        email <- if(!is_empty(self$properties$mail))
+            self$properties$mail
+        else self$properties$userPrincipalName
+        if(is_empty(email))
+            email <- "unknown"
+        cat("<Outlook client for '", self$properties$displayName, "'>\n", sep="")
+        cat("  email address:", email, "\n")
+        cat("---\n")
+        cat(format_public_methods(self))
+        invisible(self)
     }
 ))
 

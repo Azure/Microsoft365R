@@ -1,11 +1,13 @@
-#' @format An R6 object of class `ms_outlook`, inheriting from `az_user`.
+#' @format An R6 object of class `ms_outlook`, inheriting from `ms_object`.
 #' @export
-ms_outlook <- R6::R6Class("ms_outlook", inherit=az_user,
+ms_outlook <- R6::R6Class("ms_outlook", inherit=ms_object,
 
 public=list(
 
     initialize=function(token, tenant=NULL, properties=NULL)
     {
+        self$type <- "user"
+        private$api_type <- "users"
         super$initialize(token, tenant, properties)
     },
 

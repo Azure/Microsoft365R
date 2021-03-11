@@ -154,7 +154,7 @@ add_user_methods <- function()
         lapply(private$init_list_objects(res, "team"), function(team) team$sync_fields())
     })
 
-    az_user$set("public", "as_outlook", overwrite=TRUE,
+    az_user$set("public", "get_outlook", overwrite=TRUE,
     function()
     {
         ms_outlook$new(self$token, self$tenant, self$properties)

@@ -129,3 +129,23 @@ test_that("Methods work with filenames with special characters",
     expect_silent(item$delete(confirm=FALSE))
 })
 
+
+test_that("Nested folder creation works",
+{
+    od <- get_personal_onedrive()
+
+    f1 <- make_name(10)
+    f2 <- make_name(10)
+    f3 <- make_name(10)
+
+    it12 <- od$create_folder(file.path(f1, f2))
+    expect_is(it12, "ms_drive_item")
+
+    it1 <- od$get_item(f1)
+    expect_is(it1, "ms_drive_item")
+
+    it123 <- it1$create_folder(file.path(f2, f3))
+    expect_is(it123, "ms_drive_item")
+
+    expect_silent(it1$delete(confirm=FALSE))
+})

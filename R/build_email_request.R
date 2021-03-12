@@ -25,7 +25,7 @@ build_email_body.character <- function(body, content_type, attachments, subject,
 }
 
 
-build_email_body.blastula_message <- function(body, content_type, attachments, ...)
+build_email_body.blastula_message <- function(body, content_type, attachments, subject, to, cc, bcc, ...)
 {
     req <- list(
         body=list(
@@ -33,6 +33,7 @@ build_email_body.blastula_message <- function(body, content_type, attachments, .
             content=body$html_str
         )
     )
+
     if(!is_empty(body$attachments))
     req$attachments <- lapply(body$attachments, function(a)
     {
@@ -45,13 +46,50 @@ build_email_body.blastula_message <- function(body, content_type, attachments, .
             contentType=a$content_type
         )
     })
-    req
+
+    if(!is_empty(subject))
+        req$subject <- subject
+
+    utils::modifyList(req, build_email_recipients(to, cc, bcc))
 }
 
 
-build_email_body.envelope <- function(body, content_type, attachments, subject, to, cc, bcc, ...)
+build_email_body.envelope <- function(body, ...)
 {
+    parts <- body$parts
 
+    inline <- which(sapply(parts, function(p) p$header$content_disposition == "inline"))
+    req <- if(length(inline) >= 1)
+    {
+        if(length(inline) > 1)
+            warning("Multiple inline sections found, only the first will be used", call.=FALSE)
+        inline <- parts[[inline[1]]]
+        list(
+            body=list(
+                contentType=if(inline$header$content_type == "text/html") "html" else "text",
+                content=inline$body
+            )
+        )
+    }
+    else list(body=list(contentType="text", content=""))
+
+    atts <-  which(sapply(parts, function(p) p$header$content_disposition == "attachment"))
+    req$attachments <- lapply(parts[atts], function(a)
+    {
+        assert_valid_attachment_size(nchar(a$body)/0.74)  # allow for base64 bloat
+        list(
+            `@odata.type`="#microsoft.graph.fileAttachment",
+            isInline=FALSE,
+            contentBytes=a$body,
+            name=a$header$filename,
+            contentType=a$header$content_type
+        )
+    })
+
+    if(!is_empty(body$header$Subject))
+        req$subject <- body$header$Subject
+
+    utils::modifyList(req, build_email_recipients(body$header$To, body$header$Cc, body$header$Bcc))
 }
 
 
@@ -88,4 +126,28 @@ assert_valid_attachment_size <- function(filename)
 {
     if(file.size(filename) >= 3145728)
         stop("File attachments must currently be less than 3MB in size", call.=FALSE)
+}
+
+
+build_email_recipients <- function(to, cc, bcc)
+{
+    make_recipient <- function(x)
+    {
+        if(inherits(x, "az_user"))
+        {
+            props <- x$properties
+            x <- if(!is.null(props$mail))
+                props$mail
+            else props$userPrincipalName
+            if(is_empty(x) || nchar(x) == 0)
+                stop("Unable to find email address", call.=FALSE)
+        }
+        list(emailAddress=list(address=x))
+    }
+
+    list(
+        toRecipients=lapply(to, make_recipient),
+        ccRecipients=lapply(cc, make_recipient),
+        bccRecipients=lapply(bcc, make_recipient)
+    )
 }

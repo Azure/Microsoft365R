@@ -1,3 +1,7 @@
+# Microsoft365R 2.0.0.9000
+
+- Add ability to created nested folders in OneDrive and SharePoint document libraries (#24).
+
 # Microsoft365R 2.0.0
 
 ## Major user-facing changes

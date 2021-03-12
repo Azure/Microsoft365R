@@ -19,7 +19,7 @@ public=list(
     list_folders=function()
     {
         lst <- private$get_paged_list(self$do_operation("mailFolders"))
-        private$init_list_objects(lst, default_generator=ms_outlook_folder)
+        private$init_list_objects(lst, default_generator=ms_outlook_folder, user_id=self$properties$id)
     },
 
     get_folder=function(folder_name=NULL, folder_id=NULL)
@@ -32,13 +32,13 @@ public=list(
         if(!is.null(folder_id))
         {
             op <- file.path("mailFolders", folder_id)
-            return(ms_outlook_folder$new(self$token, self$tenant, self$do_operation(op)))
+            return(ms_outlook_folder$new(self$token, self$tenant, self$do_operation(op), user_id=self$properties$id))
         }
 
         if(folder_name %in% special_email_folders)
         {
             op <- file.path("mailFolders", folder_name)
-            return(ms_outlook_folder$new(self$token, self$tenant, self$do_operation(op)))
+            return(ms_outlook_folder$new(self$token, self$tenant, self$do_operation(op), user_id=self$properties$id))
         }
 
         folders <- self$list_folders()
@@ -51,7 +51,7 @@ public=list(
     create_folder=function(folder_name)
     {
         res <- self$do_operation("mailFolders", body=list(displayName=folder_name), http_verb="POST")
-        ms_outlook_folder$new(self$token, self$tenant, res)
+        ms_outlook_folder$new(self$token, self$tenant, res, user_id=self$properties$id)
     },
 
     delete_folder=function(folder_name=NULL, folder_id=NULL, confirm=TRUE)

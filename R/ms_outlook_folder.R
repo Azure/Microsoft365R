@@ -4,23 +4,28 @@ ms_outlook_folder <- R6::R6Class("ms_outlook_folder", inherit=ms_outlook_object,
 
 public=list(
 
-    initialize=function(token, tenant=NULL, properties=NULL)
+    user_id=NULL,
+
+    initialize=function(token, tenant=NULL, properties=NULL, user_id=NULL)
     {
+        if(is.null(user_id))
+            stop("Must supply user ID", call.=FALSE)
         self$type <- "mail folder"
-        private$api_type <- "mailFolders"
+        self$user_id <- user_id
+        private$api_type <- file.path("users", self$user_id, "mailFolders")
         super$initialize(token, tenant, properties)
     },
 
     list_emails=function(n=50)
     {
         lst <- private$get_paged_list(self$do_operation("messages", options=list(`$top`=n)))
-        private$init_list_objects(lst, default_generator=ms_outlook_email)
+        private$init_list_objects(lst, default_generator=ms_outlook_email, user_id=self$user_id)
     },
 
     get_email=function(message_id)
     {
         op <- file.path("messages", message_id)
-        ms_outlook_email$new(self$token, self$tenant, self$do_operation(op))
+        ms_outlook_email$new(self$token, self$tenant, self$do_operation(op), user_id=self$user_id)
     },
 
     create_email=function(body="", content_type=c("text", "html"), subject="", to=NULL, cc=NULL, bcc=NULL,
@@ -29,7 +34,7 @@ public=list(
         content_type <- match.arg(content_type)
         req <- build_email_request(body, content_type, attachments, subject, to, cc, bcc)
         res <- ms_outlook_email$new(self$token, self$tenant,
-            self$do_operation("messages", body=req, http_verb="POST"))
+            self$do_operation("messages", body=req, http_verb="POST"), user_id=self$user_id)
 
         if(send_now)
         {

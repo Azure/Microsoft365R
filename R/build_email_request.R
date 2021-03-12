@@ -2,11 +2,11 @@
 
 build_email_request <- function(body, ...)
 {
-    UseMethod("build_email_body")
+    UseMethod("build_email_request")
 }
 
 
-build_email_body.character <- function(body, content_type, attachments, subject, to, cc, bcc, ...)
+build_email_request.character <- function(body, content_type, attachments, subject, to, cc, bcc, ...)
 {
     req <- list(
         body=list(
@@ -25,7 +25,7 @@ build_email_body.character <- function(body, content_type, attachments, subject,
 }
 
 
-build_email_body.blastula_message <- function(body, content_type, attachments, subject, to, cc, bcc, ...)
+build_email_request.blastula_message <- function(body, content_type, attachments, subject, to, cc, bcc, ...)
 {
     req <- list(
         body=list(
@@ -54,7 +54,7 @@ build_email_body.blastula_message <- function(body, content_type, attachments, s
 }
 
 
-build_email_body.envelope <- function(body, ...)
+build_email_request.envelope <- function(body, ...)
 {
     parts <- body$parts
 

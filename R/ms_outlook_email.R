@@ -21,6 +21,13 @@ public=list(
         self$update(subject=subject)
     },
 
+    set_recipients=function(to=NULL, cc=NULL, bcc=NULL)
+    {
+        if(is_empty(to) && is_empty(cc) && is_empty(bcc))
+            message("Clearing all recipients")
+        do.call(self$update, build_email_recipients(to, cc, bcc))
+    },
+
     add_attachment=function(object)
     {
         atts <- if(is.null(self$properties$attachments))
@@ -41,11 +48,6 @@ public=list(
     download_attachment=function(attachment_name, attachment_id, dest, overwrite=FALSE)
     {
         self$get_attachment(attachment_name, attachment_id)$download(dest, overwrite=FALSE)
-    },
-
-    set_recipients=function(to=NULL, cc=NULL, bcc=NULL)
-    {
-        self$update(build_email_recipients(to, cc, bcc))
     },
 
     send=function()

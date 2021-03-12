@@ -88,7 +88,7 @@ public=list(
                           attachments=NULL)
     {
         # use a dummy drafts folder object
-        ms_outlook_folder$new(self$token, self$tenant, list(id="drafts"))$
+        ms_outlook_folder$new(self$token, self$tenant, list(id="drafts"), user_id=self$properties$id)$
             create_email(body, content_type, subject, to, cc, bcc, attachments)
     },
 

@@ -132,6 +132,11 @@ assert_valid_attachment_size <- function(filesize)
 
 build_email_recipients <- function(to, cc, bcc)
 {
+    fix_recipient_list <- function(x)
+    {
+        if(is.object(x)) list(x) else x
+    }
+
     make_recipient <- function(x)
     {
         if(inherits(x, "az_user"))
@@ -147,8 +152,8 @@ build_email_recipients <- function(to, cc, bcc)
     }
 
     list(
-        toRecipients=lapply(to, make_recipient),
-        ccRecipients=lapply(cc, make_recipient),
-        bccRecipients=lapply(bcc, make_recipient)
+        toRecipients=lapply(fix_recipient_list(to), make_recipient),
+        ccRecipients=lapply(fix_recipient_list(cc), make_recipient),
+        bccRecipients=lapply(fix_recipient_list(bcc), make_recipient)
     )
 }

@@ -29,7 +29,7 @@ public=list(
     },
 
     create_email=function(body="", content_type=c("text", "html"), subject="", to=NULL, cc=NULL, bcc=NULL,
-                          attachments=NULL, send_now=FALSE)
+                          reply_to=NULL, attachments=NULL, send_now=FALSE)
     {
         content_type <- match.arg(content_type)
         req <- build_email_request(body, content_type, attachments, subject, to, cc, bcc)
@@ -39,8 +39,9 @@ public=list(
         if(send_now)
         {
             res$send()
-            res$sync_fields()
+            return(invisible(NULL))  # sent email no longer has any link to draft, despite immutable IDs (!)
         }
+
         res
     },
 

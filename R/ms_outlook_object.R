@@ -5,7 +5,7 @@ public=list(
 
     do_operation=function(op="", ...)
     {
-        outlook_headers <- httr::add_headers(Prefer='IdType="ImmutableID"')
+        outlook_headers <- httr::add_headers(Prefer='IdType="ImmutableId"')
         super$do_operation(op, ..., outlook_headers)
     }
 ))

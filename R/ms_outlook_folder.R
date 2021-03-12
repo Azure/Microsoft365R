@@ -50,21 +50,6 @@ public=list(
         self$get_email(message_id)$delete(confirm=confirm)
     },
 
-    send_email=function(message_id)
-    {
-        self$get_email(message_id)$send()
-    },
-
-    copy_email=function(message_id, dest)
-    {
-        self$get_email(message_id)$copy(dest)
-    },
-
-    move_email=function(message_id, dest)
-    {
-        self$get_email(message_id)$move(dest)
-    },
-
     print=function(...)
     {
         cat("<Outlook folder '", self$properties$displayName, "'>\n", sep="")

@@ -32,7 +32,10 @@ public=list(
             self$do_operation("messages", body=req, http_verb="POST"))
 
         if(send_now)
+        {
             res$send()
+            res$sync_fields()
+        }
         res
     },
 

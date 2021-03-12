@@ -11,7 +11,7 @@ public=list(
         super$initialize(token, tenant, properties)
     },
 
-    add_subject=function(subject)
+    set_subject=function(subject)
     {
         self$update(subject=subject)
     },

@@ -29,23 +29,23 @@ build_email_body.blastula_message <- function(body, content_type, attachments, s
 {
     req <- list(
         body=list(
-            contentType="html",
+            contentType="html",  # blastula emails are always HTML
             content=body$html_str
         )
     )
 
     if(!is_empty(body$attachments))
-    req$attachments <- lapply(body$attachments, function(a)
-    {
-        assert_valid_attachment_size(a$file_path)
-        list(
-            `@odata.type`="#microsoft.graph.fileAttachment",
-            isInline=FALSE,
-            contentBytes=openssl::base64_encode(readBin(a$file_path, "raw", file.size(a$file_path))),
-            name=a$filename,
-            contentType=a$content_type
-        )
-    })
+        req$attachments <- lapply(body$attachments, function(a)
+        {
+            assert_valid_attachment_size(file.size(a$file_path))
+            list(
+                `@odata.type`="#microsoft.graph.fileAttachment",
+                isInline=FALSE,
+                contentBytes=openssl::base64_encode(readBin(a$file_path, "raw", file.size(a$file_path))),
+                name=a$filename,
+                contentType=a$content_type
+            )
+        })
 
     if(!is_empty(subject))
         req$subject <- subject
@@ -74,17 +74,18 @@ build_email_body.envelope <- function(body, ...)
     else list(body=list(contentType="text", content=""))
 
     atts <-  which(sapply(parts, function(p) p$header$content_disposition == "attachment"))
-    req$attachments <- lapply(parts[atts], function(a)
-    {
-        assert_valid_attachment_size(nchar(a$body)/0.74)  # allow for base64 bloat
-        list(
-            `@odata.type`="#microsoft.graph.fileAttachment",
-            isInline=FALSE,
-            contentBytes=a$body,
-            name=a$header$filename,
-            contentType=a$header$content_type
-        )
-    })
+    if(!is_empty(atts))
+        req$attachments <- lapply(parts[atts], function(a)
+        {
+            assert_valid_attachment_size(nchar(a$body)/0.74)  # allow for base64 bloat
+            list(
+                `@odata.type`="#microsoft.graph.fileAttachment",
+                isInline=FALSE,
+                contentBytes=a$body,
+                name=a$header$filename,
+                contentType=a$header$content_type
+            )
+        })
 
     if(!is_empty(body$header$Subject))
         req$subject <- body$header$Subject
@@ -100,7 +101,7 @@ make_email_attachment <- function(object)
 
     if(file.exists(object))  # a file
     {
-        assert_valid_attachment_size(object)
+        assert_valid_attachment_size(file.size(object))
         list(
             `@odata.type`="#microsoft.graph.fileAttachment",
             isInline=FALSE,
@@ -122,9 +123,9 @@ make_email_attachment <- function(object)
 }
 
 
-assert_valid_attachment_size <- function(filename)
+assert_valid_attachment_size <- function(filesize)
 {
-    if(file.size(filename) >= 3145728)
+    if(filesize >= 3145728)
         stop("File attachments must currently be less than 3MB in size", call.=FALSE)
 }
 

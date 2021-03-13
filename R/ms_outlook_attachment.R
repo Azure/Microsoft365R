@@ -56,7 +56,7 @@ public=list(
 ))
 
 
-get_type <- function(type)
+get_attachment_type <- function(type)
 {
     if(is_empty(type))
         stop("Unable to determine attachment type", call.=FALSE)

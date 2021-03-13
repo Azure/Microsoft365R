@@ -64,11 +64,6 @@ public=list(
         self$get_folder("inbox")
     },
 
-    get_outbox=function()
-    {
-        self$get_folder("outbox")
-    },
-
     get_sent_items=function()
     {
         self$get_folder("sentitems")

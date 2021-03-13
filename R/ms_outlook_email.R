@@ -89,9 +89,25 @@ public=list(
         lst
     },
 
-    copy=function(dest) {},
+    copy=function(folder_name, folder_id)
+    {
+        assert_one_arg(folder_name, folder_id, msg="Supply exactly one of destination folder name or ID")
+        if(is.null(folder_id))
+            folder_id <- private$find_folder_id(folder_name)
 
-    move=function(dest) {},
+        res <- self$do_operation("copy", body=list(destinationId=folder_id), http_verb="POST")
+        ms_outlook_email$new(self$token, self$tenant, res, user_id=self$user_id)
+    },
+
+    move=function(folder_name, folder_id)
+    {
+        assert_one_arg(folder_name, folder_id, msg="Supply exactly one of destination folder name or ID")
+        if(is.null(folder_id))
+            folder_id <- private$find_folder_id(folder_name)
+
+        res <- self$do_operation("move", body=list(destinationId=folder_id), http_verb="POST")
+        ms_outlook_email$new(self$token, self$tenant, res, user_id=self$user_id)
+    },
 
     reply=function(to=NULL, cc=NULL, bcc=NULL) {},
 
@@ -128,6 +144,23 @@ public=list(
             cat(" ...\n")
         else cat("\n")
         invisible(self)
+    }
+),
+
+private=list(
+
+    find_folder_id=function(folder)
+    {
+        if(inherits(folder, "ms_outlook_folder"))
+            return(folder$properties$id)
+
+        fnames <- strsplit(folder, "/", fixed=TRUE)[[1]]
+        # create dummy outlook client to get top-level folder
+        outlook <- ms_outlook$new(self$token, self$tenant, list(id=self$user_id))
+        folder <- outlook$get_folder(fnames[1])
+        for(f in fnames[-1])
+            folder <- folder$get_folder(f)
+        folder$properties$id
     }
 ))
 

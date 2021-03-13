@@ -84,12 +84,11 @@ public=list(
         self$get_folder("deleteditems")
     },
 
-    create_email=function(body="", content_type=c("text", "html"), subject="", to=NULL, cc=NULL, bcc=NULL,
-                          attachments=NULL)
+    create_email=function(...)
     {
         # use a dummy drafts folder object
         ms_outlook_folder$new(self$token, self$tenant, list(id="drafts"), user_id=self$properties$id)$
-            create_email(body, content_type, subject, to, cc, bcc, attachments)
+            create_email(...)
     },
 
     print=function(...)

@@ -30,15 +30,40 @@ public=list(
 
     add_attachment=function(object)
     {
-        atts <- if(is.null(self$properties$attachments))
-            list()
-        else self$properties$attachments
-        self$update(attachments=c(atts, list(make_email_attachment(object))))
+        res <- self$do_operation("attachments", body=make_email_attachment(object), http_verb="POST")
+        ms_outlook_attachment$new(self$token, self$tenant, res,
+            user_id=self$user_id, message_id=self$properties$id)
     },
 
-    get_attachment=function(attachment_name, attachment_id) {},
+    get_attachment=function(attachment_name=NULL, attachment_id=NULL)
+    {
+        assert_one_arg(attachment_name, attachment_id, msg="Supply exactly one of attachment name or ID")
+        if(is.null(attachment_id))
+        {
+            atts <- self$list_attachments()
+            att_names <- sapply(atts, function(a) a$properties$name)
+            wch <- which(att_names == attachment_name)
+            if(length(wch) == 0)
+                stop("Attachment '", attachment_name, "' not found", call.=FALSE)
+            if(length(wch) > 1)
+                stop("More than one attachment named '", attachment_name, "'", call.=FALSE)
+            return(atts[[wch]])
+        }
 
-    list_attachments=function() {},
+        fields <- c("id", "name", "contentType", "size", "isInline", "lastModifiedDateTime")
+        res <- self$do_operation(file.path("attachments", attachment_id),
+            options=list(select=paste(fields, collapse=",")))
+        ms_outlook_attachment$new(self$token, self$tenant, res,
+            user_id=self$user_id, message_id=self$properties$id)
+    },
+
+    list_attachments=function()
+    {
+        fields <- c("id", "name", "contentType", "size", "isInline", "lastModifiedDateTime")
+        res <- self$do_operation("attachments", options=list(select=paste(fields, collapse=",")))
+        private$init_list_objects(private$get_paged_list(res), default_generator=ms_outlook_attachment,
+            user_id=self$user_id, message_id=self$properties$id)
+    },
 
     remove_attachment=function(attachment_name, attachment_id, confirm=TRUE)
     {
@@ -53,7 +78,7 @@ public=list(
     send=function()
     {
         self$do_operation("send", http_verb="POST")
-        invisible(NULL)
+        self$sync_fields()
     },
 
     copy=function(dest) {},

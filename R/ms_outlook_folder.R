@@ -37,11 +37,7 @@ public=list(
             self$do_operation("messages", body=req, http_verb="POST"), user_id=self$user_id)
 
         if(send_now)
-        {
             res$send()
-            return(invisible(NULL))  # sent email no longer has any link to draft, despite immutable IDs (!)
-        }
-
         res
     },
 

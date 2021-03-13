@@ -113,10 +113,16 @@ make_email_attachment <- function(object)
     else if(!is_empty(httr::parse_url(object)$scheme))  # a URL
     {
         url <- httr::parse_url(object)
+        name <- basename(url$path)
+        if(name == "")
+            name <- url$hostname
         list(
             `@odata.type`="#microsoft.graph.referenceAttachment",
-            name=basename(url$path),
-            sourceUrl=object
+            name=name,
+            sourceUrl=object,
+            providerType="other",
+            permission="view",
+            isFolder=FALSE
         )
     }
     else stop("Bad attachment: '", object, "'", call.=FALSE)
@@ -148,7 +154,7 @@ build_email_recipients <- function(to, cc, bcc)
             if(is_empty(x) || nchar(x) == 0)
                 stop("Unable to find email address", call.=FALSE)
         }
-        list(emailAddress=list(address=x))
+        list(emailAddress=list(address=as.character(x)))
     }
 
     list(

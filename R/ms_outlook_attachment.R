@@ -31,7 +31,7 @@ public=list(
         invisible(self)
     },
 
-    download=function(dest, overwrite=overwrite)
+    download=function(dest=self$properties$name, overwrite=overwrite)
     {
         res <- self$do_operation("value", config=httr::write_disk(dest, overwrite=overwrite),
                                  http_status_handler="pass")

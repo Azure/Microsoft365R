@@ -47,6 +47,41 @@ public=list(
         self$get_email(message_id)$delete(confirm=confirm)
     },
 
+    list_folders=function()
+    {
+        lst <- private$get_paged_list(self$do_operation("childFolders"))
+        private$init_list_objects(lst, default_generator=ms_outlook_folder, user_id=self$user_id)
+    },
+
+    get_folder=function(folder_name=NULL, folder_id=NULL)
+    {
+        assert_one_arg(folder_name, folder_id, msg="Supply exactly one of folder name or ID")
+
+        if(!is.null(folder_id))
+        {
+            op <- file.path("users", self$user_id, "mailFolders", folder_id)
+            res <- call_graph_endpoint(self$token, self$tenant, op)
+            return(ms_outlook_folder$new(self$token, self$tenant, res, user_id=self$properties$id))
+        }
+
+        folders <- self$list_folders()
+        wch <- which(sapply(folders, function(f) f$properties$displayName == folder_name))
+        if(length(wch) != 1)
+            stop("Invalid folder name '", folder_name, "'", call.=FALSE)
+        else folders[[wch]]
+    },
+
+    create_folder=function(folder_name)
+    {
+        op <- file.path("childFolders", folder_name)
+        ms_outlook_folder$new(self$token, self$tenant, self$do_operation(op, http_verb="POST"), user_id=self$user_id)
+    },
+
+    delete_folder=function(folder_name=NULL, folder_id=NULL, confirm=TRUE)
+    {
+        self$get_folder(folder_name, folder_id)$delete(confirm=confirm)
+    },
+
     print=function(...)
     {
         cat("<Outlook folder '", self$properties$displayName, "'>\n", sep="")

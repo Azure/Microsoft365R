@@ -81,6 +81,14 @@ public=list(
         self$sync_fields()
     },
 
+    get_message_headers=function()
+    {
+        res <- self$do_operation(options=list(select="internetMessageHeaders"))$internetMessageHeaders
+        lst <- sapply(lst, `[[`, "value")
+        names(lst) <- sapply(lst, `[[`, "name")
+        lst
+    },
+
     copy=function(dest) {},
 
     move=function(dest) {},
@@ -92,6 +100,7 @@ public=list(
     print=function(...)
     {
         cat("<Outlook email>\n", sep="")
+        cat("  directory id:", self$properties$id, "\n")
         if(!is_empty(self$properties$from))
             cat("  from:", format_email_recipient(self$properties$from), "\n")
         else cat("  from:\n")

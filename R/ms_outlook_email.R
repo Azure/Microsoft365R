@@ -28,6 +28,19 @@ public=list(
         do.call(self$update, build_email_recipients(to, cc, bcc))
     },
 
+    add_recipients=function(to=NULL, cc=NULL, bcc=NULL)
+    {
+        find_address <- function(x)
+        {
+            x$emailAddress$address
+        }
+        current_to <- sapply(self$properties$toRecipients, find_address)
+        current_cc <- sapply(self$properties$ccRecipients, find_address)
+        current_bcc <- sapply(self$properties$bccRecipients, find_address)
+
+        self$set_recipients(c(current_to, to), c(current_cc, cc), c(current_bcc, bcc))
+    },
+
     add_attachment=function(object)
     {
         res <- self$do_operation("attachments", body=make_email_attachment(object), http_verb="POST")
@@ -84,8 +97,8 @@ public=list(
     get_message_headers=function()
     {
         res <- self$do_operation(options=list(select="internetMessageHeaders"))$internetMessageHeaders
-        lst <- sapply(lst, `[[`, "value")
-        names(lst) <- sapply(lst, `[[`, "name")
+        lst <- sapply(res, `[[`, "value")
+        names(lst) <- sapply(res, `[[`, "name")
         lst
     },
 
@@ -109,9 +122,41 @@ public=list(
         ms_outlook_email$new(self$token, self$tenant, res, user_id=self$user_id)
     },
 
-    reply=function(to=NULL, cc=NULL, bcc=NULL) {},
+    reply_all=function(comment="")
+    {
+        op <- "createReplyAll"
+        body <- list(comment=comment)
+        reply <- ms_outlook_email$new(self$token, self$tenant,
+            self$do_operation("op", body=body, http_verb="POST"), user_id=self$user_id)
+        if(send_now)
+            reply$send()
+        reply
+    },
 
-    forward=function(to=NULL, cc=NULL, bcc=NULL) {},
+    reply=function(comment="", send_now=FALSE)
+    {
+        op <- "createReply"
+        body <- list(comment=comment)
+        reply <- ms_outlook_email$new(self$token, self$tenant,
+            self$do_operation("op", body=body, http_verb="POST"), user_id=self$user_id)
+        if(send_now)
+            reply$send()
+        reply
+    },
+
+    forward=function(comment="", to=NULL, cc=NULL, bcc=NULL, send_now=FALSE)
+    {
+        op <- "createforward"
+        body <- c(
+            list(comment=comment),
+            build_email_recipients(to, cc, bcc)
+        )
+        reply <- ms_outlook_email$new(self$token, self$tenant,
+            self$do_operation("op", body=list(comment=comment), http_verb="POST"), user_id=self$user_id)
+        if(send_now)
+            reply$send()
+        reply
+    },
 
     print=function(...)
     {
@@ -151,15 +196,17 @@ private=list(
 
     find_folder_id=function(folder)
     {
-        if(inherits(folder, "ms_outlook_folder"))
-            return(folder$properties$id)
-
-        fnames <- strsplit(folder, "/", fixed=TRUE)[[1]]
-        # create dummy outlook client to get top-level folder
-        outlook <- ms_outlook$new(self$token, self$tenant, list(id=self$user_id))
-        folder <- outlook$get_folder(fnames[1])
-        for(f in fnames[-1])
-            folder <- folder$get_folder(f)
+        if(is.character(folder))
+        {
+            fnames <- strsplit(folder, "/", fixed=TRUE)[[1]]
+            # create dummy outlook client to get top-level folder
+            outlook <- ms_outlook$new(self$token, self$tenant, list(id=self$user_id))
+            folder <- outlook$get_folder(fnames[1])
+            for(f in fnames[-1])
+                folder <- folder$get_folder(f)
+        }
+        if(!inherits(folder, "ms_outlook_folder"))
+            stop("Invalid folder object", call.=FALSE)
         folder$properties$id
     }
 ))

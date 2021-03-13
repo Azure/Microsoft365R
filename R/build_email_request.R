@@ -153,8 +153,12 @@ build_email_recipients <- function(to, cc, bcc)
             else props$userPrincipalName
             if(is_empty(x) || nchar(x) == 0)
                 stop("Unable to find email address", call.=FALSE)
+            name <- props$displayName
         }
-        list(emailAddress=list(address=as.character(x)))
+        else name <- x <- as.character(x)
+        if(!grepl(".+@.+", x))  # basic check for a valid address
+            stop("Invalid email address '", x, "'", call.=FALSE)
+        list(emailAddress=list(name=name, address=x))
     }
 
     list(

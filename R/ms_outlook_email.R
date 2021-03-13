@@ -90,6 +90,8 @@ public=list(
 
     send=function()
     {
+        if(!self$properties$isDraft)
+            stop("Email has already been sent", call.=FALSE)
         self$do_operation("send", http_verb="POST")
         self$sync_fields()
     },
@@ -102,7 +104,7 @@ public=list(
         lst
     },
 
-    copy=function(folder_name, folder_id)
+    copy=function(folder_name=NULL, folder_id=NULL)
     {
         assert_one_arg(folder_name, folder_id, msg="Supply exactly one of destination folder name or ID")
         if(is.null(folder_id))
@@ -112,7 +114,7 @@ public=list(
         ms_outlook_email$new(self$token, self$tenant, res, user_id=self$user_id)
     },
 
-    move=function(folder_name, folder_id)
+    move=function(folder_name=NULL, folder_id=NULL)
     {
         assert_one_arg(folder_name, folder_id, msg="Supply exactly one of destination folder name or ID")
         if(is.null(folder_id))
@@ -219,11 +221,10 @@ format_email_recipient <- function(obj)
     name_null <- is_empty(name) || nchar(name) == 0
     addr_null <- is_empty(addr) || nchar(addr) == 0
 
-    if(name_null && addr_null)
-        "<unknown>"
-    else if(name_null)
-        addr
-    else name
+    if(addr_null) "<unknown>"
+    else if(!name_null && name != addr)
+        sprintf("%s <%s>", name, addr)
+    else addr
 }
 
 

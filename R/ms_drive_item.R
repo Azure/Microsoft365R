@@ -243,7 +243,6 @@ public=list(
     download=function(dest=self$properties$name, overwrite=FALSE)
     {
         private$assert_is_file()
-        filepath <- file.path(self$parentReference$path, self$properties$name)
         res <- self$do_operation("content", config=httr::write_disk(dest, overwrite=overwrite),
                                  http_status_handler="pass")
         if(httr::status_code(res) >= 300)

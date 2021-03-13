@@ -16,9 +16,10 @@ public=list(
         super$initialize(token, tenant, properties)
     },
 
-    list_emails=function(n=50)
+    list_emails=function(n=50, order_by=c("date", "subject", "to", "importance"), order=c("descending", "ascending"))
     {
-        lst <- private$get_paged_list(self$do_operation("messages", options=list(`$top`=n)))
+        opts <- list(`$orderby`=order_by)
+        lst <- private$get_paged_list(self$do_operation("messages"), n=n)
         private$init_list_objects(lst, default_generator=ms_outlook_email, user_id=self$user_id)
     },
 

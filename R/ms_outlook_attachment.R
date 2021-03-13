@@ -6,6 +6,7 @@ public=list(
 
     user_id=NULL,
     message_id=NULL,
+    attachment_type=NULL,
 
     initialize=function(token, tenant=NULL, properties=NULL, user_id=NULL, message_id=NULL)
     {
@@ -14,13 +15,14 @@ public=list(
         self$type <- "email"
         self$user_id <- user_id
         self$message_id <- message_id
+        self$attachment_type <- get_attachment_type(properties$`@odata.type`)
         private$api_type <- file.path("users", self$user_id, "messages", message_id, "attachments")
         super$initialize(token, tenant, properties)
     },
 
     sync_fields=function()
     {
-        opts <- if(self$get_type() == "file")
+        opts <- if(self$attachment_type == "file")
         {
             # don't download attachment contents if this is a file attachment
             fields <- c("id", "name", "contentType", "size", "isInline", "lastModifiedDateTime", "contentId")
@@ -44,24 +46,24 @@ public=list(
         invisible(NULL)
     },
 
-    get_type=function()
-    {
-        type <- self$properties$`@odata.type`
-        if(is_empty(type))
-            stop("Unable to determine attachment type", call.=FALSE)
-        switch(type,
-            "#microsoft.graph.fileAttachment"="file",
-            "#microsoft.graph.referenceAttachment"="link",
-            "#microsoft.graph.itemAttachment"="Outlook item",
-            stop("Unable to determine attachment type", call.=FALSE)
-        )
-    },
-
     print=function(...)
     {
         cat("<Outlook email attachment '", self$properties$name, "'>\n", sep="")
         cat("  directory id:", self$properties$id, "\n")
-        cat("  attachment type:", self$get_type(), "\n")
+        cat("  attachment type:", self$attachment_type, "\n")
         invisible(self)
     }
 ))
+
+
+get_type <- function(type)
+{
+    if(is_empty(type))
+        stop("Unable to determine attachment type", call.=FALSE)
+    switch(type,
+        "#microsoft.graph.fileAttachment"="file",
+        "#microsoft.graph.referenceAttachment"="link",
+        "#microsoft.graph.itemAttachment"="Outlook item",
+        "<unknown>"
+    )
+}

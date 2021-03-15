@@ -16,6 +16,19 @@ public=list(
         super$initialize(token, tenant, properties)
     },
 
+    set_body=function(body=NULL, content_type=NULL)
+    {
+        if(is.null(body) && is.null(content_type))
+            return(self)
+
+        if(is.null(body))
+            body <- self$properties$body$content
+        if(is.null(content_type))
+            content_type <- self$properties$body$contentType
+        req <- build_email_request(body, content_type)
+        do.call(self$update, req)
+    },
+
     set_subject=function(subject)
     {
         self$update(subject=subject)
@@ -25,7 +38,7 @@ public=list(
     {
         if(is_empty(to) && is_empty(cc) && is_empty(bcc))
             message("Clearing all recipients")
-        do.call(self$update, build_email_recipients(to, cc, bcc))
+        do.call(self$update, build_email_recipients(to, cc, bcc, NA))
     },
 
     add_recipients=function(to=NULL, cc=NULL, bcc=NULL)
@@ -34,11 +47,18 @@ public=list(
         {
             x$emailAddress$address
         }
-        current_to <- sapply(self$properties$toRecipients, find_address)
-        current_cc <- sapply(self$properties$ccRecipients, find_address)
-        current_bcc <- sapply(self$properties$bccRecipients, find_address)
+        current_to <- lapply(self$properties$toRecipients, find_address)
+        current_cc <- lapply(self$properties$ccRecipients, find_address)
+        current_bcc <- lapply(self$properties$bccRecipients, find_address)
 
-        self$set_recipients(c(current_to, to), c(current_cc, cc), c(current_bcc, bcc))
+        self$set_recipients(c(current_to, to), c(current_cc, cc), c(current_bcc, bcc), NA)
+    },
+
+    set_reply_to=function(reply_to=NULL)
+    {
+        if(is_empty(reply_to))
+            message("Clearing reply-to")
+        self$update(NA, NA, NA, reply_to)
     },
 
     add_attachment=function(object)

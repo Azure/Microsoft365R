@@ -7,6 +7,8 @@
 \alias{list_sharepoint_sites}
 \alias{get_team}
 \alias{list_teams}
+\alias{get_personal_outlook}
+\alias{get_business_outlook}
 \title{Login clients for Microsoft 365}
 \usage{
 get_personal_onedrive(
@@ -49,6 +51,19 @@ get_team(
 )
 
 list_teams(
+  tenant = Sys.getenv("CLIMICROSOFT365_TENANT", "common"),
+  app = Sys.getenv("CLIMICROSOFT365_AADAPPID"),
+  scopes = ".default",
+  ...
+)
+
+get_personal_outlook(
+  app = .microsoft365r_app_id,
+  scopes = c("Mail.Send", "Mail.ReadWrite", "User.Read"),
+  ...
+)
+
+get_business_outlook(
   tenant = Sys.getenv("CLIMICROSOFT365_TENANT", "common"),
   app = Sys.getenv("CLIMICROSOFT365_AADAPPID"),
   scopes = ".default",

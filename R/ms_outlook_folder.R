@@ -17,7 +17,7 @@
 #' - `sync_fields()`: Synchronise the R object with the item metadata in Microsoft Graph.
 #' - `list_emails()`: List the emails in this folder.
 #' - `get_email(message_id)`: Get the email with the specified ID.
-#' - `create_email(...)`: Creates a new draft email in this folder, optionally sending it as well. See 'Sending emails' below.
+#' - `create_email(...)`: Creates a new draft email in this folder, optionally sending it as well. See 'Creating and sending emails'.
 #' - `delete_email(message_id, confim=TRUE)`: Deletes the specified email. By default, ask for confirmation first.
 #' - `list_folders()`: List subfolders of this folder.
 #' - `get_folder(folder_name, folder_id)`: Get a subfolder, either by the name or ID.
@@ -28,7 +28,33 @@
 #' Creating new objects of this class should be done via the `get_folder`, `list_folders` or `create_folder` methods of this class or the [`ms_outlook`] class. Calling the `new()` method for this class only constructs the R object; it does not call the Microsoft Graph API to retrieve or create the actual folder.
 #'
 #' @section Creating and sending emails:
-#' Outlook allows creating new draft emails in any folder, not just the Drafts folder (although that is the default for the Outlook app). To create a new email, call the `create_email()` method with the following arguments.
+#' Outlook allows creating new draft emails in any folder, not just the Drafts folder (although that is the default for the Outlook app). To create a new email, call the `create_email()` method, which has the following signature:
+#'```
+#' create_email(body = "", content_type = c("text", "html"), subject = "",
+#'              to = NULL, cc = NULL, bcc = NULL, reply_to = NULL,
+#'              attachments = NULL, send_now = FALSE)
+#' ```
+#' - `body`: The body of the message. This should be a string or vector of strings, which will be pasted together with newlines as separators. You can also supply a message object as created by the blastula or emayili packages---see the examples below.
+#' - `content_type`: The format of the body, either "text" (the default) or HTML.
+#' - `subject`: The subject of the message.
+#' - `to,cc,bcc,reply_to`: These should be lists of email addresses, in standard "user@host" format. You can also supply objects of class [`AzureGraph::az_user`] representing user accounts in Azure Active Directory.
+#' - `attachments`: A list of file names or URLs to attach to the message.
+#' - `send_now`: Whether the email should be sent immediately, or saved as a draft. You can send a draft email later with its `send()` method.
+#'
+#' This returns an object of class [`ms_outlook_email`], which has methods for making further edits, replying, forwarding, and sending.
+#'
+#' You can also supply message objects as created by the blastula and emayili packages in the `body` argument. Note that blastula objects include attachments (if any), and emayili objects include attachments, recipients, and subject line; the corresponding arguments to `create_email()` will not be used in this case.
+#'
+#' @section Listing emails:
+#' To list the emails in a folder, call the `list_emails()` method. This has the following signature:
+#' ```
+#' list_emails(by = "received", n = 100, pagesize = 10)
+#' ```
+#' - `by`: The sorting order of the message list. The default is to sort by descending date received (most recent first). Other alternatives are "from" and "subject".
+#' - `n`: The total number of emails to retrieve. The default is 100.
+#' - `pagesize`: The number of emails per page. You can change this to a larger number to increase throughput, at the risk of running into timeouts.
+#'
+#' This returns a list of objects of class [`ms_outlook_email`].
 #'
 #' @seealso
 #' [`ms_outlook`], [`ms_outlook_email`]
@@ -37,6 +63,72 @@
 #' [Outlook API reference](https://docs.microsoft.com/en-us/graph/api/resources/mail-api-overview?view=graph-rest-1.0)
 #'
 #' @examples
+#' \dontrun{
+#'
+#' outl <- get_personal_outlook()
+#'
+#' folder <- outl$get_folder("My folder")
+#'
+#' ##
+#' ## listing emails
+#' ##
+#'
+#' # the default: 100 most recent messages
+#' folder$list_emails()
+#'
+#' # sorted by subject, then by most recent received date
+#' folder$list_emails(by="subject")
+#'
+#' # retrieve a specific email:
+#' # note the Outlook ID is NOT the same as the Internet message-id
+#' email_id <- folder$list_emails()[[1]]$properties$id
+#' folder$get_email(email_id)
+#'
+#' ##
+#' ## creating/sending emails
+#' ##
+#'
+#' # a simple text email with just a body:
+#' # you can add other properties by calling the returned object's methods
+#' folder$create_email("Hello from R")
+#'
+#' # email with attachments
+#' folder$create_email("Hello from R, see attached doc and spreadsheet",
+#'     attachments=c("mydocument.docx", "mydata.xlsx"))
+#'
+#' # HTML-formatted email with all necessary fields, sent immediately
+#' folder$create_email("<emph>Emphatic hello</emph> from R",
+#'     content_type="html",
+#'     to="user@example.com",
+#'     subject="example email",
+#'     send_now=TRUE)
+#'
+#' # using blastula to create a HTML email with Markdown
+#' bl_msg <- blastula::compose_email(md(
+#' "
+#' ## Hello!
+#'
+#' This is an email message that was generated by the blastula package.
+#'
+#' We can use **Markdown** formatting with the `md()` function.
+#'
+#' Cheers,
+#'
+#' The blastula team
+#' "))
+#' folder$create_email(bl_msg, subject="example blastula email")
+#'
+#'
+#' # using emayili to create an email with attachments
+#' ey_email <- envelope() %>%
+#'     text("Hello from emayili") %>%
+#'     to("user@example.com") %>%
+#'     subject("example emayili email") %>%
+#'     attachment("mydocument.docx") %>%
+#'     attachment("mydata.xlsx")
+#' folder$create_email(ey_email)
+#'
+#' }
 #' @format An R6 object of class `ms_outlook_folder`, inheriting from `ms_outlook_object`, which in turn inherits from `ms_object`.
 #' @export
 ms_outlook_folder <- R6::R6Class("ms_outlook_folder", inherit=ms_outlook_object,
@@ -55,10 +147,11 @@ public=list(
         super$initialize(token, tenant, properties)
     },
 
-    list_emails=function(by=c("sent", "subject", "from", "importance"), order=c("descending", "ascending"), n=100)
+    list_emails=function(by="received", n=100, pagesize=10)
     {
-        opts <- list(`$orderby`=by)
-        lst <- private$get_paged_list(self$do_operation("messages"), n=n)
+        order_by <- email_list_order(by)
+        opts <- list(`$orderby`=order_by, `$top`=pagesize)
+        lst <- private$get_paged_list(self$do_operation("messages", options=opts), n=n)
         private$init_list_objects(lst, default_generator=ms_outlook_email, user_id=self$user_id)
     },
 
@@ -72,7 +165,7 @@ public=list(
                           reply_to=NULL, attachments=NULL, send_now=FALSE)
     {
         content_type <- match.arg(content_type)
-        req <- build_email_request(body, content_type, attachments, subject, to, cc, bcc)
+        req <- build_email_request(body, content_type, attachments, subject, to, cc, bcc, reply_to)
         res <- ms_outlook_email$new(self$token, self$tenant,
             self$do_operation("messages", body=req, http_verb="POST"), user_id=self$user_id)
 
@@ -130,3 +223,18 @@ public=list(
         invisible(self)
     }
 ))
+
+
+email_list_order <- function(vars)
+{
+    varmap <- list(
+        received="receivedDateTime desc",
+        subject="subject",
+        from="from/emailAddress/name"
+    )
+    if(!all(vars %in% names(varmap)))
+        stop("Unknown ordering field", call.=FALSE)
+    if(vars != "received")
+        vars <- c(vars, "received")
+    paste(varmap[vars], collapse=",")
+}

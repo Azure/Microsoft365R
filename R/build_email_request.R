@@ -6,7 +6,8 @@ build_email_request <- function(body, ...)
 }
 
 
-build_email_request.character <- function(body, content_type, attachments, subject, to, cc, bcc, ...)
+build_email_request.character <- function(body, content_type,
+    attachments=NULL, subject=NULL, to=NA, cc=NA, bcc=NA, reply_to=NA, ...)
 {
     req <- list(
         body=list(
@@ -21,11 +22,12 @@ build_email_request.character <- function(body, content_type, attachments, subje
     if(!is_empty(subject))
         req$subject <- subject
 
-    utils::modifyList(req, build_email_recipients(to, cc, bcc))
+    utils::modifyList(req, build_email_recipients(to, cc, bcc, reply_to))
 }
 
 
-build_email_request.blastula_message <- function(body, content_type, attachments, subject, to, cc, bcc, ...)
+build_email_request.blastula_message <- function(body, content_type,
+    attachments=NULL, subject=NULL, to=NA, cc=NA, bcc=NA, reply_to=NA, ...)
 {
     req <- list(
         body=list(
@@ -50,7 +52,7 @@ build_email_request.blastula_message <- function(body, content_type, attachments
     if(!is_empty(subject))
         req$subject <- subject
 
-    utils::modifyList(req, build_email_recipients(to, cc, bcc))
+    utils::modifyList(req, build_email_recipients(to, cc, bcc, reply_to))
 }
 
 
@@ -90,7 +92,8 @@ build_email_request.envelope <- function(body, ...)
     if(!is_empty(body$header$Subject))
         req$subject <- body$header$Subject
 
-    utils::modifyList(req, build_email_recipients(body$header$To, body$header$Cc, body$header$Bcc))
+    with(body$header,
+        utils::modifyList(req, To, Cc, Bcc, Reply_To))
 }
 
 
@@ -136,34 +139,42 @@ assert_valid_attachment_size <- function(filesize)
 }
 
 
-build_email_recipients <- function(to, cc, bcc)
+build_email_recipients <- function(to, cc, bcc, reply_to)
 {
-    fix_recipient_list <- function(x)
+    make_recipients <- function(addr_list)
     {
-        if(is.object(x)) list(x) else x
-    }
+        # NA means don't update current value
+        if(is.na(addr_list))
+            return(NA)
 
-    make_recipient <- function(x)
-    {
-        if(inherits(x, "az_user"))
+        # handle case of a single az_user object
+        if(is.object(addr_list))
+            addr_list <- list(addr_list)
+
+        lapply(addr_list, function(x)
         {
-            props <- x$properties
-            x <- if(!is.null(props$mail))
-                props$mail
-            else props$userPrincipalName
-            if(is_empty(x) || nchar(x) == 0)
-                stop("Unable to find email address", call.=FALSE)
-            name <- props$displayName
-        }
-        else name <- x <- as.character(x)
-        if(!grepl(".+@.+", x))  # basic check for a valid address
-            stop("Invalid email address '", x, "'", call.=FALSE)
-        list(emailAddress=list(name=name, address=x))
+            if(inherits(x, "az_user"))
+            {
+                props <- x$properties
+                x <- if(!is.null(props$mail))
+                    props$mail
+                else props$userPrincipalName
+                if(is_empty(x) || nchar(x) == 0)
+                    stop("Unable to find email address", call.=FALSE)
+                name <- props$displayName
+            }
+            else name <- x <- as.character(x)
+            if(!grepl(".+@.+", x))  # basic check for a valid address
+                stop("Invalid email address '", x, "'", call.=FALSE)
+            list(emailAddress=list(name=name, address=x))
+        })
     }
 
-    list(
-        toRecipients=lapply(fix_recipient_list(to), make_recipient),
-        ccRecipients=lapply(fix_recipient_list(cc), make_recipient),
-        bccRecipients=lapply(fix_recipient_list(bcc), make_recipient)
+    out <- list(
+        toRecipients=make_recipients(to),
+        ccRecipients=make_recipients(cc),
+        bccRecipients=make_recipients(bcc),
+        replyTo=make_recipients(reply_to)
     )
+    out[sapply(out, function(x) !is.na(x))]
 }

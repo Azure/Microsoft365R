@@ -110,8 +110,6 @@ public=list(
 
     send=function()
     {
-        if(!self$properties$isDraft)
-            stop("Email has already been sent", call.=FALSE)
         self$do_operation("send", http_verb="POST")
         self$sync_fields()
     },

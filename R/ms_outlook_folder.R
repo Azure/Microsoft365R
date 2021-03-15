@@ -41,7 +41,7 @@
 #' - `attachments`: A list of file names or URLs to attach to the message.
 #' - `send_now`: Whether the email should be sent immediately, or saved as a draft. You can send a draft email later with its `send()` method.
 #'
-#' This returns an object of class [`ms_outlook_email`], which has methods for making further edits, replying, forwarding, and sending.
+#' This returns an object of class [`ms_outlook_email`], which has methods for making further edits, replying, forwarding, and (re-)sending.
 #'
 #' You can also supply message objects as created by the blastula and emayili packages in the `body` argument. Note that blastula objects include attachments (if any), and emayili objects include attachments, recipients, and subject line; the corresponding arguments to `create_email()` will not be used in this case.
 #'
@@ -115,17 +115,18 @@
 #' Cheers,
 #'
 #' The blastula team
-#' "))
+#' "),
+#'     footer=md("Sent via Microsoft365R"))
 #' folder$create_email(bl_msg, subject="example blastula email")
 #'
 #'
 #' # using emayili to create an email with attachments
-#' ey_email <- envelope() %>%
-#'     text("Hello from emayili") %>%
-#'     to("user@example.com") %>%
-#'     subject("example emayili email") %>%
-#'     attachment("mydocument.docx") %>%
-#'     attachment("mydata.xlsx")
+#' ey_email <- emayili::envelope(
+#'     text="Hello from emayili",
+#'     to="user@example.com",
+#'     subject="example emayili email") %>%
+#'     emayili::attachment("mydocument.docx") %>%
+#'     emayili::attachment("mydata.xlsx")
 #' folder$create_email(ey_email)
 #'
 #' }

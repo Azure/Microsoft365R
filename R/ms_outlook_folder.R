@@ -1,3 +1,42 @@
+#' Outlook mail folder
+#'
+#' Class representing a folder in Outlook.
+#'
+#' @docType class
+#' @section Fields:
+#' - `token`: The token used to authenticate with the Graph host.
+#' - `tenant`: The Azure Active Directory tenant for the parent drive.
+#' - `type`: always "mail folder" for an Outlook folder object.
+#' - `user_id`: the user ID of the Outlook account.
+#' - `properties`: The item properties (metadata).
+#' @section Methods:
+#' - `new(...)`: Initialize a new object. Do not call this directly; see 'Initialization' below.
+#' - `delete(confirm=TRUE)`: Delete this folder. By default, ask for confirmation first. Note that special folders cannot be deleted.
+#' - `update(...)`: Update the item's properties (metadata) in Microsoft Graph.
+#' - `do_operation(...)`: Carry out an arbitrary operation on the item.
+#' - `sync_fields()`: Synchronise the R object with the item metadata in Microsoft Graph.
+#' - `list_emails()`: List the emails in this folder.
+#' - `get_email(message_id)`: Get the email with the specified ID.
+#' - `create_email(...)`: Creates a new draft email in this folder, optionally sending it as well. See 'Sending emails' below.
+#' - `delete_email(message_id, confim=TRUE)`: Deletes the specified email. By default, ask for confirmation first.
+#' - `list_folders()`: List subfolders of this folder.
+#' - `get_folder(folder_name, folder_id)`: Get a subfolder, either by the name or ID.
+#' - `create_folder(folder_name)`: Create a new subfolder of this folder.
+#' - `delete_folder(folder_name, folder_id, confirm=TRUE)`: Delete a subfolder. By default, ask for confirmation first.
+#'
+#' @section Initialization:
+#' Creating new objects of this class should be done via the `get_folder`, `list_folders` or `create_folder` methods of this class or the [`ms_outlook`] class. Calling the `new()` method for this class only constructs the R object; it does not call the Microsoft Graph API to retrieve or create the actual folder.
+#'
+#' @section Creating and sending emails:
+#' Outlook allows creating new draft emails in any folder, not just the Drafts folder (although that is the default for the Outlook app). To create a new email, call the `create_email()` method with the following arguments.
+#'
+#' @seealso
+#' [`ms_outlook`], [`ms_outlook_email`]
+#'
+#' [Microsoft Graph overview](https://docs.microsoft.com/en-us/graph/overview),
+#' [Outlook API reference](https://docs.microsoft.com/en-us/graph/api/resources/mail-api-overview?view=graph-rest-1.0)
+#'
+#' @examples
 #' @format An R6 object of class `ms_outlook_folder`, inheriting from `ms_outlook_object`, which in turn inherits from `ms_object`.
 #' @export
 ms_outlook_folder <- R6::R6Class("ms_outlook_folder", inherit=ms_outlook_object,
@@ -16,9 +55,9 @@ public=list(
         super$initialize(token, tenant, properties)
     },
 
-    list_emails=function(n=50, order_by=c("date", "subject", "to", "importance"), order=c("descending", "ascending"))
+    list_emails=function(by=c("sent", "subject", "from", "importance"), order=c("descending", "ascending"), n=100)
     {
-        opts <- list(`$orderby`=order_by)
+        opts <- list(`$orderby`=by)
         lst <- private$get_paged_list(self$do_operation("messages"), n=n)
         private$init_list_objects(lst, default_generator=ms_outlook_email, user_id=self$user_id)
     },

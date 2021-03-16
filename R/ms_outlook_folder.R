@@ -5,7 +5,7 @@
 #' @docType class
 #' @section Fields:
 #' - `token`: The token used to authenticate with the Graph host.
-#' - `tenant`: The Azure Active Directory tenant for the parent drive.
+#' - `tenant`: The Azure Active Directory tenant for the email account.
 #' - `type`: always "mail folder" for an Outlook folder object.
 #' - `user_id`: the user ID of the Outlook account.
 #' - `properties`: The item properties (metadata).
@@ -28,7 +28,7 @@
 #' Creating new objects of this class should be done via the `get_folder`, `list_folders` or `create_folder` methods of this class or the [`ms_outlook`] class. Calling the `new()` method for this class only constructs the R object; it does not call the Microsoft Graph API to retrieve or create the actual folder.
 #'
 #' @section Creating and sending emails:
-#' Outlook allows creating new draft emails in any folder, not just the Drafts folder (although that is the default for the Outlook app). To create a new email, call the `create_email()` method, which has the following signature:
+#' Outlook allows creating new draft emails in any folder, not just the Drafts folder (although that is the default location for the Outlook app, and the `ms_outlook` client class). To create a new email, call the `create_email()` method, which has the following signature:
 #'```
 #' create_email(body = "", content_type = c("text", "html"), subject = "",
 #'              to = NULL, cc = NULL, bcc = NULL, reply_to = NULL,
@@ -46,7 +46,7 @@
 #' You can also supply message objects as created by the blastula and emayili packages in the `body` argument. Note that blastula objects include attachments (if any), and emayili objects include attachments, recipients, and subject line; the corresponding arguments to `create_email()` will not be used in this case.
 #'
 #' @section Listing emails:
-#' To list the emails in a folder, call the `list_emails()` method. This has the following signature:
+#' To list the emails in a folder, call the `list_emails()` method. This returns a list of objects of class [`ms_outlook_email`], and has the following signature:
 #' ```
 #' list_emails(by = "received", n = 100, pagesize = 10)
 #' ```

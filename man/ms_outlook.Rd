@@ -44,7 +44,9 @@ Creating new objects of this class should be done via the \code{get_personal_out
 
 \section{Creating and sending emails}{
 
-To create a new email, call the \code{create_email()} method. You can either save the email in the Drafts folder for further editing, or send it immediately. This method has the following signature:\preformatted{create_email(body = "", content_type = c("text", "html"), subject = "",
+To create a new email, call the \code{create_email()} method. The default behaviour is to create a new draft email in the Drafts folder, which can then be edited further to add attachments, recipients etc; or the email can be sent immediately.
+
+The \code{create_email()} method has the following signature:\preformatted{create_email(body = "", content_type = c("text", "html"), subject = "",
              to = NULL, cc = NULL, bcc = NULL, reply_to = NULL,
              attachments = NULL, send_now = FALSE)
 }
@@ -108,8 +110,7 @@ sent$list_emails()
 ## creating/sending emails
 ##
 
-# a simple text email with just a body:
-# you can add other properties by calling the returned object's methods
+# a simple text email with just a body (can't be sent)
 outl$create_email("Hello from R")
 
 # email with attachments
@@ -122,6 +123,13 @@ outl$create_email("<emph>Emphatic hello</emph> from R",
     to="user@example.com",
     subject="example email",
     send_now=TRUE)
+
+# you can also create a blank email object and call its methods to add content
+outl$create_email()$
+    set_body("<emph>Emphatic hello</emph> from R", content_type="html")$
+    set_recipients(to="user@example.com")$
+    set_subject("example email")$
+    send()
 
 # using blastula to create a HTML email with Markdown
 bl_msg <- blastula::compose_email(md(

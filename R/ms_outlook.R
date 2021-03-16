@@ -25,7 +25,9 @@
 #' Creating new objects of this class should be done via the `get_personal_outlook()` or `get_business_outlook()` functions, or the `get_outlook` method of the [`az_user`] class. Calling the `new()` method for this class only constructs the R object; it does not call the Microsoft Graph API to retrieve the account information.
 #'
 #' @section Creating and sending emails:
-#' To create a new email, call the `create_email()` method. You can either save the email in the Drafts folder for further editing, or send it immediately. This method has the following signature:
+#' To create a new email, call the `create_email()` method. The default behaviour is to create a new draft email in the Drafts folder, which can then be edited further to add attachments, recipients etc; or the email can be sent immediately.
+#'
+#' The `create_email()` method has the following signature:
 #'```
 #' create_email(body = "", content_type = c("text", "html"), subject = "",
 #'              to = NULL, cc = NULL, bcc = NULL, reply_to = NULL,
@@ -50,8 +52,6 @@
 #' - `by`: The sorting order of the message list. The default is to sort by descending date received (most recent first). Other alternatives are "from" and "subject".
 #' - `n`: The total number of emails to retrieve. The default is 100.
 #' - `pagesize`: The number of emails per page. You can change this to a larger number to increase throughput, at the risk of running into timeouts.
-#'
-#' @format An R6 object of class `ms_outlook`, inheriting from `ms_outlook_object`, which in turn inherits from `ms_object`.
 #'
 #' @seealso
 #' [`ms_outlook_folder`], [`ms_outlook_email`]
@@ -94,8 +94,7 @@
 #' ## creating/sending emails
 #' ##
 #'
-#' # a simple text email with just a body:
-#' # you can add other properties by calling the returned object's methods
+#' # a simple text email with just a body (can't be sent)
 #' outl$create_email("Hello from R")
 #'
 #' # email with attachments
@@ -108,6 +107,13 @@
 #'     to="user@example.com",
 #'     subject="example email",
 #'     send_now=TRUE)
+#'
+#' # you can also create a blank email object and call its methods to add content
+#' outl$create_email()$
+#'     set_body("<emph>Emphatic hello</emph> from R", content_type="html")$
+#'     set_recipients(to="user@example.com")$
+#'     set_subject("example email")$
+#'     send()
 #'
 #' # using blastula to create a HTML email with Markdown
 #' bl_msg <- blastula::compose_email(md(
@@ -136,6 +142,7 @@
 #' outl$create_email(ey_email)
 #'
 #' }
+#' @format An R6 object of class `ms_outlook`, inheriting from `ms_outlook_object`, which in turn inherits from `ms_object`.
 #' @export
 ms_outlook <- R6::R6Class("ms_outlook", inherit=ms_outlook_object,
 
@@ -216,7 +223,7 @@ public=list(
         self$get_folder("deleteditems")
     },
 
-    list_emails=function()
+    list_emails=function(...)
     {
         # use a dummy inbox folder object
         ms_outlook_folder$new(self$token, self$tenant, list(id="inbox"), user_id=self$properties$id)$

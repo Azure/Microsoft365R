@@ -1,3 +1,192 @@
+#' Outlook mail message
+#'
+#' Class representing an Outlook mail message. The one class represents both sent and unsent (draft) emails.
+#'
+#' @docType class
+#' @section Fields:
+#' - `token`: The token used to authenticate with the Graph host.
+#' - `tenant`: The Azure Active Directory tenant for the email account.
+#' - `type`: always "email" for an Outlook mail message.
+#' - `properties`: The item properties (metadata).
+#' @section Methods:
+#' - `new(...)`: Initialize a new object. Do not call this directly; see 'Initialization' below.
+#' - `delete(confirm=TRUE)`: Delete this email. By default, ask for confirmation first.
+#' - `update(...)`: Update the email's properties (metadata) in Microsoft Graph.
+#' - `do_operation(...)`: Carry out an arbitrary operation on the email.
+#' - `sync_fields()`: Synchronise the R object with the email metadata in Microsoft Graph.
+#' - `set_body(body=NULL, content_type=NULL)`: Update the email body. See 'Editing an email' below.
+#' - `set_subject(subject)`: Update the email subject line.
+#' - `set_recipients(to=NULL, cc=NULL, bcc=NULL)`: Set the recipients for the email, overwriting any existing recipients.
+#' - `add_recipients(to=NULL, cc=NULL, bcc=NULL)`: Adds recipients for the email, leaving existing ones unchanged.
+#' - `set_reply_to(reply_to=NULL)`: Sets the reply-to field for the email.
+#' - `add_attachment(object, ...)`: Adds an attachment to the email. See 'Attachments' below.
+#' - `get_attachment(attachment_name=NULL, attachment_id=NULL)`: Gets an attachment, either by name or ID. Note that attachments don't need to have unique names; if multiple attachments share the same name, the method throws an error.
+#' - `list_attachments()`: Lists the current attachments for the email.
+#' - `remove_attachment(attachment_name=NULL, attachment_id=NULL, confirm=TRUE)`: Removes an attachment from the email. By default, ask for confirmation first.
+#' - `download_attachment(attachment_name=NULL, attachment_id=NULL, ...)`: Downloads an attachment. This is only supported for file attachments (not URLs).
+#' - `send()`: Sends an email.  See 'Sending, replying and forwarding'.
+#' - `reply(comment="", send_now=FALSE)`: Replies to the sender of an email.
+#' - `reply_all(comment="", send_now=FALSE)`: Replies to the sender and all recipients of an email.
+#' - `forward(comment="", to=NULL, cc=NULL, bcc=NULL, send_now=FALSE)`: Forwards the email to other recipients.
+#' - `copy(folder_name=NULL, folder_id=NULL)`: Copies the email to the destination folder.
+#' - `move(folder_name=NULL, folder_id=NULL)`: Moves the email to the destination folder.
+#' - `get_message_headers`: Retrieves the Internet message headers for an email, as a named character vector.
+#'
+#' @section Initialization:
+#' Creating new objects of this class should be done via the the appropriate methods for the [`ms_outlook`] or [`ms_outlook_folder`] classes. Calling the `new()` method for this class only constructs the R object; it does not call the Microsoft Graph API to retrieve or create the actual folder.
+#'
+#' @section Editing an email:
+#' This class exposes several methods for updating the properties of an email. They should work both for unsent (draft) emails and sent ones, although they make most sense in the context of editing drafts.
+#'
+#' `set_body(body, content_type)` updates the message body of the email. This has 2 arguments: `body` which is the body text itself, and `content_type` which should be either "text" or "html". For both arguments, you can set the value to NULL to leave the current property unchanged. The `body` argument can also be a message object from either the blastula or emayili packages, much like when creating a new email.
+#'
+#' `set_subject(subject)` sets the subject line of the email.
+#'
+#' `set_recipients(to, cc, bcc)` sets or clears the recipients of the email. The `to`, `cc` and `bcc` arguments should be lists of either email addresses as character strings, or objects of class `az_user` representing a user account in Azure Active Directory. The default behaviour is to overwrite any existing recipients; to avoid this, pass `NA` as the value for the relevant argument. Alternatively, you can use the `add_recipients()` method.
+#'
+#' `add_recipients(to, cc, bcc)` is like `set_recipients()` but leaves existing recipients unchanged.
+#'
+#' `set_reply_to(reply_to)` sets or clears the reply-to address for the email. Leave the `reply_to` argument at its default NULL value to clear this property.
+#'
+#' @section Attachments:
+#' This class exposes the following methods for working with attachments.
+#'
+#' `add_attachment(object, ...)` adds an attachment to the email. The `object` argument should be a character string containing a filename or URL, or an object of class `ms_drive_item`. In the latter case, a shareable link to the drive item will be attached to the email, with the specifics of the link given by the `...` arguments.
+#'
+#' `list_attachments()` lists the attachments for the email. This will be a list of objects of class [`ms_outlook_attachment`] containing the metadata for the attachments.
+#'
+#' `get_attachment(attachment_name, attachment_id)`: Retrieves the metadata for an attachment, as an object of class `ms_outlook_attachment`. Note that multiple attachments can share the same name; in this case, you must specify the ID of the attachment.
+#'
+#' `download_attachment(attachment_name, attachment_id, dest, overwrite)`: Downloads a file attachment. The default destination filename is the name of the attachment.
+#'
+#' `remove_attachment(attachment_name, attachment_id)` removes (deletes) an attachment.
+#'
+#' @section Sending, replying and forwarding:
+#' Microsoft365R's default behaviour when creating, replying or forwarding emails is to create a draft message object, to allow for further edits. The draft is saved in the Drafts folder by default, and can be sent later by calling its `send()` method.
+#'
+#' The methods for replying and forwarding are `reply()`, `reply_all()` and `forward()`. The first argument is the reply text, which will appear above the current message body in the message body of the reply. For `forward()`, the other arguments are `to`, `cc` and `bcc` to specify the recipients of the forwarded email.
+#'
+#' @section Other methods:
+#' The `copy()` and `move()` methods copy and move an email to a different folder. To specify a nested folder, separate each of the folder names with a slash, eg "folder1/folder2/folder3".
+#'
+#' The `get_message_headers()` method retrieves the Internet message headers for the email, as a named character vector.
+#'
+#' @seealso
+#' [`ms_outlook`], [`ms_outlook_folder`], [`ms_outlook_attachment`]
+#'
+#' [Microsoft Graph overview](https://docs.microsoft.com/en-us/graph/overview),
+#' [Outlook API reference](https://docs.microsoft.com/en-us/graph/api/resources/mail-api-overview?view=graph-rest-1.0)
+#'
+#' @examples
+#' \dontrun{
+#'
+#' outl <- get_personal_outlook()
+#'
+#' ##
+#' ## creating a new email
+#' ##
+#'
+#' # a blank text email
+#' em <- outl$create_email()
+#'
+#' # add a body
+#' em$set_body("Hello from R")
+#'
+#' # add recipients
+#' em$set_recipients(to="user@example.com")
+#'
+#' # add subject line
+#' em$set_subject("example email")
+#'
+#' # add an attachment
+#' em$add_attachment("mydocument.docx")
+#'
+#' # oops, wrong recipient, it should be someone else
+#' # this removes user@example.com from the to: field
+#' em$set_recipients(to="user2@example.com")
+#'
+#' # and we should also cc a third user
+#' em$add_recipients(cc="user3@example.com")
+#'
+#' # send it
+#' em$send()
+#'
+#' # you can also compose an email as a pipeline
+#' outl$create_email()$
+#'     set_body("Hello from R")$
+#'     set_recipients(to="user2@example.com", cc="user3@example.com")$
+#'     set_subject("example email")$
+#'     add_attachment("mydocument.docx")$
+#'     send()
+#'
+#' # using blastula to create a HTML email with Markdown
+#' bl_msg <- blastula::compose_email(md(
+#' "
+#' ## Hello!
+#'
+#' This is an email message that was generated by the blastula package.
+#'
+#' We can use **Markdown** formatting with the `md()` function.
+#'
+#' Cheers,
+#'
+#' The blastula team
+#' "),
+#'     footer=md("Sent via Microsoft365R"))
+#' outl$create_email()
+#'     set_body(bl_msg)$
+#'     set_subject("example blastula email")
+#'
+#'
+#' ##
+#' ## replying and forwarding
+#' ##
+#'
+#' # get the most recent email in the Inbox
+#' em <- outl$list_emails()[[1]]
+#'
+#' # reply to the message sender, cc'ing Carol
+#' em$reply()$
+#'     add_recipients(cc="carol@example.com")$
+#'     send()
+#'
+#' # reply to everyone, setting the reply-to address to a null address
+#' em$reply_all()$
+#'     set_reply_to("do_not_reply@example.com")$
+#'     send()
+#'
+#' # forward to Mallory
+#' em$forward("mallory@example.com")$
+#'     send()
+#'
+#'
+#' ##
+#' ## attachments
+#' ##
+#'
+#' # download an attachment by name (assumes there is only one 'myfile.docx')
+#' em$download_attachment("myfile.docx")
+#'
+#' # a more reliable way: get the list of attachments, and download via the object
+#' atts <- em$list_attachments()
+#' atts[[1]]$download()
+#'
+#' # add and remove an attachment
+#' em$add_attachment("anotherfile.pptx")
+#' em$remove_attachment("anotherfile.pptx")
+#'
+#'
+#' ##
+#' ## moving and copying
+#' ##
+#'
+#' # copy an email to a nested folder
+#' em$copy("folder1/folder2")
+#'
+#' # move it instead
+#' em$move("folder3")
+#'
+#' }
 #' @format An R6 object of class `ms_outlook_email`, inheriting from `ms_outlook_object`, which in turn inherits from `ms_object`.
 #' @export
 ms_outlook_email <- R6::R6Class("ms_outlook_email", inherit=ms_outlook_object,
@@ -61,8 +250,10 @@ public=list(
         self$update(NA, NA, NA, reply_to)
     },
 
-    add_attachment=function(object)
+    add_attachment=function(object, ...)
     {
+        if(inherits(object, "ms_drive_item"))
+            object <- object$create_share_link(...)
         res <- self$do_operation("attachments", body=make_email_attachment(object), http_verb="POST")
         ms_outlook_attachment$new(self$token, self$tenant, res,
             user_id=self$user_id, message_id=self$properties$id)
@@ -105,13 +296,49 @@ public=list(
 
     download_attachment=function(attachment_name, attachment_id, dest, overwrite=FALSE)
     {
-        self$get_attachment(attachment_name, attachment_id)$download(dest, overwrite=FALSE)
+        self$get_attachment(attachment_name, attachment_id)$download(dest, overwrite=overwrite)
     },
 
     send=function()
     {
         self$do_operation("send", http_verb="POST")
         self$sync_fields()
+    },
+
+    reply=function(comment="", send_now=FALSE)
+    {
+        op <- "createReply"
+        body <- list(comment=comment)
+        reply <- ms_outlook_email$new(self$token, self$tenant,
+            self$do_operation("op", body=body, http_verb="POST"), user_id=self$user_id)
+        if(send_now)
+            reply$send()
+        reply
+    },
+
+    reply_all=function(comment="", send_now=FALSE)
+    {
+        op <- "createReplyAll"
+        body <- list(comment=comment)
+        reply <- ms_outlook_email$new(self$token, self$tenant,
+            self$do_operation("op", body=body, http_verb="POST"), user_id=self$user_id)
+        if(send_now)
+            reply$send()
+        reply
+    },
+
+    forward=function(comment="", to=NULL, cc=NULL, bcc=NULL, send_now=FALSE)
+    {
+        op <- "createforward"
+        body <- c(
+            list(comment=comment),
+            build_email_recipients(to, cc, bcc)
+        )
+        reply <- ms_outlook_email$new(self$token, self$tenant,
+            self$do_operation("op", body=list(comment=comment), http_verb="POST"), user_id=self$user_id)
+        if(send_now)
+            reply$send()
+        reply
     },
 
     get_message_headers=function()
@@ -140,42 +367,6 @@ public=list(
 
         res <- self$do_operation("move", body=list(destinationId=folder_id), http_verb="POST")
         ms_outlook_email$new(self$token, self$tenant, res, user_id=self$user_id)
-    },
-
-    reply_all=function(comment="")
-    {
-        op <- "createReplyAll"
-        body <- list(comment=comment)
-        reply <- ms_outlook_email$new(self$token, self$tenant,
-            self$do_operation("op", body=body, http_verb="POST"), user_id=self$user_id)
-        if(send_now)
-            reply$send()
-        reply
-    },
-
-    reply=function(comment="", send_now=FALSE)
-    {
-        op <- "createReply"
-        body <- list(comment=comment)
-        reply <- ms_outlook_email$new(self$token, self$tenant,
-            self$do_operation("op", body=body, http_verb="POST"), user_id=self$user_id)
-        if(send_now)
-            reply$send()
-        reply
-    },
-
-    forward=function(comment="", to=NULL, cc=NULL, bcc=NULL, send_now=FALSE)
-    {
-        op <- "createforward"
-        body <- c(
-            list(comment=comment),
-            build_email_recipients(to, cc, bcc)
-        )
-        reply <- ms_outlook_email$new(self$token, self$tenant,
-            self$do_operation("op", body=list(comment=comment), http_verb="POST"), user_id=self$user_id)
-        if(send_now)
-            reply$send()
-        reply
     },
 
     print=function(...)

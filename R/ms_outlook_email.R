@@ -146,17 +146,17 @@
 #' em <- outl$list_emails()[[1]]
 #'
 #' # reply to the message sender, cc'ing Carol
-#' em$reply()$
+#' em$reply("I agree")$
 #'     add_recipients(cc="carol@example.com")$
 #'     send()
 #'
 #' # reply to everyone, setting the reply-to address to a null address
-#' em$reply_all()$
+#' em$reply_all("Please do not reply")$
 #'     set_reply_to("do_not_reply@example.com")$
 #'     send()
 #'
-#' # forward to Mallory
-#' em$forward("mallory@example.com")$
+#' # forward to Dave
+#' em$forward("FYI", to="dave@example.com")$
 #'     send()
 #'
 #'

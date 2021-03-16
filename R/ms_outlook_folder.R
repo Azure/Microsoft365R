@@ -45,6 +45,8 @@
 #'
 #' You can also supply message objects as created by the blastula and emayili packages in the `body` argument. Note that blastula objects include attachments (if any), and emayili objects include attachments, recipients, and subject line; the corresponding arguments to `create_email()` will not be used in this case.
 #'
+#' To reply to or forward an email, first retrieve it using `get_email()` or `list_emails()`, and then call its `reply()`, `reply_all()` or `forward()` methods.
+#'
 #' @section Listing emails:
 #' To list the emails in a folder, call the `list_emails()` method. This returns a list of objects of class [`ms_outlook_email`], and has the following signature:
 #' ```

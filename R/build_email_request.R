@@ -61,10 +61,10 @@ build_email_request.envelope <- function(body, ...)
     parts <- body$parts
 
     inline <- which(sapply(parts, function(p) p$header$content_disposition == "inline"))
-    req <- if(length(inline) >= 1)
+    if(length(inline) > 1)
+        warning("Multiple inline sections found, only the first will be used", call.=FALSE)
+    req <- if(!is_empty(inline))
     {
-        if(length(inline) > 1)
-            warning("Multiple inline sections found, only the first will be used", call.=FALSE)
         inline <- parts[[inline[1]]]
         list(
             body=list(

@@ -308,7 +308,7 @@ public=list(
     create_reply=function(comment="", send_now=FALSE)
     {
         op <- "createReply"
-        body <- list(comment=comment)
+        body <- list(comment=make_reply_comment(comment))
         reply <- ms_outlook_email$new(self$token, self$tenant,
             self$do_operation(op, body=body, http_verb="POST"), user_id=self$user_id)
         if(send_now)
@@ -319,7 +319,7 @@ public=list(
     create_reply_all=function(comment="", send_now=FALSE)
     {
         op <- "createReplyAll"
-        body <- list(comment=comment)
+        body <- list(comment=make_reply_comment(comment))
         reply <- ms_outlook_email$new(self$token, self$tenant,
             self$do_operation(op, body=body, http_verb="POST"), user_id=self$user_id)
         if(send_now)
@@ -331,8 +331,8 @@ public=list(
     {
         op <- "createforward"
         body <- c(
-            list(comment=comment),
-            build_email_recipients(to, cc, bcc)
+            list(comment=make_reply_comment(comment)),
+            build_email_recipients(to, cc, bcc, NA)
         )
         reply <- ms_outlook_email$new(self$token, self$tenant,
             self$do_operation(op, body=list(comment=comment), http_verb="POST"), user_id=self$user_id)
@@ -442,3 +442,34 @@ format_email_date <- function(datestr)
     date <- as.POSIXct(datestr, format="%Y-%m-%dT%H:%M:%OS", tz="UTC")
     format(date, tz="", usetz=TRUE)
 }
+
+
+make_reply_comment <- function(comment)
+{
+    UseMethod("comment")
+}
+
+
+make_reply_comment.default <- function(comment)
+{
+    as.character(comment)
+}
+
+
+make_reply_comment.blastula_message <- function(comment)
+{
+    comment$html_str
+}
+
+
+make_reply_comment.envelope <- function(comment)
+{
+    parts <- comment$parts
+    inline <- which(sapply(parts, function(p) p$header$content_disposition == "inline"))
+    if(length(inline) > 1)
+        warning("Multiple inline sections found, only the first will be used", call.=FALSE)
+    req <- if(!is_empty(inline))
+        parts[[inline[1]]]$body
+    else ""
+}
+

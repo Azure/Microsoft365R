@@ -25,9 +25,9 @@
 #' - `remove_attachment(attachment_name=NULL, attachment_id=NULL, confirm=TRUE)`: Removes an attachment from the email. By default, ask for confirmation first.
 #' - `download_attachment(attachment_name=NULL, attachment_id=NULL, ...)`: Downloads an attachment. This is only supported for file attachments (not URLs).
 #' - `send()`: Sends an email.  See 'Sending, replying and forwarding'.
-#' - `reply(comment="", send_now=FALSE)`: Replies to the sender of an email.
-#' - `reply_all(comment="", send_now=FALSE)`: Replies to the sender and all recipients of an email.
-#' - `forward(comment="", to=NULL, cc=NULL, bcc=NULL, send_now=FALSE)`: Forwards the email to other recipients.
+#' - `create_reply(comment="", send_now=FALSE)`: Replies to the sender of an email.
+#' - `create_reply_all(comment="", send_now=FALSE)`: Replies to the sender and all recipients of an email.
+#' - `create_forward(comment="", to=NULL, cc=NULL, bcc=NULL, send_now=FALSE)`: Forwards the email to other recipients.
 #' - `copy(folder_name=NULL, folder_id=NULL)`: Copies the email to the destination folder.
 #' - `move(folder_name=NULL, folder_id=NULL)`: Moves the email to the destination folder.
 #' - `get_message_headers`: Retrieves the Internet message headers for an email, as a named character vector.
@@ -64,7 +64,7 @@
 #' @section Sending, replying and forwarding:
 #' Microsoft365R's default behaviour when creating, replying or forwarding emails is to create a draft message object, to allow for further edits. The draft is saved in the Drafts folder by default, and can be sent later by calling its `send()` method.
 #'
-#' The methods for replying and forwarding are `reply()`, `reply_all()` and `forward()`. The first argument is the reply text, which will appear above the current message body in the message body of the reply. For `forward()`, the other arguments are `to`, `cc` and `bcc` to specify the recipients of the forwarded email.
+#' The methods for replying and forwarding are `create_reply()`, `create_reply_all()` and `create_forward()`. The first argument to these is the reply text, which will appear above the current message text in the body of the reply. For `create_forward()`, the other arguments are `to`, `cc` and `bcc` to specify the recipients of the forwarded email.
 #'
 #' @section Other methods:
 #' The `copy()` and `move()` methods copy and move an email to a different folder. To specify a nested folder, separate each of the folder names with a slash, eg "folder1/folder2/folder3".
@@ -146,17 +146,17 @@
 #' em <- outl$list_emails()[[1]]
 #'
 #' # reply to the message sender, cc'ing Carol
-#' em$reply("I agree")$
+#' em$create_reply("I agree")$
 #'     add_recipients(cc="carol@example.com")$
 #'     send()
 #'
-#' # reply to everyone, setting the reply-to address to a null address
-#' em$reply_all("Please do not reply")$
+#' # reply to everyone, setting the reply-to address
+#' em$create_reply_all("Please do not reply")$
 #'     set_reply_to("do_not_reply@example.com")$
 #'     send()
 #'
 #' # forward to Dave
-#' em$forward("FYI", to="dave@example.com")$
+#' em$create_forward("FYI", to="dave@example.com")$
 #'     send()
 #'
 #'
@@ -305,29 +305,29 @@ public=list(
         self$sync_fields()
     },
 
-    reply=function(comment="", send_now=FALSE)
+    create_reply=function(comment="", send_now=FALSE)
     {
         op <- "createReply"
         body <- list(comment=comment)
         reply <- ms_outlook_email$new(self$token, self$tenant,
-            self$do_operation("op", body=body, http_verb="POST"), user_id=self$user_id)
+            self$do_operation(op, body=body, http_verb="POST"), user_id=self$user_id)
         if(send_now)
             reply$send()
         reply
     },
 
-    reply_all=function(comment="", send_now=FALSE)
+    create_reply_all=function(comment="", send_now=FALSE)
     {
         op <- "createReplyAll"
         body <- list(comment=comment)
         reply <- ms_outlook_email$new(self$token, self$tenant,
-            self$do_operation("op", body=body, http_verb="POST"), user_id=self$user_id)
+            self$do_operation(op, body=body, http_verb="POST"), user_id=self$user_id)
         if(send_now)
             reply$send()
         reply
     },
 
-    forward=function(comment="", to=NULL, cc=NULL, bcc=NULL, send_now=FALSE)
+    create_forward=function(comment="", to=NULL, cc=NULL, bcc=NULL, send_now=FALSE)
     {
         op <- "createforward"
         body <- c(
@@ -335,7 +335,7 @@ public=list(
             build_email_recipients(to, cc, bcc)
         )
         reply <- ms_outlook_email$new(self$token, self$tenant,
-            self$do_operation("op", body=list(comment=comment), http_verb="POST"), user_id=self$user_id)
+            self$do_operation(op, body=list(comment=comment), http_verb="POST"), user_id=self$user_id)
         if(send_now)
             reply$send()
         reply

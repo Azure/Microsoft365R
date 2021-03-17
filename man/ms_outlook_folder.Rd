@@ -60,11 +60,11 @@ Outlook allows creating new draft emails in any folder, not just the Drafts fold
 \item \code{send_now}: Whether the email should be sent immediately, or saved as a draft. You can send a draft email later with its \code{send()} method.
 }
 
-This returns an object of class \code{\link{ms_outlook_email}}, which has methods for making further edits, replying, forwarding, and (re-)sending.
+This returns an object of class \code{\link{ms_outlook_email}}, which has methods for making further edits.
 
 You can also supply message objects as created by the blastula and emayili packages in the \code{body} argument. Note that blastula objects include attachments (if any), and emayili objects include attachments, recipients, and subject line; the corresponding arguments to \code{create_email()} will not be used in this case.
 
-To reply to or forward an email, first retrieve it using \code{get_email()} or \code{list_emails()}, and then call its \code{reply()}, \code{reply_all()} or \code{forward()} methods.
+To reply to or forward an email, first retrieve it using \code{get_email()} or \code{list_emails()}, and then call its \code{create_reply()}, \code{create_reply_all()} or \code{create_forward()} methods.
 }
 
 \section{Listing emails}{

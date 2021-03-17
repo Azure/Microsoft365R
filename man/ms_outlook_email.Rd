@@ -39,9 +39,9 @@ Class representing an Outlook mail message. The one class represents both sent a
 \item \code{remove_attachment(attachment_name=NULL, attachment_id=NULL, confirm=TRUE)}: Removes an attachment from the email. By default, ask for confirmation first.
 \item \code{download_attachment(attachment_name=NULL, attachment_id=NULL, ...)}: Downloads an attachment. This is only supported for file attachments (not URLs).
 \item \code{send()}: Sends an email.  See 'Sending, replying and forwarding'.
-\item \code{reply(comment="", send_now=FALSE)}: Replies to the sender of an email.
-\item \code{reply_all(comment="", send_now=FALSE)}: Replies to the sender and all recipients of an email.
-\item \code{forward(comment="", to=NULL, cc=NULL, bcc=NULL, send_now=FALSE)}: Forwards the email to other recipients.
+\item \code{create_reply(comment="", send_now=FALSE)}: Replies to the sender of an email.
+\item \code{create_reply_all(comment="", send_now=FALSE)}: Replies to the sender and all recipients of an email.
+\item \code{create_forward(comment="", to=NULL, cc=NULL, bcc=NULL, send_now=FALSE)}: Forwards the email to other recipients.
 \item \code{copy(folder_name=NULL, folder_id=NULL)}: Copies the email to the destination folder.
 \item \code{move(folder_name=NULL, folder_id=NULL)}: Moves the email to the destination folder.
 \item \code{get_message_headers}: Retrieves the Internet message headers for an email, as a named character vector.
@@ -87,7 +87,7 @@ This class exposes the following methods for working with attachments.
 
 Microsoft365R's default behaviour when creating, replying or forwarding emails is to create a draft message object, to allow for further edits. The draft is saved in the Drafts folder by default, and can be sent later by calling its \code{send()} method.
 
-The methods for replying and forwarding are \code{reply()}, \code{reply_all()} and \code{forward()}. The first argument is the reply text, which will appear above the current message body in the message body of the reply. For \code{forward()}, the other arguments are \code{to}, \code{cc} and \code{bcc} to specify the recipients of the forwarded email.
+The methods for replying and forwarding are \code{create_reply()}, \code{create_reply_all()} and \code{create_forward()}. The first argument to these is the reply text, which will appear above the current message text in the body of the reply. For \code{create_forward()}, the other arguments are \code{to}, \code{cc} and \code{bcc} to specify the recipients of the forwarded email.
 }
 
 \section{Other methods}{
@@ -166,17 +166,17 @@ outl$create_email()
 em <- outl$list_emails()[[1]]
 
 # reply to the message sender, cc'ing Carol
-em$reply("I agree")$
+em$create_reply("I agree")$
     add_recipients(cc="carol@example.com")$
     send()
 
-# reply to everyone, setting the reply-to address to a null address
-em$reply_all("Please do not reply")$
+# reply to everyone, setting the reply-to address
+em$create_reply_all("Please do not reply")$
     set_reply_to("do_not_reply@example.com")$
     send()
 
 # forward to Dave
-em$forward("FYI", to="dave@example.com")$
+em$create_forward("FYI", to="dave@example.com")$
     send()
 
 

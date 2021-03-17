@@ -191,28 +191,19 @@ public=list(
     create_folder=function(path)
     {
         private$assert_is_folder()
-        create_next_level <- function(item, path)
+        # personal OD supports creating nested folder in one API call
+        if(self$properties$parentReference$driveType == "personal")
         {
+            op <- sub("::", "", paste0(private$make_absolute_path(dirname(path)), ":/children"))
             body <- list(
-                name=path,
+                name=enc2utf8(basename(path)),
                 folder=named_list(),
                 `@microsoft.graph.conflictBehavior`="fail"
             )
-            res <- item$do_operation("children", body=body, http_verb="POST")
-            ms_drive_item$new(self$token, self$tenant, res)
+            res <- call_graph_endpoint(self$token, op, body=body, http_verb="POST")
+            invisible(ms_drive_item$new(self$token, self$tenant, res))
         }
-        path <- strsplit(enc2utf8(path), "/")[[1]]
-        item <- self
-        for(p in path)
-        {
-            nextitem <- try(item$get_item(p), silent=TRUE)
-            item <- if(inherits(nextitem, "try-error"))
-                create_next_level(item, p)
-            else nextitem
-        }
-        if(!item$is_folder())
-            stop("Unable to create folder", call.=FALSE)
-        item
+        else create_folder_business_od(self, path)  # must create each folder separately
     },
 
     upload=function(src, dest=basename(src), blocksize=32768000)
@@ -319,3 +310,29 @@ private=list(
 
 # alias for convenience
 ms_drive_item$set("public", "list_files", overwrite=TRUE, ms_drive_item$public_methods$list_items)
+
+
+create_folder_business_od <- function(item, path)
+{
+    create_next_level <- function(item, path)
+    {
+        body <- list(
+            name=path,
+            folder=named_list(),
+            `@microsoft.graph.conflictBehavior`="fail"
+        )
+        res <- item$do_operation("children", body=body, http_verb="POST")
+        ms_drive_item$new(item$token, item$tenant, res)
+    }
+    path <- strsplit(enc2utf8(path), "/")[[1]]
+    for(p in path)
+    {
+        nextitem <- try(item$get_item(p), silent=TRUE)
+        item <- if(inherits(nextitem, "try-error"))
+            create_next_level(item, p)
+        else nextitem
+    }
+    if(!item$is_folder())
+        stop("Unable to create folder", call.=FALSE)
+    item
+}

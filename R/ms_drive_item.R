@@ -191,19 +191,20 @@ public=list(
     create_folder=function(path)
     {
         private$assert_is_folder()
-        # personal OD supports creating nested folder in one API call
-        if(self$properties$parentReference$driveType == "personal")
-        {
-            op <- sub("::", "", paste0(private$make_absolute_path(dirname(path)), ":/children"))
-            body <- list(
-                name=enc2utf8(basename(path)),
-                folder=named_list(),
-                `@microsoft.graph.conflictBehavior`="fail"
-            )
-            res <- call_graph_endpoint(self$token, op, body=body, http_verb="POST")
-            invisible(ms_drive_item$new(self$token, self$tenant, res))
-        }
-        else create_folder_business_od(self, path)  # must create each folder separately
+
+        # only personal OD supports creating nested folder in one API call
+        # business OD and SPO require creating folders 1 level at a time
+        if(self$properties$parentReference$driveType != "personal")
+            return(create_folder_business_od(self, path))
+
+        op <- sub("::", "", paste0(private$make_absolute_path(dirname(path)), ":/children"))
+        body <- list(
+            name=enc2utf8(basename(path)),
+            folder=named_list(),
+            `@microsoft.graph.conflictBehavior`="fail"
+        )
+        res <- call_graph_endpoint(self$token, op, body=body, http_verb="POST")
+        invisible(ms_drive_item$new(self$token, self$tenant, res))
     },
 
     upload=function(src, dest=basename(src), blocksize=32768000)

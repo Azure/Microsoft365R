@@ -192,18 +192,13 @@ public=list(
     {
         private$assert_is_folder()
 
-        # only personal OD supports creating nested folder in one API call
-        # business OD and SPO require creating folders 1 level at a time
-        if(self$properties$parentReference$driveType != "personal")
-            return(create_folder_business_od(self, path))
-
-        op <- sub("::", "", paste0(private$make_absolute_path(dirname(path)), ":/children"))
+        # see https://stackoverflow.com/a/66686842/474349
+        op <- sub("::", "", private$make_absolute_path(enc2utf8(path)))
         body <- list(
-            name=enc2utf8(basename(path)),
             folder=named_list(),
             `@microsoft.graph.conflictBehavior`="fail"
         )
-        res <- call_graph_endpoint(self$token, op, body=body, http_verb="POST")
+        res <- call_graph_endpoint(self$token, op, body=body, http_verb="PATCH")
         invisible(ms_drive_item$new(self$token, self$tenant, res))
     },
 
@@ -311,29 +306,3 @@ private=list(
 
 # alias for convenience
 ms_drive_item$set("public", "list_files", overwrite=TRUE, ms_drive_item$public_methods$list_items)
-
-
-create_folder_business_od <- function(item, path)
-{
-    create_next_level <- function(item, path)
-    {
-        body <- list(
-            name=path,
-            folder=named_list(),
-            `@microsoft.graph.conflictBehavior`="fail"
-        )
-        res <- item$do_operation("children", body=body, http_verb="POST")
-        ms_drive_item$new(item$token, item$tenant, res)
-    }
-
-    # get or create all parent folders, then create last folder
-    path <- strsplit(enc2utf8(path), "/")[[1]]
-    for(p in path[seq_len(length(path) - 1)])
-    {
-        nextitem <- try(item$get_item(p), silent=TRUE)
-        item <- if(inherits(nextitem, "try-error"))
-            create_next_level(item, p)
-        else nextitem
-    }
-    create_next_level(item, path[length(path)])
-}

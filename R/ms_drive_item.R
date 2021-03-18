@@ -193,7 +193,7 @@ public=list(
         private$assert_is_folder()
 
         # see https://stackoverflow.com/a/66686842/474349
-        op <- sub("::", "", private$make_absolute_path(enc2utf8(path)))
+        op <- private$make_absolute_path(path))
         body <- list(
             folder=named_list(),
             `@microsoft.graph.conflictBehavior`="fail"

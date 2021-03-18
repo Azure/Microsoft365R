@@ -325,15 +325,15 @@ create_folder_business_od <- function(item, path)
         res <- item$do_operation("children", body=body, http_verb="POST")
         ms_drive_item$new(item$token, item$tenant, res)
     }
+
+    # get or create all parent folders, then create last folder
     path <- strsplit(enc2utf8(path), "/")[[1]]
-    for(p in path)
+    for(p in path[seq_len(length(path) - 1)])
     {
         nextitem <- try(item$get_item(p), silent=TRUE)
         item <- if(inherits(nextitem, "try-error"))
             create_next_level(item, p)
         else nextitem
     }
-    if(!item$is_folder())
-        stop("Unable to create folder", call.=FALSE)
-    item
+    create_next_level(item, path[length(path)])
 }

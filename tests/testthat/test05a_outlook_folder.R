@@ -29,6 +29,10 @@ test_that("Outlook folder methods work",
     Sys.sleep(1)
     e3 <- folder$create_email("test email 3", subject="test email 3")
 
+    e11 <- folder$get_email(e1$properties$id)
+    expect_is(e11, "ms_outlook_email")
+    expect_identical(e11$properties$id, e1$properties$id)
+
     get_subj <- function(email) email$properties$subject
     get_recv <- function(email) email$properties$receivedDateTime
 
@@ -50,6 +54,8 @@ test_that("Outlook folder methods work",
                 get_subj(lst3[[3]]) == get_subj(e1))
 
     expect_error(folder$list_emails(by="reply_to"))  # unsupported field
+
+    expect_silent(folder$delete_email(e11$properties$id, confirm=FALSE))
 
     fname2 <- make_name()
     folder$create_folder(fname2)

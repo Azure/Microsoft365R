@@ -66,10 +66,10 @@ You can also supply message objects as created by the blastula and emayili packa
 
 \section{Listing emails}{
 
-To list the emails in the Inbox, call the \code{list_emails()} method. This returns a list of objects of class \code{\link{ms_outlook_email}}, and has the following signature:\preformatted{list_emails(by = "received", n = 100, pagesize = 10)
+To list the emails in the Inbox, call the \code{list_emails()} method. This returns a list of objects of class \code{\link{ms_outlook_email}}, and has the following signature:\preformatted{list_emails(by = "received desc", n = 100, pagesize = 10)
 }
 \itemize{
-\item \code{by}: The sorting order of the message list. The default is to sort by descending date received (most recent first). Other alternatives are "from" and "subject".
+\item \code{by}: The sorting order of the message list. The possible fields are "received" (received date, the default), "from" and "subject". To sort in descending order, add a " desc". You can specify multiple sorting fields, with later fields used to break ties in earlier ones. The last sorting field is always "received desc" unless it appears earlier.
 \item \code{n}: The total number of emails to retrieve. The default is 100.
 \item \code{pagesize}: The number of emails per page. You can change this to a larger number to increase throughput, at the risk of running into timeouts.
 }

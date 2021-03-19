@@ -50,9 +50,9 @@
 #' @section Listing emails:
 #' To list the emails in a folder, call the `list_emails()` method. This returns a list of objects of class [`ms_outlook_email`], and has the following signature:
 #' ```
-#' list_emails(by = "received", n = 100, pagesize = 10)
+#' list_emails(by = "received desc", n = 100, pagesize = 10)
 #' ```
-#' - `by`: The sorting order of the message list. The default is to sort by descending date received (most recent first). Other alternatives are "from" and "subject".
+#' - `by`: The sorting order of the message list. The possible fields are "received" (received date, the default), "from" and "subject". To sort in descending order, add a " desc". You can specify multiple sorting fields, with later fields used to break ties in earlier ones. The last sorting field is always "received desc" unless it appears earlier.
 #' - `n`: The total number of emails to retrieve. The default is 100.
 #' - `pagesize`: The number of emails per page. You can change this to a larger number to increase throughput, at the risk of running into timeouts.
 #'
@@ -80,6 +80,9 @@
 #'
 #' # sorted by subject, then by most recent received date
 #' folder$list_emails(by="subject")
+#'
+#' # sorted by from name in descending order, then by most recent received date
+#' folder$list_emails(by="from desc")
 #'
 #' # retrieve a specific email:
 #' # note the Outlook ID is NOT the same as the Internet message-id
@@ -150,7 +153,7 @@ public=list(
         super$initialize(token, tenant, properties)
     },
 
-    list_emails=function(by="received", n=100, pagesize=10)
+    list_emails=function(by="received desc", n=100, pagesize=10)
     {
         order_by <- email_list_order(by)
         opts <- list(`$orderby`=order_by, `$top`=pagesize)
@@ -208,8 +211,8 @@ public=list(
 
     create_folder=function(folder_name)
     {
-        op <- file.path("childFolders", folder_name)
-        ms_outlook_folder$new(self$token, self$tenant, self$do_operation(op, http_verb="POST"), user_id=self$user_id)
+        res <- self$do_operation("childFolders", body=list(displayName=folder_name), http_verb="POST")
+        ms_outlook_folder$new(self$token, self$tenant, res, user_id=self$user_id)
     },
 
     delete_folder=function(folder_name=NULL, folder_id=NULL, confirm=TRUE)
@@ -230,14 +233,17 @@ public=list(
 
 email_list_order <- function(vars)
 {
-    varmap <- list(
-        received="receivedDateTime desc",
-        subject="subject",
-        from="from/emailAddress/name"
+    varmap <- c(
+        "received"="receivedDateTime",
+        "subject"="subject",
+        "from"="from/emailAddress/name",
+        "received desc"="receivedDateTime desc",
+        "subject desc"="subject desc",
+        "from desc"="from/emailAddress/name desc"
     )
     if(!all(vars %in% names(varmap)))
         stop("Unknown ordering field", call.=FALSE)
-    if(vars != "received")
-        vars <- c(vars, "received")
+    if(!any(grepl("received", vars)))
+        vars <- c(vars, "received desc")
     paste(varmap[vars], collapse=",")
 }

@@ -44,6 +44,10 @@ test_that("Outlook client works",
     expect_is(outl$get_drafts(), "ms_outlook_folder")
     expect_is(outl$get_sent_items(), "ms_outlook_folder")
     expect_is(outl$get_deleted_items(), "ms_outlook_folder")
+
+    eml <- outl$create_email("hello from R")
+    expect_is(eml, "ms_outlook_email")
+    expect_silent(eml$delete(confirm=FALSE))
 })
 
 

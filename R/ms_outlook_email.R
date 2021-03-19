@@ -261,6 +261,7 @@ public=list(
         res <- self$do_operation("attachments", body=make_email_attachment(object), http_verb="POST")
         ms_outlook_attachment$new(self$token, self$tenant, res,
             user_id=self$user_id, message_id=self$properties$id)
+        self
     },
 
     get_attachment=function(attachment_name=NULL, attachment_id=NULL)
@@ -293,12 +294,12 @@ public=list(
             user_id=self$user_id, message_id=self$properties$id)
     },
 
-    remove_attachment=function(attachment_name, attachment_id, confirm=TRUE)
+    remove_attachment=function(attachment_name=NULL, attachment_id=NULL, confirm=TRUE)
     {
         self$get_attachment(attachment_name, attachment_id)$delete(confirm=confirm)
     },
 
-    download_attachment=function(attachment_name, attachment_id, dest, overwrite=FALSE)
+    download_attachment=function(attachment_name=NULL, attachment_id=NULL, dest, overwrite=FALSE)
     {
         self$get_attachment(attachment_name, attachment_id)$download(dest, overwrite=overwrite)
     },

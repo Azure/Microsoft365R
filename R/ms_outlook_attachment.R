@@ -76,7 +76,7 @@ public=list(
 
     download=function(dest=self$properties$name, overwrite=FALSE)
     {
-        res <- self$do_operation("value", config=httr::write_disk(dest, overwrite=overwrite),
+        res <- self$do_operation("$value", config=httr::write_disk(dest, overwrite=overwrite),
                                  http_status_handler="pass")
         if(httr::status_code(res) >= 300)
         {

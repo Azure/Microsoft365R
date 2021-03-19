@@ -15,11 +15,6 @@ tok <- try(AzureAuth::get_azure_token(c("openid", "offline_access"),
 if(inherits(tok, "try-error"))
     skip("Outlook tests skipped: unable to login to consumers tenant")
 
-get_to_addr <- function(x, n=1) x$properties$toRecipients[[n]]$emailAddress$address
-get_cc_addr <- function(x, n=1) x$properties$ccRecipients[[n]]$emailAddress$address
-get_bcc_addr <- function(x, n=1) x$properties$bccRecipients[[n]]$emailAddress$address
-get_replyto_addr <- function(x, n=1) x$properties$replyTo[[n]]$emailAddress$address
-
 fname <- make_name()
 folder <- get_personal_outlook()$create_folder(fname)
 

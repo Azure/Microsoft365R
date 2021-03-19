@@ -1,9 +1,10 @@
 app <- Sys.getenv("AZ_TEST_NATIVE_APP_ID")
+from_addr <- Sys.getenv("AZ_TEST_OUTLOOK_FROM_ADDR")
 to_addr <- Sys.getenv("AZ_TEST_OUTLOOK_TO_ADDR")
 cc_addr <- Sys.getenv("AZ_TEST_OUTLOOK_CC_ADDR")
 bcc_addr <- Sys.getenv("AZ_TEST_OUTLOOK_BCC_ADDR")
 
-if(app == "" || to_addr == "" || cc_addr == "" || bcc_addr == "")
+if(app == "" || from_addr == "" || to_addr == "" || cc_addr == "" || bcc_addr == "")
     skip("Outlook email tests skipped: Microsoft Graph credentials not set")
 
 if(!interactive())
@@ -65,8 +66,8 @@ test_that("Outlook email methods work",
     expect_error(get_cc_addr(em, 2))
     expect_identical(get_bcc_addr(em), bcc_addr)
 
-    em$set_reply_to(to_addr)
-    expect_identical(get_replyto_addr(em), to_addr)
+    em$set_reply_to(from_addr)
+    expect_identical(get_replyto_addr(em), from_addr)
     expect_identical(get_to_addr(em), to_addr)
     expect_identical(get_cc_addr(em), cc_addr)
     expect_identical(get_bcc_addr(em), bcc_addr)

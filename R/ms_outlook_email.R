@@ -335,12 +335,12 @@ public=list(
     create_forward=function(comment="", to=NULL, cc=NULL, bcc=NULL, send_now=FALSE)
     {
         op <- "createforward"
-        body <- c(
-            list(comment=make_reply_comment(comment)),
-            build_email_recipients(to, cc, bcc, NA)
+        body <- list(
+            comment=make_reply_comment(comment),
+            message=build_email_recipients(to, cc, bcc, NA)
         )
         reply <- ms_outlook_email$new(self$token, self$tenant,
-            self$do_operation(op, body=list(comment=comment), http_verb="POST"), user_id=self$user_id)
+            self$do_operation(op, body=body, http_verb="POST"), user_id=self$user_id)
         if(send_now)
             reply$send()
         reply
@@ -451,7 +451,7 @@ format_email_date <- function(datestr)
 
 make_reply_comment <- function(comment)
 {
-    UseMethod("comment")
+    UseMethod("make_reply_comment")
 }
 
 

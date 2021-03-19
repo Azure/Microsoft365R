@@ -240,14 +240,18 @@ public=list(
         current_cc <- lapply(self$properties$ccRecipients, find_address)
         current_bcc <- lapply(self$properties$bccRecipients, find_address)
 
-        self$set_recipients(c(current_to, to), c(current_cc, cc), c(current_bcc, bcc), NA)
+        self$set_recipients(c(current_to, to), c(current_cc, cc), c(current_bcc, bcc))
     },
 
     set_reply_to=function(reply_to=NULL)
     {
         if(is_empty(reply_to))
             message("Clearing reply-to")
-        self$update(NA, NA, NA, reply_to)
+
+        # possible bug: can only set reply-to if 1 other recipient field is included in request
+        recipients <- build_email_recipients(NA, NA, NA, reply_to)
+        recipients$toRecipients <- self$properties$toRecipients
+        do.call(self$update, recipients)
     },
 
     add_attachment=function(object, ...)

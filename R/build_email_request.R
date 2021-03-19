@@ -92,8 +92,8 @@ build_email_request.envelope <- function(body, ...)
     if(!is_empty(body$header$Subject))
         req$subject <- body$header$Subject
 
-    with(body$header,
-        utils::modifyList(req, To, Cc, Bcc, Reply_To))
+    utils::modifyList(req,
+        build_email_recipients(body$header$To, body$header$Cc, body$header$Bcc, body$header$Reply_To))
 }
 
 

@@ -17,8 +17,6 @@ test_that("Outlook folder methods work",
     outl <- get_personal_outlook()
     expect_is(outl, c("ms_outlook", "ms_outlook_object"))
 
-    inbox <- outl$get_inbox()
-
     fname <- make_name()
     folder <- outl$create_folder(fname)
     expect_is(folder, c("ms_outlook_folder", "ms_outlook_object"))

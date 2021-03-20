@@ -407,25 +407,6 @@ public=list(
         else cat("\n")
         invisible(self)
     }
-),
-
-private=list(
-
-    find_folder_id=function(folder)
-    {
-        if(is.character(folder))
-        {
-            fnames <- strsplit(folder, "/", fixed=TRUE)[[1]]
-            # create dummy outlook client to get top-level folder
-            outlook <- ms_outlook$new(self$token, self$tenant, list(id=self$user_id))
-            folder <- outlook$get_folder(fnames[1])
-            for(f in fnames[-1])
-                folder <- folder$get_folder(f)
-        }
-        if(!inherits(folder, "ms_outlook_folder"))
-            stop("Invalid folder object", call.=FALSE)
-        folder$properties$id
-    }
 ))
 
 

@@ -37,6 +37,7 @@ Class representing a folder in Outlook.
 \item \code{get_folder(folder_name, folder_id)}: Get a subfolder, either by the name or ID.
 \item \code{create_folder(folder_name)}: Create a new subfolder of this folder.
 \item \code{delete_folder(folder_name, folder_id, confirm=TRUE)}: Delete a subfolder. By default, ask for confirmation first.
+\item \verb{copy(dest),move(dest)}: Copies or moves this folder to another folder. All the contents of the folder will also be copied/moved. The destination should be an object of class \code{ms_outlook_folder}.
 }
 }
 

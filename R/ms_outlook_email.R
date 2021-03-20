@@ -28,8 +28,7 @@
 #' - `create_reply(comment="", send_now=FALSE)`: Replies to the sender of an email.
 #' - `create_reply_all(comment="", send_now=FALSE)`: Replies to the sender and all recipients of an email.
 #' - `create_forward(comment="", to=NULL, cc=NULL, bcc=NULL, send_now=FALSE)`: Forwards the email to other recipients.
-#' - `copy(folder_name=NULL, folder_id=NULL)`: Copies the email to the destination folder.
-#' - `move(folder_name=NULL, folder_id=NULL)`: Moves the email to the destination folder.
+#' - `copy(dest),move(dest)`: Copies or moves the email to the destination folder.
 #' - `get_message_headers`: Retrieves the Internet message headers for an email, as a named character vector.
 #'
 #' @section Initialization:
@@ -67,7 +66,7 @@
 #' The methods for replying and forwarding are `create_reply()`, `create_reply_all()` and `create_forward()`. The first argument to these is the reply text, which will appear above the current message text in the body of the reply. For `create_forward()`, the other arguments are `to`, `cc` and `bcc` to specify the recipients of the forwarded email.
 #'
 #' @section Other methods:
-#' The `copy()` and `move()` methods copy and move an email to a different folder. To specify a nested folder, separate each of the folder names with a slash, eg "folder1/folder2/folder3".
+#' The `copy()` and `move()` methods copy and move an email to a different folder. The destination should be an object of class `ms_outlook_folder`.
 #'
 #' The `get_message_headers()` method retrieves the Internet message headers for the email, as a named character vector.
 #'
@@ -180,11 +179,12 @@
 #' ## moving and copying
 #' ##
 #'
-#' # copy an email to a nested folder
-#' em$copy("folder1/folder2")
+#' # copy an email to a nested folder: /folder1/folder2
+#' dest <- outl$get_folder("folder1")$get_folder("folder2")
+#' em$copy(dest)
 #'
 #' # move it instead
-#' em$move("folder3")
+#' em$move(dest)
 #'
 #' }
 #' @format An R6 object of class `ms_outlook_email`, inheriting from `ms_outlook_object`, which in turn inherits from `ms_object`.
@@ -299,9 +299,9 @@ public=list(
         self$get_attachment(attachment_name, attachment_id)$delete(confirm=confirm)
     },
 
-    download_attachment=function(attachment_name=NULL, attachment_id=NULL, dest, overwrite=FALSE)
+    download_attachment=function(attachment_name=NULL, attachment_id=NULL, ...)
     {
-        self$get_attachment(attachment_name, attachment_id)$download(dest, overwrite=overwrite)
+        self$get_attachment(attachment_name, attachment_id)$download(...)
     },
 
     send=function()
@@ -354,24 +354,25 @@ public=list(
         lst
     },
 
-    copy=function(folder_name=NULL, folder_id=NULL)
+    copy=function(dest)
     {
-        assert_one_arg(folder_name, folder_id, msg="Supply exactly one of destination folder name or ID")
-        if(is.null(folder_id))
-            folder_id <- private$find_folder_id(folder_name)
+        if(!inherits(dest, "ms_outlook_folder"))
+            stop("Destination must be a folder object", call.=FALSE)
 
-        res <- self$do_operation("copy", body=list(destinationId=folder_id), http_verb="POST")
-        ms_outlook_email$new(self$token, self$tenant, res, user_id=self$user_id)
+        body <- list(destinationId=dest$properties$id)
+        ms_outlook_email$new(self$token, self$tenant, self$do_operation("copy", body=body, http_verb="POST"),
+            user_id=self$user_id)
     },
 
-    move=function(folder_name=NULL, folder_id=NULL)
+    move=function(dest)
     {
-        assert_one_arg(folder_name, folder_id, msg="Supply exactly one of destination folder name or ID")
-        if(is.null(folder_id))
-            folder_id <- private$find_folder_id(folder_name)
+        if(!inherits(dest, "ms_outlook_folder"))
+            stop("Destination must be a folder object", call.=FALSE)
 
-        res <- self$do_operation("move", body=list(destinationId=folder_id), http_verb="POST")
-        ms_outlook_email$new(self$token, self$tenant, res, user_id=self$user_id)
+        on.exit(self$sync_fields())
+        body <- list(destinationId=dest$properties$id)
+        ms_outlook_email$new(self$token, self$tenant, self$do_operation("move", body=body, http_verb="POST"),
+            user_id=self$user_id)
     },
 
     print=function(...)

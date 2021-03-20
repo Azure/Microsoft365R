@@ -23,6 +23,7 @@
 #' - `get_folder(folder_name, folder_id)`: Get a subfolder, either by the name or ID.
 #' - `create_folder(folder_name)`: Create a new subfolder of this folder.
 #' - `delete_folder(folder_name, folder_id, confirm=TRUE)`: Delete a subfolder. By default, ask for confirmation first.
+#' - `copy(dest),move(dest)`: Copies or moves this folder to another folder. All the contents of the folder will also be copied/moved. The destination should be an object of class `ms_outlook_folder`.
 #'
 #' @section Initialization:
 #' Creating new objects of this class should be done via the `get_folder`, `list_folders` or `create_folder` methods of this class or the [`ms_outlook`] class. Calling the `new()` method for this class only constructs the R object; it does not call the Microsoft Graph API to retrieve or create the actual folder.
@@ -218,6 +219,27 @@ public=list(
     delete_folder=function(folder_name=NULL, folder_id=NULL, confirm=TRUE)
     {
         self$get_folder(folder_name, folder_id)$delete(confirm=confirm)
+    },
+
+    copy=function(dest)
+    {
+        if(!inherits(dest, "ms_outlook_folder"))
+            stop("Destination must be a folder object", call.=FALSE)
+
+        body <- list(destinationId=dest$properties$id)
+        ms_outlook_email$new(self$token, self$tenant, self$do_operation("copy", body=body, http_verb="POST"),
+            user_id=self$user_id)
+    },
+
+    move=function(dest)
+    {
+        if(!inherits(dest, "ms_outlook_folder"))
+            stop("Destination must be a folder object", call.=FALSE)
+
+        on.exit(self$sync_fields())
+        body <- list(destinationId=dest$properties$id)
+        ms_outlook_email$new(self$token, self$tenant, self$do_operation("move", body=body, http_verb="POST"),
+            user_id=self$user_id)
     },
 
     print=function(...)

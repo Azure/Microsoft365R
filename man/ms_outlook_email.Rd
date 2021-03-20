@@ -42,8 +42,7 @@ Class representing an Outlook mail message. The one class represents both sent a
 \item \code{create_reply(comment="", send_now=FALSE)}: Replies to the sender of an email.
 \item \code{create_reply_all(comment="", send_now=FALSE)}: Replies to the sender and all recipients of an email.
 \item \code{create_forward(comment="", to=NULL, cc=NULL, bcc=NULL, send_now=FALSE)}: Forwards the email to other recipients.
-\item \code{copy(folder_name=NULL, folder_id=NULL)}: Copies the email to the destination folder.
-\item \code{move(folder_name=NULL, folder_id=NULL)}: Moves the email to the destination folder.
+\item \verb{copy(dest),move(dest)}: Copies or moves the email to the destination folder.
 \item \code{get_message_headers}: Retrieves the Internet message headers for an email, as a named character vector.
 }
 }
@@ -92,7 +91,7 @@ The methods for replying and forwarding are \code{create_reply()}, \code{create_
 
 \section{Other methods}{
 
-The \code{copy()} and \code{move()} methods copy and move an email to a different folder. To specify a nested folder, separate each of the folder names with a slash, eg "folder1/folder2/folder3".
+The \code{copy()} and \code{move()} methods copy and move an email to a different folder. The destination should be an object of class \code{ms_outlook_folder}.
 
 The \code{get_message_headers()} method retrieves the Internet message headers for the email, as a named character vector.
 }
@@ -200,11 +199,12 @@ em$remove_attachment("anotherfile.pptx")
 ## moving and copying
 ##
 
-# copy an email to a nested folder
-em$copy("folder1/folder2")
+# copy an email to a nested folder: /folder1/folder2
+dest <- outl$get_folder("folder1")$get_folder("folder2")
+em$copy(dest)
 
 # move it instead
-em$move("folder3")
+em$move(dest)
 
 }
 }

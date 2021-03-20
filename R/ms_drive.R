@@ -198,6 +198,13 @@ ms_drive$set("public", "list_files", overwrite=TRUE, ms_drive$public_methods$lis
 
 parse_upload_range <- function(response, blocksize)
 {
+    if(is_empty(response))
+        return(NULL)
+
+    # Outlook and Sharepoint/OneDrive teams not talking to each other....
+    if(!is.null(response$NextExpectedRanges) && is.null(response$nextExpectedRanges))
+        response$nextExpectedRanges <- response$NextExpectedRanges
+
     if(is.null(response$nextExpectedRanges))
         return(NULL)
 

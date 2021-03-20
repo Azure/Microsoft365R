@@ -172,9 +172,14 @@ public=list(
                           reply_to=NULL, attachments=NULL, send_now=FALSE)
     {
         content_type <- match.arg(content_type)
-        req <- build_email_request(body, content_type, attachments, subject, to, cc, bcc, reply_to)
+        req <- build_email_request(body, content_type, subject, to, cc, bcc, reply_to)
         res <- ms_outlook_email$new(self$token, self$tenant,
             self$do_operation("messages", body=req, http_verb="POST"), user_id=self$user_id)
+
+        # must do this separately because large attachments require a valid message ID
+        add_external_attachments(body, res)
+        for(att in attachments)
+            res$add_attachment(att)
 
         if(send_now)
             res$send()

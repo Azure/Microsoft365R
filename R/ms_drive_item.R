@@ -227,7 +227,7 @@ public=list(
             headers <- httr::add_headers(
                 `Content-Length`=thisblock,
                 `Content-Range`=sprintf("bytes %.0f-%.0f/%.0f",
-                    next_blockstart, next_blockstart + next_blocksize - 1, size)
+                    next_blockstart, next_blockstart + thisblock - 1, size)
             )
             res <- httr::PUT(upload_dest, headers, body=body)
             httr::stop_for_status(res)

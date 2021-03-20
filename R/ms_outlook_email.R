@@ -258,10 +258,10 @@ public=list(
     {
         if(inherits(object, "ms_drive_item"))
             object <- object$create_share_link(...)
-        res <- self$do_operation("attachments", body=make_email_attachment(object), http_verb="POST")
-        ms_outlook_attachment$new(self$token, self$tenant, res,
-            user_id=self$user_id, message_id=self$properties$id)
-        self
+        att <- private$make_attachment(object)
+        if(!is_empty(att))  # check for large attachment
+            self$do_operation("attachments", body=att, http_verb="POST")
+        self$sync_fields()
     },
 
     get_attachment=function(attachment_name=NULL, attachment_id=NULL)
@@ -297,6 +297,7 @@ public=list(
     remove_attachment=function(attachment_name=NULL, attachment_id=NULL, confirm=TRUE)
     {
         self$get_attachment(attachment_name, attachment_id)$delete(confirm=confirm)
+        self$sync_fields()
     },
 
     download_attachment=function(attachment_name=NULL, attachment_id=NULL, ...)
@@ -406,6 +407,48 @@ public=list(
             cat(" ...\n")
         else cat("\n")
         invisible(self)
+    }
+),
+
+private=list(
+
+    make_attachment=function(object)
+    {
+        if(!is.character(object))
+            stop("Attachments must be provided as filenames or URLs", call.=FALSE)
+
+        if(file.exists(object))  # a file
+        {
+            # assert_valid_attachment_size(file.size(object))
+            # simple attachment if file is small enough, otherwise use upload session
+            if(file.size(object) < 3145728)
+            {
+                list(
+                    `@odata.type`="#microsoft.graph.fileAttachment",
+                    isInline=FALSE,
+                    contentBytes=openssl::base64_encode(readBin(object, "raw", file.size(object))),
+                    name=basename(object),
+                    contentType=mime::guess_type(object)
+                )
+            }
+            else make_large_attachment(object, self)
+        }
+        else if(!is_empty(httr::parse_url(object)$scheme))  # a URL
+        {
+            url <- httr::parse_url(object)
+            name <- basename(url$path)
+            if(name == "")
+                name <- url$hostname
+            list(
+                `@odata.type`="#microsoft.graph.referenceAttachment",
+                name=name,
+                sourceUrl=object,
+                providerType="other",
+                permission="view",
+                isFolder=FALSE
+            )
+        }
+        else stop("Bad attachment: '", object, "'", call.=FALSE)
     }
 ))
 

@@ -92,6 +92,8 @@ public=list(
         cat("<Outlook email attachment '", self$properties$name, "'>\n", sep="")
         cat("  directory id:", self$properties$id, "\n")
         cat("  attachment type:", self$attachment_type, "\n")
+        if(self$attachment_type == "file")
+            cat("  attachment size:", self$properties$size, "\n")
         invisible(self)
     }
 ))

@@ -6,19 +6,40 @@ add_external_attachments <- function(object, email)
 
 add_external_attachments.blastula_message <- function(object, email)
 {
-
+    for(a in object$attachments)
+        email$add_attachment(a$file_path)
 }
 
 
 add_external_attachments.envelope <- function(object, email)
 {
-
+    atts <-  which(sapply(parts, function(p) p$header$content_disposition == "attachment"))
+    for(a in parts[atts])
+    {
+        if(!is_small_attachment(nchar(a$body)/0.74))  # allow for base64 bloat
+            stop("File attachments from emayili > 3MB not currently supported", call.=FALSE)
+        att <- list(
+            `@odata.type`="#microsoft.graph.fileAttachment",
+            isInline=FALSE,
+            contentBytes=a$body,
+            name=a$header$filename,
+            contentType=a$header$content_type
+        )
+        email$do_operation("attachments", body=att, http_verb="POST")
+    }
 }
 
 
 add_external_attachments.default <- function(object, email)
 {
+    # do nothing if message object is not a recognised class (from blastula or emayili)
     NULL
+}
+
+
+is_small_attachment <- function(filesize, threshold=3e6)
+{
+    filesize <= threshold
 }
 
 

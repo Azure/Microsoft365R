@@ -421,7 +421,7 @@ private=list(
         {
             # assert_valid_attachment_size(file.size(object))
             # simple attachment if file is small enough, otherwise use upload session
-            if(file.size(object) < 3145728)
+            if(is_small_attachment(file.size(object)))
             {
                 list(
                     `@odata.type`="#microsoft.graph.fileAttachment",

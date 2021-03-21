@@ -31,20 +31,6 @@ build_email_request.blastula_message <- function(body, content_type,
             content=body$html_str
         )
     )
-
-    if(!is_empty(body$attachments))
-        req$attachments <- lapply(body$attachments, function(a)
-        {
-            assert_small_attachment(file.size(a$file_path))
-            list(
-                `@odata.type`="#microsoft.graph.fileAttachment",
-                isInline=FALSE,
-                contentBytes=openssl::base64_encode(readBin(a$file_path, "raw", file.size(a$file_path))),
-                name=a$filename,
-                contentType=a$content_type
-            )
-        })
-
     if(!is_empty(subject))
         req$subject <- subject
 
@@ -71,32 +57,11 @@ build_email_request.envelope <- function(body, token=NULL, user_id=NULL, ...)
     }
     else list(body=list(contentType="text", content=""))
 
-    atts <-  which(sapply(parts, function(p) p$header$content_disposition == "attachment"))
-    if(!is_empty(atts))
-        req$attachments <- lapply(parts[atts], function(a)
-        {
-            assert_small_attachment(nchar(a$body)/0.74)  # allow for base64 bloat
-            list(
-                `@odata.type`="#microsoft.graph.fileAttachment",
-                isInline=FALSE,
-                contentBytes=a$body,
-                name=a$header$filename,
-                contentType=a$header$content_type
-            )
-        })
-
     if(!is_empty(body$header$Subject))
         req$subject <- body$header$Subject
 
     utils::modifyList(req,
         build_email_recipients(body$header$To, body$header$Cc, body$header$Bcc, body$header$Reply_To))
-}
-
-
-assert_small_attachment <- function(filesize)
-{
-    if(filesize >= 3145728)
-        stop("File attachments must currently be less than 3MB in size", call.=FALSE)
 }
 
 

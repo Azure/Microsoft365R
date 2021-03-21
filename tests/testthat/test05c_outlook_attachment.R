@@ -76,6 +76,45 @@ test_that("Attachments from emayili work",
 })
 
 
+create_bigfile <- function(size)
+{
+    f <- tempfile()
+    con <- file(f, open="wb")
+    on.exit(close(con))
+    x <- sample(letters, size, replace=TRUE)
+    writeBin(charToRaw(paste0(x, collapse="")), con)
+    f
+}
+src <- create_bigfile(4e6)
+
+test_that("Large attachments work",
+{
+    expect_silent(em <- folder$create_email(attachments=src))
+    lst <- em$list_attachments()
+    expect_true(!is_empty(lst) && as.numeric(lst[[1]]$properties$size) >= 4e6)
+})
+
+
+test_that("Large attachments from blastula work",
+{
+    bl_em <- blastula::compose_email("test blastula email")
+    bl_em <- blastula::add_attachment(bl_em, src)
+    em <- folder$create_email(bl_em)
+    lst <- em$list_attachments()
+    expect_true(!is_empty(lst) && as.numeric(lst[[1]]$properties$size) >= 4e6)
+})
+
+
+test_that("Large attachments from emayili fail",
+{
+    ey_em <- emayili::envelope(text="test emayili email")
+    ey_em <- emayili::attachment(ey_em, src)
+    expect_warning(em <- folder$create_email(ey_em))
+    expect_true(is_empty(em$list_attachments()))
+})
+
+
 teardown({
     folder$delete(confirm=FALSE)
+    unlink(src)
 })

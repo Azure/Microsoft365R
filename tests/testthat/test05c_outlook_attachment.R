@@ -105,7 +105,7 @@ test_that("Large attachments from blastula work",
 })
 
 
-test_that("Large attachments from emayili fail",
+test_that("Large attachments from emayili skipped",
 {
     ey_em <- emayili::envelope(text="test emayili email")
     ey_em <- emayili::attachment(ey_em, src)

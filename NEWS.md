@@ -1,5 +1,12 @@
 # Microsoft365R 2.0.0.9000
 
+- Add support for sending and managing emails in Outlook. Use the `get_personal_outlook()` and `get_business_outlook()` client functions to access the emails in your personal account and work or school account, respectively. Functionality supported includes:
+  - Send and reply to emails, optionally composed with either the blastula or emayili packages
+  - List and retrieve emails
+  - Create and delete folders
+  - Move and copy emails between folders
+  - Move and copy folders
+  - Add, remove, and download attachments
 - Add ability to created nested folders in OneDrive and SharePoint document libraries (#24).
 
 # Microsoft365R 2.0.0

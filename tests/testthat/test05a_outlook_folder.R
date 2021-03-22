@@ -12,6 +12,10 @@ tok <- try(AzureAuth::get_azure_token(c("openid", "offline_access"),
 if(inherits(tok, "try-error"))
     skip("Outlook tests skipped: unable to login to consumers tenant")
 
+inbox <- try(call_graph_endpoint(tok, "me/mailFolders/inbox"), silent=TRUE)
+if(inherits(inbox, "try-error"))
+    skip("Outlook tests skipped: service not available")
+
 test_that("Outlook folder methods work",
 {
     outl <- get_personal_outlook()

@@ -20,14 +20,15 @@ tok <- try(AzureAuth::get_azure_token(
 if(inherits(tok, "try-error"))
     skip("Teams tests skipped: no access to tenant")
 
+team <- try(call_graph_endpoint(tok, file.path("teams", team_id)), silent=TRUE)
+if(inherits(team, "try-error"))
+    skip("Teams tests skipped: service not available")
+
 test_that("Teams client works",
 {
     expect_error(get_team(team_name=team_name, team_id=team_id, tenant=tenant, app=app))
 
-    team1 <- try(get_team(team_name=team_name, tenant=tenant, app=app), silent=TRUE)
-    if(inherits(team1, "try-error"))
-        skip("SharePoint tests skipped: service not available")
-
+    team1 <- get_team(team_name=team_name, tenant=tenant, app=app)
     expect_is(team1, "ms_team")
     expect_identical(team1$properties$displayName, team_name)
 

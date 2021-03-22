@@ -227,7 +227,7 @@ public=list(
             headers <- httr::add_headers(
                 `Content-Length`=thisblock,
                 `Content-Range`=sprintf("bytes %.0f-%.0f/%.0f",
-                    next_blockstart, next_blockstart + next_blocksize - 1, size)
+                    next_blockstart, next_blockstart + thisblock - 1, size)
             )
             res <- httr::PUT(upload_dest, headers, body=body)
             httr::stop_for_status(res)
@@ -244,7 +244,6 @@ public=list(
     download=function(dest=self$properties$name, overwrite=FALSE)
     {
         private$assert_is_file()
-        filepath <- file.path(self$parentReference$path, self$properties$name)
         res <- self$do_operation("content", config=httr::write_disk(dest, overwrite=overwrite),
                                  http_status_handler="pass")
         if(httr::status_code(res) >= 300)

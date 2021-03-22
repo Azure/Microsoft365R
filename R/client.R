@@ -160,6 +160,26 @@ list_teams <- function(tenant=Sys.getenv("CLIMICROSOFT365_TENANT", "common"),
     login$get_user()$list_teams()
 }
 
+#' @rdname client
+#' @export
+get_personal_outlook <- function(app=.microsoft365r_app_id,
+                                 scopes=c("Mail.Send", "Mail.ReadWrite", "User.Read"),
+                                 ...)
+{
+    do_login("consumers", app, scopes, ...)$get_user()$get_outlook()
+}
+
+#' @rdname client
+#' @export
+get_business_outlook <- function(tenant=Sys.getenv("CLIMICROSOFT365_TENANT", "common"),
+                                 app=Sys.getenv("CLIMICROSOFT365_AADAPPID"),
+                                 scopes=".default",
+                                 ...)
+{
+    app <- choose_app(app)
+    do_login(tenant, app, scopes, ...)$get_user()$get_outlook()
+}
+
 
 .ms365_login_env <- new.env()
 

@@ -153,6 +153,12 @@ add_user_methods <- function()
         res <- private$get_paged_list(self$do_operation("joinedTeams", options=opts))
         lapply(private$init_list_objects(res, "team"), function(team) team$sync_fields())
     })
+
+    az_user$set("public", "get_outlook", overwrite=TRUE,
+    function()
+    {
+        ms_outlook$new(self$token, self$tenant, self$properties)
+    })
 }
 
 add_group_methods <- function()

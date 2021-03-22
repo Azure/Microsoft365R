@@ -21,14 +21,16 @@ tok <- try(AzureAuth::get_azure_token(
 if(inherits(tok, "try-error"))
     skip("SharePoint tests skipped: no access to tenant")
 
+site <- try(call_graph_endpoint(tok, file.path("sites", site_id)), silent=TRUE)
+if(inherits(site, "try-error"))
+    skip("SharePoint tests skipped: service not available")
+
 test_that("SharePoint client works",
 {
     expect_error(get_sharepoint_site(site_name=site_name, site_url=site_url, site_id=site_id,
                                      tenant=tenant, app=app))
 
-    site1 <- try(get_sharepoint_site(site_name=site_name, tenant=tenant, app=app), silent=TRUE)
-    if(inherits(site1, "try-error"))
-        skip("SharePoint tests skipped: service not available")
+    site1 <- get_sharepoint_site(site_name=site_name, tenant=tenant, app=app)
     expect_is(site1, "ms_site")
     expect_identical(site1$properties$displayName, site_name)
 

@@ -21,6 +21,10 @@ tok <- try(AzureAuth::get_azure_token(
 if(inherits(tok, "try-error"))
     skip("Channel tests skipped: no access to tenant")
 
+team <- try(call_graph_endpoint(tok, file.path("teams", team_id)), silent=TRUE)
+if(inherits(team, "try-error"))
+    skip("Channel tests skipped: service not available")
+
 test_that("Channel methods work",
 {
     team <- get_team(team_id=team_id, tenant=tenant, app=app)

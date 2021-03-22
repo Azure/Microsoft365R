@@ -16,13 +16,13 @@ tok <- try(AzureAuth::get_azure_token(
 if(inherits(tok, "try-error"))
     skip("OneDrive for Business tests skipped: no access to tenant")
 
+gr <- AzureGraph::ms_graph$new(token=tok)
+drv <- try(call_graph_endpoint(tok, "me/drive"), silent=TRUE)
+if(inherits(drv, "try-error"))
+    skip("OneDrive for Business tests skipped: service not available")
+
 test_that("OneDrive for Business works",
 {
-    gr <- AzureGraph::ms_graph$new(token=tok)
-    drv <- try(gr$get_user()$get_drive(), silent=TRUE)
-    if(inherits(drv, "try-error"))
-        skip("OneDrive for Business tests skipped: service not available")
-
     od <- get_business_onedrive(tenant=tenant)
     expect_is(od, "ms_drive")
 

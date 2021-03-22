@@ -126,17 +126,12 @@ em$add_attachment("mydocument.docx")
 em$send()
 
 # list the most recent emails in your inbox
-outl$list_emails()
+emlst <- outl$list_emails()
 
-# get the most recent email
-em_recent <- outl$list_emails()[[1]]
-
-# download an attachment from it
-em_recent$download_attachment("mytalk.pptx")
-
-# reply to the email
-repl <- em_recent$create_reply("Replying from R")
-repl$send()
+# reply to the most recent email
+emlst[[1]]$
+    create_reply("Replying from R")$
+    send()
 ```
 
 ----

@@ -118,8 +118,13 @@ public=list(
         dirs <- children$isdir
         for(d in children$name[dirs])
             self$get_item(d)$delete(confirm=confirm, force_recursive=TRUE)
-        for(f in children$name[!dirs])
-            self$get_item(f)$delete(confirm=confirm, force_recursive=FALSE)
+
+        deletes <- lapply(children$name[!dirs], function(f)
+        {
+            path <- private$make_absolute_path(f)
+            graph_request$new(path, http_verb="DELETE")
+        })
+        call_batch_endpoint(self$token, deletes)
 
         super$delete(confirm=confirm)
     },

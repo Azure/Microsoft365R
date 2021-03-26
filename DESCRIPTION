@@ -29,5 +29,7 @@ Suggests:
     testthat,
     blastula,
     emayili
+Remotes:
+    Azure/AzureGraph@batch-request
 Roxygen: list(markdown=TRUE, r6=FALSE)
 RoxygenNote: 7.1.1

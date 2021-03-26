@@ -70,3 +70,12 @@ The above methods are the **recommended solutions** to dealing with access restr
 
 Be warned that these workarounds may draw the attention of your admin!
 
+## Other issues
+
+The AzureR packages save your login sessions so that you don't need to reauthenticate each time. If you're experiencing authentication failures, you can try clearing the saved data by running the following code:
+
+```r
+AzureAuth::clean_token_directory()
+AzureGraph::delete_graph_login(tenant="mytenant")
+```
+

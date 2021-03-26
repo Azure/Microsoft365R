@@ -134,9 +134,9 @@ public=list(
         self$get_item(path)$open()
     },
 
-    delete_item=function(path, confirm=TRUE)
+    delete_item=function(path, confirm=TRUE, force=FALSE)
     {
-        self$get_item(path)$delete(confirm=confirm)
+        self$get_item(path)$delete(confirm=confirm, force=force)
     },
 
     get_item=function(path)

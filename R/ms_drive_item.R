@@ -109,6 +109,21 @@ public=list(
         super$initialize(token, tenant, properties)
     },
 
+    delete=function(confirm=TRUE, force_recursive=FALSE)
+    {
+        if(!force_recursive || !self$is_folder())
+            return(super$delete(confirm=confirm))
+
+        children <- self$list_items()
+        dirs <- children$isdir
+        for(d in children$name[dirs])
+            self$get_item(d)$delete(confirm=confirm, force_recursive=TRUE)
+        for(f in children$name[!dirs])
+            self$get_item(f)$delete(confirm=confirm, force_recursive=FALSE)
+
+        super$delete(confirm=confirm)
+    },
+
     is_folder=function()
     {
         !is.null(self$properties$folder)

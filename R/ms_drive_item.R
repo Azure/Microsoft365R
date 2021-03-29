@@ -124,11 +124,7 @@ public=list(
             path <- private$make_absolute_path(f)
             graph_request$new(path, http_verb="DELETE")
         })
-        res <- call_batch_endpoint(self$token, deletes)
-
-        statuses <- sapply(res$responses, function(r) r$status)
-        if(any(as.numeric(statuses) >= 300))
-            stop("Some files could not be deleted", call.=FALSE)
+        call_batch_endpoint(self$token, deletes)
 
         super$delete(confirm=confirm)
     },

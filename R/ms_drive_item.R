@@ -124,7 +124,14 @@ public=list(
             path <- private$make_absolute_path(f)
             graph_request$new(path, http_verb="DELETE")
         })
-        call_batch_endpoint(self$token, deletes)
+        # do in batches of 20
+        i <- length(deletes)
+        while(i > 0)
+        {
+            batch <- seq(from=max(1, i - 19), to=i)
+            call_batch_endpoint(self$token, deletes[batch])
+            i <- max(1, i - 19) - 1
+        }
 
         super$delete(confirm=confirm)
     },

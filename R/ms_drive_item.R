@@ -10,7 +10,7 @@
 #' - `properties`: The item properties (metadata).
 #' @section Methods:
 #' - `new(...)`: Initialize a new object. Do not call this directly; see 'Initialization' below.
-#' - `delete(confirm=TRUE, force_recursive=FALSE)`: Delete this item. By default, ask for confirmation first. For personal OneDrive, deleting a folder will also automatically delete its contents; for business OneDrive or SharePoint document libraries, you may need to set `force_recursive=TRUE` to delete the contents first depending on your organisation's policies. Note that this proceeds item by item, so can be slow for large folders.
+#' - `delete(confirm=TRUE, by_item=FALSE)`: Delete this item. By default, ask for confirmation first. For personal OneDrive, deleting a folder will also automatically delete its contents; for business OneDrive or SharePoint document libraries, you may need to set `by_item=TRUE` to delete the contents first depending on your organisation's policies. Note that this can be slow for large folders.
 #' - `update(...)`: Update the item's properties (metadata) in Microsoft Graph.
 #' - `do_operation(...)`: Carry out an arbitrary operation on the item.
 #' - `sync_fields()`: Synchronise the R object with the item metadata in Microsoft Graph.
@@ -109,15 +109,15 @@ public=list(
         super$initialize(token, tenant, properties)
     },
 
-    delete=function(confirm=TRUE, force_recursive=FALSE)
+    delete=function(confirm=TRUE, by_item=FALSE)
     {
-        if(!force_recursive || !self$is_folder())
+        if(!by_item || !self$is_folder())
             return(super$delete(confirm=confirm))
 
         children <- self$list_items()
         dirs <- children$isdir
         for(d in children$name[dirs])
-            self$get_item(d)$delete(confirm=confirm, force_recursive=TRUE)
+            self$get_item(d)$delete(confirm=confirm, by_item=TRUE)
 
         deletes <- lapply(children$name[!dirs], function(f)
         {

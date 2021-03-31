@@ -13,22 +13,22 @@ tok <- try(AzureAuth::get_azure_token(c("https://graph.microsoft.com/Mail.Read",
     tenant="9188040d-6c67-4c5b-b112-36a304b66dad", app=.microsoft365r_app_id, version=2),
     silent=TRUE)
 if(inherits(tok, "try-error"))
-    skip("Outlook tests skipped: unable to login to consumers tenant")
+    skip("Outlook email attachment tests skipped: unable to login to consumers tenant")
 
 inbox <- try(call_graph_endpoint(tok, "me/mailFolders/inbox"), silent=TRUE)
 if(inherits(inbox, "try-error"))
-    skip("Outlook tests skipped: service not available")
+    skip("Outlook email attachment tests skipped: service not available")
 
 inbox <- try(call_graph_endpoint(tok, "me/mailFolders/inbox"), silent=TRUE)
 if(inherits(inbox, "try-error"))
-    skip("Outlook tests skipped: service not available")
+    skip("Outlook email attachment tests skipped: service not available")
 
 fname <- make_name()
 folder <- get_personal_outlook()$create_folder(fname)
 
 test_that("Outlook email attachment methods work",
 {
-    em <- folder$create_email()
+    em <- folder$create_email("test email", content_type="html")
     expect_is(em$add_attachment("../resources/logo_small.jpg"), "ms_outlook_email")
 
     atts <- em$list_attachments()
@@ -48,6 +48,11 @@ test_that("Outlook email attachment methods work",
     expect_error(em$get_attachment("logo_small.jpg"))  # duplicate filenames
 
     expect_silent(em$remove_attachment(attachment_id=id1, confirm=FALSE))
+
+    em$add_attachment("https://example.com")
+    att2 <- em$get_attachment("example.com")
+    expect_is(att2, "ms_outlook_attachment")
+    expect_identical(att2$attachment_type, "link")
 })
 
 
@@ -139,6 +144,24 @@ test_that("Inline images from blastula work",
     em <- folder$create_email(bl_em)
     lst <- em$list_attachments()
     expect_true(!is_empty(lst))
+})
+
+
+test_that("Links from OneDrive work",
+{
+    od <- try(get_personal_onedrive(), silent=TRUE)
+    if(inherits(od, "try-error"))
+        skip("OneDrive attachment tests skipped: service not available")
+
+    f <- write_file()
+    item <- od$upload_file(f, basename(f))
+
+    em <- folder$create_email("test email", content_type="html")
+    em$add_attachment(item, expiry="14 days")
+    lst <- em$list_attachments()
+    expect_true(!is_empty(lst))
+
+    item$delete(confirm=FALSE)
 })
 
 

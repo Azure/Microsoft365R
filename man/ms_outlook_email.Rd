@@ -72,9 +72,13 @@ This class exposes several methods for updating the properties of an email. They
 
 This class exposes the following methods for working with attachments.
 
-\code{add_attachment(object, ...)} adds an attachment to the email. The \code{object} argument should be a character string containing a filename or URL, or an object of class \code{ms_drive_item}. In the latter case, a shareable link to the drive item will be attached to the email, with the specifics of the link given by the \code{...} arguments.
+\code{add_attachment(object, type, expiry, password, scope)} adds an attachment to the email. The arguments are as follows:
+\itemize{
+\item \code{object}: A character string containing a filename or URL, or an object of class \code{\link{ms_drive_item}} representing a file in OneDrive or SharePoint. In the latter case, a shareable link to the drive item will be attached to the email, with the link details given by the other arguments.
+\item \verb{type, expiry, password, scope}: The specifics for the shareable link to attach to the email, if \code{object} is a drive item. See the \code{create_share_link()} method of the \code{\link{ms_drive_item}} class; the default is to create a read-only link valid for 7 days.
+}
 
-\code{add_image(object)} adds an image as an \emph{inline} attachment, ie, as part of the message body. The \code{object} argument should be a filename, and the message content type will be set to "html" if it is not already. Currently Microsoft365R does minimal formatting of the image; consider using a package like blastula for more control over the layout parameters of inline images.
+\code{add_image(object)} adds an image as an \emph{inline} attachment, ie, as part of the message body. The \code{object} argument should be a filename, and the message content type will be set to "html" if it is not already. Currently Microsoft365R does minimal formatting of the image; consider using a package like blastula for more control over the layout of inline images.
 
 \code{list_attachments()} lists the attachments for the email, including inline images. This will be a list of objects of class \code{\link{ms_outlook_attachment}} containing the metadata for the attachments.
 
@@ -122,6 +126,10 @@ em$set_subject("example email")
 
 # add an attachment
 em$add_attachment("mydocument.docx")
+
+# add a shareable link to a file in OneDrive
+mysheet <- get_personal_onedrive()$get_item("documents/mysheet.xlsx")
+em$add_attachment(mysheet)
 
 # add an inline image
 em$add_image("myggplot.jpg")

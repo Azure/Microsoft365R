@@ -122,6 +122,16 @@ test_that("Large attachments from emayili skipped",
 })
 
 
+test_that("Inline images work",
+{
+    em <- folder$create_email("test email", content_type="html")
+    em$add_image("../resources/logo_small.jpg")
+    lst <- em$list_attachments()
+    expect_true(!is_empty(lst))
+    expect_true(lst[[1]]$properties$isInline)
+})
+
+
 test_that("Inline images from blastula work",
 {
     bl_img <- blastula::add_image("../resources/logo_small.jpg")

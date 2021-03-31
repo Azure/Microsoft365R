@@ -20,6 +20,7 @@
 #' - `add_recipients(to=NULL, cc=NULL, bcc=NULL)`: Adds recipients for the email, leaving existing ones unchanged.
 #' - `set_reply_to(reply_to=NULL)`: Sets the reply-to field for the email.
 #' - `add_attachment(object, ...)`: Adds an attachment to the email. See 'Attachments' below.
+#' - `add_image(object)`: Adds an inline image to the email.
 #' - `get_attachment(attachment_name=NULL, attachment_id=NULL)`: Gets an attachment, either by name or ID. Note that attachments don't need to have unique names; if multiple attachments share the same name, the method throws an error.
 #' - `list_attachments()`: Lists the current attachments for the email.
 #' - `remove_attachment(attachment_name=NULL, attachment_id=NULL, confirm=TRUE)`: Removes an attachment from the email. By default, ask for confirmation first.
@@ -52,7 +53,9 @@
 #'
 #' `add_attachment(object, ...)` adds an attachment to the email. The `object` argument should be a character string containing a filename or URL, or an object of class `ms_drive_item`. In the latter case, a shareable link to the drive item will be attached to the email, with the specifics of the link given by the `...` arguments.
 #'
-#' `list_attachments()` lists the attachments for the email. This will be a list of objects of class [`ms_outlook_attachment`] containing the metadata for the attachments.
+#' `add_image(object)` adds an image as an _inline_ attachment, ie, as part of the message body. The `object` argument should be a filename, and the message content type will be set to "html" if it is not already. Currently Microsoft365R does minimal formatting of the image; consider using a package like blastula for more control over the layout parameters of inline images.
+#'
+#' `list_attachments()` lists the attachments for the email, including inline images. This will be a list of objects of class [`ms_outlook_attachment`] containing the metadata for the attachments.
 #'
 #' `get_attachment(attachment_name, attachment_id)`: Retrieves the metadata for an attachment, as an object of class `ms_outlook_attachment`. Note that multiple attachments can share the same name; in this case, you must specify the ID of the attachment.
 #'
@@ -89,7 +92,7 @@
 #' em <- outl$create_email()
 #'
 #' # add a body
-#' em$set_body("Hello from R")
+#' em$set_body("Hello from R", content_type="html")
 #'
 #' # add recipients
 #' em$set_recipients(to="user@example.com")
@@ -99,6 +102,9 @@
 #'
 #' # add an attachment
 #' em$add_attachment("mydocument.docx")
+#'
+#' # add an inline image
+#' em$add_image("myggplot.jpg")
 #'
 #' # oops, wrong recipient, it should be someone else
 #' # this removes user@example.com from the to: field
@@ -254,13 +260,25 @@ public=list(
         do.call(self$update, recipients)
     },
 
-    add_attachment=function(object, inline=FALSE,
-                            type=c("view", "edit", "embed"), expiry="7 days", password=NULL, scope=NULL)
+    add_attachment=function(object, type=c("view", "edit", "embed"), expiry="7 days", password=NULL, scope=NULL)
     {
-        att <- private$make_attachment(object, inline, match.arg(type), expiry, password, scope)
+        att <- private$make_attachment(object, FALSE, match.arg(type), expiry, password, scope)
         if(!is_empty(att))  # check for large attachment
             self$do_operation("attachments", body=att, http_verb="POST")
         self$sync_fields()
+    },
+
+    add_image=function(object)
+    {
+        if(self$properties$body$contentType != "html")
+            warning("Message body will be converted to HTML", call.=FALSE)
+
+        att <- private$make_attachment(object, TRUE)
+        if(!is_empty(att))
+            self$do_operation("attachments", body=att, http_verb="POST")
+        body <- c(self$properties$body$content,
+            sprintf('<img src="cid:%s"/>', att$name))
+        self$set_body(body=body, content_type="html")
     },
 
     get_attachment=function(attachment_name=NULL, attachment_id=NULL)
@@ -419,7 +437,6 @@ private=list(
 
         if(is_file)
         {
-            # assert_valid_attachment_size(file.size(object))
             # simple attachment if file is small enough, otherwise use upload session
             out <- if(is_small_attachment(file.size(object)))
             {
@@ -431,7 +448,12 @@ private=list(
                     contentType=mime::guess_type(object)
                 )
             }
-            else make_large_attachment(object, self)
+            else
+            {
+                if(inline)
+                    stop("Inline images must be < 3MB", call.=FALSE)
+                make_large_attachment(object, self)
+            }
             return(out)
         }
         if(is_item)  # special treatment for OneDrive/SharePoint links

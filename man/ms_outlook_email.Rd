@@ -34,6 +34,7 @@ Class representing an Outlook mail message. The one class represents both sent a
 \item \code{add_recipients(to=NULL, cc=NULL, bcc=NULL)}: Adds recipients for the email, leaving existing ones unchanged.
 \item \code{set_reply_to(reply_to=NULL)}: Sets the reply-to field for the email.
 \item \code{add_attachment(object, ...)}: Adds an attachment to the email. See 'Attachments' below.
+\item \code{add_image(object)}: Adds an inline image to the email.
 \item \code{get_attachment(attachment_name=NULL, attachment_id=NULL)}: Gets an attachment, either by name or ID. Note that attachments don't need to have unique names; if multiple attachments share the same name, the method throws an error.
 \item \code{list_attachments()}: Lists the current attachments for the email.
 \item \code{remove_attachment(attachment_name=NULL, attachment_id=NULL, confirm=TRUE)}: Removes an attachment from the email. By default, ask for confirmation first.
@@ -73,7 +74,9 @@ This class exposes the following methods for working with attachments.
 
 \code{add_attachment(object, ...)} adds an attachment to the email. The \code{object} argument should be a character string containing a filename or URL, or an object of class \code{ms_drive_item}. In the latter case, a shareable link to the drive item will be attached to the email, with the specifics of the link given by the \code{...} arguments.
 
-\code{list_attachments()} lists the attachments for the email. This will be a list of objects of class \code{\link{ms_outlook_attachment}} containing the metadata for the attachments.
+\code{add_image(object)} adds an image as an \emph{inline} attachment, ie, as part of the message body. The \code{object} argument should be a filename, and the message content type will be set to "html" if it is not already. Currently Microsoft365R does minimal formatting of the image; consider using a package like blastula for more control over the layout parameters of inline images.
+
+\code{list_attachments()} lists the attachments for the email, including inline images. This will be a list of objects of class \code{\link{ms_outlook_attachment}} containing the metadata for the attachments.
 
 \code{get_attachment(attachment_name, attachment_id)}: Retrieves the metadata for an attachment, as an object of class \code{ms_outlook_attachment}. Note that multiple attachments can share the same name; in this case, you must specify the ID of the attachment.
 
@@ -109,7 +112,7 @@ outl <- get_personal_outlook()
 em <- outl$create_email()
 
 # add a body
-em$set_body("Hello from R")
+em$set_body("Hello from R", content_type="html")
 
 # add recipients
 em$set_recipients(to="user@example.com")
@@ -119,6 +122,9 @@ em$set_subject("example email")
 
 # add an attachment
 em$add_attachment("mydocument.docx")
+
+# add an inline image
+em$add_image("myggplot.jpg")
 
 # oops, wrong recipient, it should be someone else
 # this removes user@example.com from the to: field

@@ -254,11 +254,10 @@ public=list(
         do.call(self$update, recipients)
     },
 
-    add_attachment=function(object, ...)
+    add_attachment=function(object, inline=FALSE,
+                            type=c("view", "edit", "embed"), expiry="7 days", password=NULL, scope=NULL)
     {
-        if(inherits(object, "ms_drive_item"))
-            object <- object$create_share_link(...)
-        att <- private$make_attachment(object)
+        att <- private$make_attachment(object, inline, match.arg(type), expiry, password, scope)
         if(!is_empty(att))  # check for large attachment
             self$do_operation("attachments", body=att, http_verb="POST")
         self$sync_fields()
@@ -412,43 +411,60 @@ public=list(
 
 private=list(
 
-    make_attachment=function(object)
+    make_attachment=function(object, inline, type, expiry, password, scope)
     {
-        if(!is.character(object))
-            stop("Attachments must be provided as filenames or URLs", call.=FALSE)
+        is_url <- is.character(object) && !is_empty(httr::parse_url(object)$scheme)
+        is_file <- is.character(object) && file.exists(object) && !dir.exists(object)
+        is_item <- inherits(object, "ms_drive_item")
 
-        if(file.exists(object))  # a file
+        if(is_file)
         {
             # assert_valid_attachment_size(file.size(object))
             # simple attachment if file is small enough, otherwise use upload session
-            if(is_small_attachment(file.size(object)))
+            out <- if(is_small_attachment(file.size(object)))
             {
                 list(
                     `@odata.type`="#microsoft.graph.fileAttachment",
-                    isInline=FALSE,
+                    isInline=inline,
                     contentBytes=openssl::base64_encode(readBin(object, "raw", file.size(object))),
                     name=basename(object),
                     contentType=mime::guess_type(object)
                 )
             }
             else make_large_attachment(object, self)
+            return(out)
         }
-        else if(!is_empty(httr::parse_url(object)$scheme))  # a URL
+        if(is_item)  # special treatment for OneDrive/SharePoint links
         {
-            url <- httr::parse_url(object)
-            name <- basename(url$path)
-            if(name == "")
-                name <- url$hostname
-            list(
-                `@odata.type`="#microsoft.graph.referenceAttachment",
-                name=name,
-                sourceUrl=object,
-                providerType="other",
-                permission="view",
-                isFolder=FALSE
-            )
+            provider <- if(object$properties$parentReference$driveType == "personal")
+                "oneDriveConsumer"
+            else "oneDriveBusiness"
+            permission <- type
+            folder <- object$is_folder()
+            object <- object$create_share_link(object, type, expiry, password, scope)
         }
-        else stop("Bad attachment: '", object, "'", call.=FALSE)
+        else
+        {
+            provider <- "other"
+            permission <- "other"
+            folder <- FALSE
+        }
+        if(!is_url(object))
+            stop("Attachment must be an ms_drive_item object, filename or URL", call.=FALSE)
+
+        url <- httr::parse_url(object)
+        name <- basename(url$path)
+        if(name == "")
+            name <- url$hostname
+        list(
+            `@odata.type`="#microsoft.graph.referenceAttachment",
+            name=name,
+            sourceUrl=object,
+            isInline=inline,
+            providerType=provider,
+            permission=permission,
+            isFolder=folder
+        )
     }
 ))
 

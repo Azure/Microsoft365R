@@ -122,6 +122,16 @@ test_that("Large attachments from emayili skipped",
 })
 
 
+test_that("Inline images from blastula work",
+{
+    bl_img <- blastula::add_image("../resources/logo_small.jpg")
+    bl_em <- blastula::compose_email(blastula::md(c("test blastula email", bl_img)))
+    em <- folder$create_email(bl_em)
+    lst <- em$list_attachments()
+    expect_true(!is_empty(lst))
+})
+
+
 teardown({
     folder$delete(confirm=FALSE)
     unlink(src)

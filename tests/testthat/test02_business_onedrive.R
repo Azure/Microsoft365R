@@ -159,6 +159,8 @@ test_that("Nested folder creation/deletion works",
     it1 <- od$get_item(f1)
     expect_is(it1, "ms_drive_item")
 
+    replicate(30, it1$upload(write_file()))
+
     it123 <- it1$create_folder(file.path(f2, f3))
     expect_is(it123, "ms_drive_item")
 

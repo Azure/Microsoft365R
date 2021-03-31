@@ -8,6 +8,7 @@
   - Move and copy folders
   - Add, remove, and download attachments
 - Add ability to created nested folders in OneDrive and SharePoint document libraries (#24).
+- Fix a bug that caused the `list_files()` method to fail on non-Windows systems (reported by Tony Sokolov).
 
 # Microsoft365R 2.0.0
 

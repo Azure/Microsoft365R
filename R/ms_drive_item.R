@@ -114,10 +114,17 @@ public=list(
         if(!by_item || !self$is_folder())
             return(super$delete(confirm=confirm))
 
+        if (confirm && interactive())
+        {
+            msg <- sprintf("Do you really want to delete the %s '%s'?", self$type, self$properties$name)
+            if (!get_confirmation(msg, FALSE))
+                return(invisible(NULL))
+        }
+
         children <- self$list_items()
         dirs <- children$isdir
         for(d in children$name[dirs])
-            self$get_item(d)$delete(confirm=confirm, by_item=TRUE)
+            self$get_item(d)$delete(confirm=FALSE, by_item=TRUE)
 
         deletes <- lapply(children$name[!dirs], function(f)
         {
@@ -133,7 +140,7 @@ public=list(
             i <- max(1, i - 19) - 1
         }
 
-        super$delete(confirm=confirm)
+        super$delete(confirm=FALSE)
     },
 
     is_folder=function()

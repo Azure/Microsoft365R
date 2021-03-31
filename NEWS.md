@@ -9,6 +9,7 @@
   - Add, remove, and download attachments
 - Add ability to created nested folders in OneDrive and SharePoint document libraries (#24).
 - Add a `by_item` argument to the `delete_item()` method for drives and the `delete()` method for drive items. This is to allow deletion of non-empty folders on SharePoint sites with data protection policies in place. Use with caution (#21).
+- Fix a bug that caused the `list_files()` method to fail on non-Windows systems (reported by Tony Sokolov).
 
 # Microsoft365R 2.0.0
 

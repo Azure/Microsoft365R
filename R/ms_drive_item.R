@@ -320,7 +320,7 @@ private=list(
                 parent$path <- sprintf("/drives/%s/root:", parent$driveId)
             file.path(parent$path, name)
         }
-        utils::URLencode(enc2utf8(file.path(op, dest)))
+        utils::URLencode(enc2utf8(sub("/$", "", file.path(op, dest))))
     },
 
     assert_is_folder=function()

@@ -11,6 +11,11 @@ add_external_attachments.blastula_message <- function(object, email)
 
     for(i in seq_along(object$images))
     {
+        if(!is_small_attachment(nchar(a$body)/0.74))  # allow for base64 bloat
+        {
+            warning("Inline images from blastula > 3MB not currently supported; will be skipped", call.=FALSE)
+            next
+        }
         body <- list(
             contentBytes=object$images[[i]],
             name=names(object$images)[1],

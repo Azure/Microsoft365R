@@ -102,7 +102,7 @@ src <- create_bigfile(4e6)
 
 test_that("Large attachments work",
 {
-    expect_silent(em <- folder$create_email(attachments=src))
+    expect_silent(em <- folder$create_email()$add_attachment(src))
     lst <- em$list_attachments()
     expect_true(!is_empty(lst) && as.numeric(lst[[1]]$properties$size) >= 4e6)
 })

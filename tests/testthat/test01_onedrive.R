@@ -149,5 +149,5 @@ test_that("Nested folder creation/deletion works",
     it123 <- it1$create_folder(file.path(f2, f3))
     expect_is(it123, "ms_drive_item")
 
-    expect_silent(it1$delete(confirm=FALSE, force=TRUE))
+    expect_silent(it1$delete(confirm=FALSE, by_item=TRUE))
 })

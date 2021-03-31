@@ -436,6 +436,8 @@ private=list(
         }
         if(is_item)  # special treatment for OneDrive/SharePoint links
         {
+            if(type == "embed")
+                stop("Share link type must be one of 'view' or 'edit'", call.=FALSE)
             provider <- if(object$properties$parentReference$driveType == "personal")
                 "oneDriveConsumer"
             else "oneDriveBusiness"

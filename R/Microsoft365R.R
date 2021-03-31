@@ -49,8 +49,9 @@ utils::globalVariables(c("self", "private"))
 # CLI for Microsoft 365 app ID
 .cli_microsoft365_app_id <- "31359c7f-bd7e-475c-86db-fdb8c937548e"
 
-# helper function
+# helper functions
 error_message <- get("error_message", getNamespace("AzureGraph"))
+get_confirmation <- get("get_confirmation", getNamespace("AzureGraph"))
 
 # dummy mention to keep CRAN happy
 # we need to ensure that vctrs is loaded so that AzureGraph will use vec_rbind

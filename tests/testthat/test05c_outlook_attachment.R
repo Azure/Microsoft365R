@@ -157,7 +157,7 @@ test_that("Links from OneDrive work",
     item <- od$upload_file(f, basename(f))
 
     em <- folder$create_email("test email", content_type="html")
-    em$add_attachment(item, expiry="14 days")
+    em$add_attachment(item, expiry="14 days", scope="anonymous")
     lst <- em$list_attachments()
     expect_true(!is_empty(lst))
 

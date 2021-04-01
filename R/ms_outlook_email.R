@@ -465,7 +465,7 @@ private=list(
             provider <- if(object$properties$parentReference$driveType == "personal")
                 "oneDriveConsumer"
             else "oneDriveBusiness"
-            permission <- type
+            permission <- paste0(scope, type)
             folder <- object$is_folder()
             object <- object$create_share_link(type, expiry, password, scope)
         }

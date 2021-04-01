@@ -49,19 +49,17 @@ Creating new objects of this class should be done via the \code{get_folder}, \co
 \section{Creating and sending emails}{
 
 Outlook allows creating new draft emails in any folder, not just the Drafts folder (although that is the default location for the Outlook app, and the \code{ms_outlook} client class). To create a new email, call the \code{create_email()} method, which has the following signature:\preformatted{create_email(body = "", content_type = c("text", "html"), subject = "",
-             to = NULL, cc = NULL, bcc = NULL, reply_to = NULL,
-             attachments = NULL, send_now = FALSE)
+             to = NULL, cc = NULL, bcc = NULL, reply_to = NULL, send_now = FALSE)
 }
 \itemize{
 \item \code{body}: The body of the message. This should be a string or vector of strings, which will be pasted together with newlines as separators. You can also supply a message object as created by the blastula or emayili packages---see the examples below.
 \item \code{content_type}: The format of the body, either "text" (the default) or HTML.
 \item \code{subject}: The subject of the message.
 \item \verb{to,cc,bcc,reply_to}: These should be lists of email addresses, in standard "user@host" format. You can also supply objects of class \code{\link[AzureGraph:az_user]{AzureGraph::az_user}} representing user accounts in Azure Active Directory.
-\item \code{attachments}: A list of file names or URLs to attach to the message.
 \item \code{send_now}: Whether the email should be sent immediately, or saved as a draft. You can send a draft email later with its \code{send()} method.
 }
 
-This returns an object of class \code{\link{ms_outlook_email}}, which has methods for making further edits.
+This returns an object of class \code{\link{ms_outlook_email}}, which has methods for making further edits and attaching files.
 
 You can also supply message objects as created by the blastula and emayili packages in the \code{body} argument. Note that blastula objects include attachments (if any), and emayili objects include attachments, recipients, and subject line; the corresponding arguments to \code{create_email()} will not be used in this case.
 
@@ -113,10 +111,6 @@ folder$get_email(email_id)
 # a simple text email with just a body:
 # you can add other properties by calling the returned object's methods
 folder$create_email("Hello from R")
-
-# email with attachments
-folder$create_email("Hello from R, see attached doc and spreadsheet",
-    attachments=c("mydocument.docx", "mydata.xlsx"))
 
 # HTML-formatted email with all necessary fields, sent immediately
 folder$create_email("<emph>Emphatic hello</emph> from R",

@@ -6,7 +6,7 @@ if(app == "")
 if(!interactive())
     skip("Outlook tests skipped: must be in interactive session")
 
-tok <- try(AzureAuth::get_azure_token(c("openid", "offline_access"),
+tok <- try(AzureAuth::get_azure_token(c("https://graph.microsoft.com/Mail.Read", "openid", "offline_access"),
     tenant="9188040d-6c67-4c5b-b112-36a304b66dad", app=.microsoft365r_app_id, version=2),
     silent=TRUE)
 if(inherits(tok, "try-error"))

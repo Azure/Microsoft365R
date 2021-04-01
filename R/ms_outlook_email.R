@@ -20,6 +20,7 @@
 #' - `add_recipients(to=NULL, cc=NULL, bcc=NULL)`: Adds recipients for the email, leaving existing ones unchanged.
 #' - `set_reply_to(reply_to=NULL)`: Sets the reply-to field for the email.
 #' - `add_attachment(object, ...)`: Adds an attachment to the email. See 'Attachments' below.
+#' - `add_image(object)`: Adds an inline image to the email.
 #' - `get_attachment(attachment_name=NULL, attachment_id=NULL)`: Gets an attachment, either by name or ID. Note that attachments don't need to have unique names; if multiple attachments share the same name, the method throws an error.
 #' - `list_attachments()`: Lists the current attachments for the email.
 #' - `remove_attachment(attachment_name=NULL, attachment_id=NULL, confirm=TRUE)`: Removes an attachment from the email. By default, ask for confirmation first.
@@ -50,9 +51,13 @@
 #' @section Attachments:
 #' This class exposes the following methods for working with attachments.
 #'
-#' `add_attachment(object, ...)` adds an attachment to the email. The `object` argument should be a character string containing a filename or URL, or an object of class `ms_drive_item`. In the latter case, a shareable link to the drive item will be attached to the email, with the specifics of the link given by the `...` arguments.
+#' `add_attachment(object, type, expiry, password, scope)` adds an attachment to the email. The arguments are as follows:
+#' - `object`: A character string containing a filename or URL, or an object of class [`ms_drive_item`] representing a file in OneDrive or SharePoint. In the latter case, a shareable link to the drive item will be attached to the email, with the link details given by the other arguments.
+#' - `type, expiry, password, scope`: The specifics for the shareable link to attach to the email, if `object` is a drive item. See the `create_share_link()` method of the [`ms_drive_item`] class; the default is to create a read-only link valid for 7 days.
 #'
-#' `list_attachments()` lists the attachments for the email. This will be a list of objects of class [`ms_outlook_attachment`] containing the metadata for the attachments.
+#' `add_image(object)` adds an image as an _inline_ attachment, ie, as part of the message body. The `object` argument should be a filename, and the message content type will be set to "html" if it is not already. Currently Microsoft365R does minimal formatting of the image; consider using a package like blastula for more control over the layout of inline images.
+#'
+#' `list_attachments()` lists the attachments for the email, including inline images. This will be a list of objects of class [`ms_outlook_attachment`] containing the metadata for the attachments.
 #'
 #' `get_attachment(attachment_name, attachment_id)`: Retrieves the metadata for an attachment, as an object of class `ms_outlook_attachment`. Note that multiple attachments can share the same name; in this case, you must specify the ID of the attachment.
 #'
@@ -89,7 +94,7 @@
 #' em <- outl$create_email()
 #'
 #' # add a body
-#' em$set_body("Hello from R")
+#' em$set_body("Hello from R", content_type="html")
 #'
 #' # add recipients
 #' em$set_recipients(to="user@example.com")
@@ -99,6 +104,13 @@
 #'
 #' # add an attachment
 #' em$add_attachment("mydocument.docx")
+#'
+#' # add a shareable link to a file in OneDrive
+#' mysheet <- get_personal_onedrive()$get_item("documents/mysheet.xlsx")
+#' em$add_attachment(mysheet)
+#'
+#' # add an inline image
+#' em$add_image("myggplot.jpg")
 #'
 #' # oops, wrong recipient, it should be someone else
 #' # this removes user@example.com from the to: field
@@ -254,14 +266,25 @@ public=list(
         do.call(self$update, recipients)
     },
 
-    add_attachment=function(object, ...)
+    add_attachment=function(object, type=c("view", "edit", "embed"), expiry="7 days", password=NULL, scope=NULL)
     {
-        if(inherits(object, "ms_drive_item"))
-            object <- object$create_share_link(...)
-        att <- private$make_attachment(object)
+        att <- private$make_attachment(object, FALSE, match.arg(type), expiry, password, scope)
         if(!is_empty(att))  # check for large attachment
             self$do_operation("attachments", body=att, http_verb="POST")
         self$sync_fields()
+    },
+
+    add_image=function(object)
+    {
+        if(self$properties$body$contentType != "html")
+            warning("Message body will be converted to HTML", call.=FALSE)
+
+        att <- private$make_attachment(object, TRUE)
+        if(!is_empty(att))
+            self$do_operation("attachments", body=att, http_verb="POST")
+        body <- c(self$properties$body$content,
+            sprintf('<img src="cid:%s"/>', att$name))
+        self$set_body(body=body, content_type="html")
     },
 
     get_attachment=function(attachment_name=NULL, attachment_id=NULL)
@@ -412,43 +435,62 @@ public=list(
 
 private=list(
 
-    make_attachment=function(object)
+    make_attachment=function(object, inline, type, expiry, password, scope)
     {
-        if(!is.character(object))
-            stop("Attachments must be provided as filenames or URLs", call.=FALSE)
-
-        if(file.exists(object))  # a file
+        if(is.character(object) && file.exists(object) && !dir.exists(object))
         {
-            # assert_valid_attachment_size(file.size(object))
             # simple attachment if file is small enough, otherwise use upload session
-            if(is_small_attachment(file.size(object)))
+            out <- if(is_small_attachment(file.size(object)))
             {
                 list(
                     `@odata.type`="#microsoft.graph.fileAttachment",
-                    isInline=FALSE,
+                    isInline=inline,
                     contentBytes=openssl::base64_encode(readBin(object, "raw", file.size(object))),
                     name=basename(object),
                     contentType=mime::guess_type(object)
                 )
             }
-            else make_large_attachment(object, self)
+            else
+            {
+                if(inline)
+                    stop("Inline images must be < 3MB", call.=FALSE)
+                make_large_attachment(object, self)
+            }
+            return(out)
         }
-        else if(!is_empty(httr::parse_url(object)$scheme))  # a URL
+        if(inherits(object, "ms_drive_item"))  # special treatment for OneDrive/SharePoint links
         {
-            url <- httr::parse_url(object)
-            name <- basename(url$path)
-            if(name == "")
-                name <- url$hostname
-            list(
-                `@odata.type`="#microsoft.graph.referenceAttachment",
-                name=name,
-                sourceUrl=object,
-                providerType="other",
-                permission="view",
-                isFolder=FALSE
-            )
+            if(type == "embed")
+                stop("Share link type must be one of 'view' or 'edit'", call.=FALSE)
+            provider <- if(object$properties$parentReference$driveType == "personal")
+                "oneDriveConsumer"
+            else "oneDriveBusiness"
+            permission <- paste0(scope, type)
+            folder <- object$is_folder()
+            object <- object$create_share_link(type, expiry, password, scope)
         }
-        else stop("Bad attachment: '", object, "'", call.=FALSE)
+        else
+        {
+            provider <- "other"
+            permission <- "other"
+            folder <- FALSE
+        }
+        if(!is.character(object) || is_empty(httr::parse_url(object)$scheme))
+            stop("Attachment must be an ms_drive_item object, filename or URL", call.=FALSE)
+
+        url <- httr::parse_url(object)
+        name <- basename(url$path)
+        if(name == "")
+            name <- url$hostname
+        list(
+            `@odata.type`="#microsoft.graph.referenceAttachment",
+            name=name,
+            sourceUrl=object,
+            isInline=inline,
+            providerType=provider,
+            permission=permission,
+            isFolder=folder
+        )
     }
 ))
 

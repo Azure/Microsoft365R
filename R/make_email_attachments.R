@@ -8,6 +8,23 @@ add_external_attachments.blastula_message <- function(object, email)
 {
     for(a in object$attachments)
         email$add_attachment(a$file_path)
+
+    for(i in seq_along(object$images))
+    {
+        if(!is_small_attachment(nchar(object$images[[i]])/0.74))  # allow for base64 bloat
+        {
+            warning("Inline images must be < 3MB; will be skipped", call.=FALSE)
+            next
+        }
+        body <- list(
+            `@odata.type`="#microsoft.graph.fileAttachment",
+            contentBytes=object$images[[i]],
+            name=names(object$images)[1],
+            contentType=attr(object$images[[i]], "content_type"),
+            isInline=TRUE
+        )
+        email$do_operation("attachments", body=body, http_verb="POST")
+    }
 }
 
 

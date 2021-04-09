@@ -1,9 +1,11 @@
 ---
 title: "Managing emails with Outlook"
 author: Hong Ooi
-output: rmarkdown::html_vignette
+output:
+    rmarkdown::html_vignette:
+        toc: true
 vignette: >
-    %\VignetteIndexEntry{Outlook email}
+    %\VignetteIndexEntry{Managing emails with Outlook}
     %\VignetteEngine{knitr::rmarkdown}
     %\VignetteEncoding{utf8}
 ---
@@ -226,7 +228,7 @@ outl$list_folders()
 # get a folder by name
 folder <- outl$get_folder("myfolder")
 
-# you can also get nested folders:
+# you can also get nested folders
 folder2 <- outl$get_folder("top level")$get_folder("2nd level")
 
 # create a new folder

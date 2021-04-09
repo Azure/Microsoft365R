@@ -12,6 +12,9 @@ vignette: >
 
 This vignette describes how to use Microsoft365R to interact with [Outlook](https://www.microsoft.com/en-au/microsoft-365/outlook/email-and-calendar-software-microsoft-outlook) for managing and sending email. See the "Authenticating to Microsoft 365" vignette for more details on authentication if required.
 
+Note that Microsoft365R only works with your _primary_ Outlook (Microsoft Exchange) account. It does not support other email providers that you may have connected to your Outlook account, eg Gmail.
+
+
 ## Outlook client
 
 To access your Outlook inbox, call either `get_personal_outlook()` or `get_business_outlook()`. The first one is for your personal account, and the second is for your work & school account. They return objects of R6 class `ms_outlook`, which has methods for drafting new emails, listing emails in your Inbox, and working with folders.
@@ -33,6 +36,7 @@ outl$list_folders()
 inbox <- outl$get_inbox()
 drafts <- outl$get_drafts()
 sent <- outl$get_sent_items()
+deleted <- outl$get_deleted_items()
 
 # get a specific folder by name
 folder <- outl$get_folder("myfolder")
@@ -235,7 +239,7 @@ folder2 <- outl$get_folder("top level")$get_folder("2nd level")
 outl$create_folder("test folder")
 
 # delete it
-outl$delete_folder("test_folder")
+outl$delete_folder("test folder")
 ```
 
 In addition, the Outlook client object provides some convenience functions for retrieving well-known folders: `get_inbox()`, `get_drafts()`, `get_sent_items()`, and `get_deleted_items()`.

@@ -1,4 +1,4 @@
-# Microsoft365R 2.0.0.9000
+# Microsoft365R 2.1.0
 
 - Add support for sending and managing emails in Outlook. Use the `get_personal_outlook()` and `get_business_outlook()` client functions to access the emails in your personal account and work or school account, respectively. Functionality supported includes:
   - Send and reply to emails, optionally composed with either the blastula or emayili packages

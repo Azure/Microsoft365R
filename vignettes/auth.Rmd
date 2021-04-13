@@ -10,17 +10,28 @@ vignette: >
 
 ## Authentication
 
-The first time you call one of the Microsoft365R client functions, it will use your Internet browser to authenticate you with Azure Active Directory, in a similar manner to other web apps. You will get a dialog box asking for permission to access your information. Your login information is saved, so you should only have to authenticate once.
+To authenticate with Azure Active Directory, simply call one of the Microsoft365R client functions.
+
+```r
+get_personal_onedrive()
+get_business_onedrive()
+get_personal_outlook()
+get_business_outlook()
+get_sharepoint_site()
+get_team()
+```
+
+Notice that you do _not_ provide your username and password in the function call. Instead, Microsoft365R will use your Internet browser to obtain your credentials, in a similar manner to other web apps. You will get a dialog box asking for permission to access your information. Your login information is saved, so you should only have to authenticate once.
 
 ### Using the device code flow
 
-Microsoft365R's default authentication method assumes that your R session can access the Internet via a browser. If this is not the case, for example if you are using Databricks or RStudio Server, you can switch to the _device code_ flow by passing the `auth_type="device_code"` argument:
+The default authentication method assumes that your R session can access the Internet via a browser. If this is not the case, for example if you are using Databricks or RStudio Server, you can switch to the _device code_ flow by passing the `auth_type="device_code"` argument:
 
 ```r
 get_personal_onedrive(auth_type="device_code")
 ```
 
-This will print an access code and URL on the screen. You login to the URL using a browser on another device, and type in the code. Once this is done, Microsoft365R will complete the authentication process.
+This will print an access code and URL on the screen. You login to the URL using a browser on another device, and type in the code. Once this is done, Microsoft365R will complete the authentication process. Again, you do _not_ provide your username and password in the function call.
 
 ### Specifying the tenant
 

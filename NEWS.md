@@ -1,4 +1,4 @@
-# Microsoft365R 2.0.0.9000
+# Microsoft365R 2.1.0
 
 - Add support for sending and managing emails in Outlook. Use the `get_personal_outlook()` and `get_business_outlook()` client functions to access the emails in your personal account and work or school account, respectively. Functionality supported includes:
   - Send and reply to emails, optionally composed with either the blastula or emayili packages
@@ -26,9 +26,9 @@
   - This facilitates managing files for Teams channels, which have associated folders in a shared document library (drive)
   - The existing methods for the `ms_drive` class now call down to the `ms_drive_item` methods, with appropriate arguments; their behaviour should be unchanged
 - Rename the client functions to allow for listing teams and sites. The original clients are still available, but are deprecated and simply redirect to the new functions. They will be removed in a future version of the package.
-  - `get_sharepoint_site()` is now `get_sharepoint_site()`
-  - `get_personal_onedrive()` is now `get_personal_onedrive()`
-  - `get_business_onedrive()` is now `get_business_onedrive()`
+  - `sharepoint_site()` is now `get_sharepoint_site()`
+  - `personal_onedrive()` is now `get_personal_onedrive()`
+  - `business_onedrive()` is now `get_business_onedrive()`
 - The first argument to `get_sharepoint_site()` is `site_name` to get a site by name, for consistency with `get_team()`. To get a site by URL, specify the `site_url` argument explicitly: `get_sharepoint_site(site_url="https://my-site-url")`.
 - Add `list_sharepoint_sites()` function to list the sites you follow.
 

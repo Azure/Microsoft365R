@@ -125,6 +125,13 @@ public=list(
         az_group$new(self$token, self$tenant, private$do_group_operation())
     },
 
+    list_members=function()
+    {
+        res <- private$get_paged_list(self$do_operation("members"))
+        private$init_list_objects(res, default_generator=ms_team_member,
+            parent_id=self$properties$id, parent_type="team")
+    },
+
     print=function(...)
     {
         cat("<Team '", self$properties$displayName, "'>\n", sep="")

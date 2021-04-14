@@ -1,0 +1,15 @@
+ms_team_member <- R6::R6Class("ms_team_member", inherit=ms_object,
+
+public=list(
+
+    initialize=function(token, tenant=NULL, properties=NULL, parent_id=NULL,
+                        parent_type=c("teams", "channels", "chats"))
+    {
+        parent_type <- match.arg(parent_type)
+        if(is.null(parent_id))
+            stop("Missing team/channel/conversation ID", call.=FALSE)
+        self$type <- "team member"
+        private$api_type <- file.path(parent_type, parent_id, "members")
+        super$initialize(token, tenant, properties)
+    }
+))

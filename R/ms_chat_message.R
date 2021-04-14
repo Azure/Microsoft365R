@@ -251,3 +251,11 @@ make_mention.ms_channel <- function(object, i)
 }
 
 
+make_mention.ms_team_member <- function(object, i)
+{
+    userprops <- call_graph_endpoint(object$token,
+        file.path("users", object$properties$userId))
+    make_mention(az_user$new(object$token, object$tenant, userprops), i)
+}
+
+

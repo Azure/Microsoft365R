@@ -86,10 +86,10 @@ public=list(
         super$initialize(token, tenant, properties)
     },
 
-    send_message=function(body, content_type=c("text", "html"), attachments=NULL, inline=NULL)
+    send_message=function(body, content_type=c("text", "html"), attachments=NULL, inline=NULL, mentions=NULL)
     {
         content_type <- match.arg(content_type)
-        call_body <- build_chatmessage_body(self, body, content_type, attachments, inline)
+        call_body <- build_chatmessage_body(self, body, content_type, attachments, inline, mentions)
         res <- self$do_operation("messages", body=call_body, http_verb="POST")
         ms_chat_message$new(self$token, self$tenant, res)
     },

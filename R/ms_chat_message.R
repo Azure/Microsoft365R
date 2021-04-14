@@ -130,7 +130,7 @@ private=list(
 ))
 
 
-build_chatmessage_body <- function(channel, body, content_type, attachments, inline)
+build_chatmessage_body <- function(channel, body, content_type, attachments, inline, mentions)
 {
     call_body <- list(body=list(content=paste(body, collapse="\n"), contentType=content_type))
     if(!is_empty(attachments))
@@ -172,5 +172,82 @@ build_chatmessage_body <- function(channel, body, content_type, attachments, inl
         })
         call_body$body$content <- paste(call_body$body$content, paste(inline_tags, collapse=""))
     }
+    if(!is_empty(mentions))
+    {
+        if(call_body$body$contentType != "html")
+            stop("Content type must be 'html' to include mentions", .call=FALSE)
+
+        call_body$mentions <- lapply(seq_along(mentions), function(i)
+        {
+            obj <- mentions[[i]]
+            if(!inherits(obj, c("ms_team_member", "az_user", "ms_team", "ms_channel")))
+                stop("Must supply an object representing a team member, user, team or channel", call.=FALSE)
+            make_mention(obj, i)
+        })
+        mention_tags <- lapply(call_body$mentions,
+            function(m) sprintf('<at id="%d">%s</at>', m$id, m$mentionText))
+        call_body$body$content <- paste(call_body$body$content, paste(mention_tags, collapse=" "))
+    }
     call_body
 }
+
+
+make_mention <- function(object, i)
+{
+    UseMethod("make_mention")
+}
+
+
+make_mention.az_user <- function(object, i)
+{
+    name <- if(!is.null(object$properties$displayName))
+        object$properties$displayName
+    else if(!is.null(object$properties$userPrincipalName))
+        object$properties$userPrincipalName
+    else stop("Could not find user display name", call.=FALSE)
+    list(
+        id=i,
+        mentionText=name,
+        mentioned=list(
+            user=list(
+                id=object$properties$id,
+                displayName=object$properties$displayName,
+                userIdentityType="aadUser"
+            )
+        )
+    )
+}
+
+
+make_mention.ms_team <- function(object, i)
+{
+    list(
+        id=i,
+        mentionText=object$properties$displayName,
+        mentioned=list(
+            conversation=list(
+                id=object$properties$id,
+                displayName=object$properties$displayName,
+                conversationIdentityType="team"
+            )
+        )
+    )
+}
+
+
+make_mention.ms_channel <- function(object, i)
+{
+    list(
+        id=i,
+        mentionText=object$properties$displayName,
+        mentioned=list(
+            conversation=list(
+                id=object$properties$id,
+                displayName=object$properties$displayName,
+                conversationIdentityType="channel"
+            )
+        )
+    )
+}
+
+

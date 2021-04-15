@@ -44,6 +44,8 @@ build_chatmessage_body <- function(channel, body, content_type, attachments, inl
     {
         if(call_body$body$contentType != "html")
             stop("Content type must be 'html' to include mentions", .call=FALSE)
+        if(inherits(mentions, c("ms_team_member", "az_user", "ms_team", "ms_channel")))
+            mentions <- list(mentions)
 
         call_body$mentions <- lapply(seq_along(mentions), function(i)
         {

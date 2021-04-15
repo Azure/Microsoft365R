@@ -11,5 +11,13 @@ public=list(
         self$type <- "team member"
         private$api_type <- file.path(parent_type, parent_id, "members")
         super$initialize(token, tenant, properties)
+    },
+
+    print=function(...)
+    {
+        cat("<Team member '", self$properties$displayName, "'>\n", sep="")
+        cat("  directory id:", self$properties$id, "\n")
+        cat("  user id:", self$properties$userId, "\n")
+        invisible(self)
     }
 ))

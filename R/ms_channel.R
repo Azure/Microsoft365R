@@ -133,6 +133,35 @@ public=list(
         private$folder
     },
 
+    list_members=function()
+    {
+        res <- private$get_paged_list(self$do_operation("members"))
+        private$init_list_objects(res, default_generator=ms_team_member,
+            parent_id=self$properties$id, parent_type="channel")
+    },
+
+    get_member=function(name=NULL, email=NULL, id=NULL)
+    {
+        assert_one_arg(name, email, id, msg="Supply exactly one of member name, email address, or ID")
+        if(!is.null(id))
+        {
+            res <- self$do_operation(file.path("members", id))
+            ms_team_member$new(self$token, self$tenant, res,
+                parent_id=self$properties$id, parent_type="channel")
+        }
+        else
+        {
+            filter <- if(!is.null(name))
+                sprintf("displayName eq '%s'", name)
+            else sprintf("microsoft.graph.aadUserConversationMember/email eq '%s'", email)
+            res <- private$get_paged_list(self$do_operation("members", options=list(`$filter`=filter)))
+            if(length(res) != 1)
+                stop("Invalid name or email address", call.=FALSE)
+            ms_team_member$new(self$topken, self$tenant, res[[1]],
+                parent_id=self$properties$id, parent_type="channel")
+        }
+    },
+
     print=function(...)
     {
         cat("<Teams channel '", self$properties$displayName, "'>\n", sep="")

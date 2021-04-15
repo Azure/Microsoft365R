@@ -1,3 +1,4 @@
+#' @export
 ms_team_member <- R6::R6Class("ms_team_member", inherit=ms_object,
 
 public=list(
@@ -8,7 +9,7 @@ public=list(
         parent_type <- match.arg(parent_type)
         if(is.null(parent_id))
             stop("Missing team/channel/conversation ID", call.=FALSE)
-        self$type <- "team member"
+        self$type <- sub("s$", " member", parent_type)
         private$api_type <- file.path(parent_type, parent_id, "members")
         super$initialize(token, tenant, properties)
     },
@@ -23,7 +24,9 @@ public=list(
 
     print=function(...)
     {
-        cat("<Team member '", self$properties$displayName, "'>\n", sep="")
+        type <- self$type
+        substr(type, 1, 1) <- toupper(substr(type, 1, 1))
+        cat("<", type, " '", self$properties$displayName, "'>\n", sep="")
         cat("  directory id:", self$properties$id, "\n")
         cat("  user id:", self$properties$userId, "\n")
         invisible(self)

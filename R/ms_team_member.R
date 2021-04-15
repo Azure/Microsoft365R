@@ -13,6 +13,14 @@ public=list(
         super$initialize(token, tenant, properties)
     },
 
+    get_aaduser <- function()
+    {
+        if(is.null(self$properties$userId))
+            stop("Not an Azure Active Directory user identity", call.=FALSE)
+        res <- call_graph_endpoint(self$token, file.path("users", self$properties$userId))
+        az_user$new(self$token, self$tenant, res)
+    },
+
     print=function(...)
     {
         cat("<Team member '", self$properties$displayName, "'>\n", sep="")

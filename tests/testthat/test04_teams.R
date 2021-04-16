@@ -43,7 +43,7 @@ test_that("Teams client works",
 
 test_that("Teams methods work",
 {
-    team <- get_team(team_name, tenant=tenant, app=app)
+    team <- get_team(team_id=team_id, tenant=tenant, app=app)
     expect_is(team, "ms_team")
 
     # drive -- functionality tested in test02
@@ -86,4 +86,40 @@ test_that("Teams methods work",
 
     chan2 <- team$get_channel(channel_id=channel_id)
     expect_is(chan2, "ms_channel")
+})
+
+test_that("Team member methods work",
+{
+    team <- get_team(team_id=team_id, tenant=tenant, app=app)
+
+    mlst <- team$list_members()
+    expect_is(mlst, "list")
+    expect_true(all(sapply(mlst, inherits, "ms_team_member")))
+    expect_true(all(sapply(mlst, function(obj) obj$type == "team member")))
+
+    usr <- mlst[[1]]
+    usrname <- usr$properties$displayName
+    usremail <- usr$properties$email
+    usrid <- usr$properties$id
+    expect_false(is.null(usrname))
+    expect_false(is.null(usremail))
+    expect_false(is.null(usrid))
+
+    usr1 <- team$get_member(usrname)
+    expect_is(usr1, "ms_team_member")
+    expect_identical(usr$properties$id, usr1$properties$id)
+
+    usr2 <- team$get_member(email=usremail)
+    expect_is(usr2, "ms_team_member")
+    expect_identical(usr$properties$id, usr2$properties$id)
+
+    usr3 <- team$get_member(id=usrid)
+    expect_is(usr3, "ms_team_member")
+    expect_identical(usr$properties$id, usr3$properties$id)
+
+    aaduser <- usr$get_aaduser()
+    expect_is(aaduser, "az_user")
+
+    aaduser1 <- usr1$get_aaduser()
+    expect_is(aaduser1, "az_user")
 })

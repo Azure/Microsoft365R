@@ -176,7 +176,7 @@ public=list(
             res <- private$get_paged_list(self$do_operation("members", options=list(`$filter`=filter)))
             if(length(res) != 1)
                 stop("Invalid name or email address", call.=FALSE)
-            ms_team_member$new(self$topken, self$tenant, res[[1]],
+            ms_team_member$new(self$token, self$tenant, res[[1]],
                 parent_id=self$properties$id, parent_type="channel")
         }
     },

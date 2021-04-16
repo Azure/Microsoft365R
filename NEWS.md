@@ -1,3 +1,9 @@
+# Microsoft365R 2.1.0.9000
+
+- Add `list_members()` and `get_member()` methods for teams and channels.
+- Add support for @mentions in Teams channel messages (#26).
+- Add a `by_item` argument to the `delete_item()` method for drives and the `delete()` method for drive items. This is to allow deletion of non-empty folders on SharePoint sites with data protection policies in place. Use with caution (#21).
+
 # Microsoft365R 2.1.0
 
 - Add support for sending and managing emails in Outlook. Use the `get_personal_outlook()` and `get_business_outlook()` client functions to access the emails in your personal account and work or school account, respectively. Functionality supported includes:

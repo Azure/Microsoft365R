@@ -20,7 +20,7 @@
 #' - `create_folder(path)`: Create a folder.
 #' - `open_item(path)`: Open a file or folder.
 #' - `create_share_link(...)`: Create a shareable link for a file or folder.
-#' - `delete_item(path, confirm)`: Delete a file or folder.
+#' - `delete_item(path, confirm, by_item)`: Delete a file or folder. By default, ask for confirmation first. For personal OneDrive, deleting a folder will also automatically delete its contents; for business OneDrive or SharePoint document libraries, you may need to set `by_item=TRUE` to delete the contents first depending on your organisation's policies. Note that this can be slow for large folders.
 #' - `get_item(path)`: Get an item representing a file or folder.
 #' - `get_item_properties(path)`: Get the properties (metadata) for a file or folder.
 #' - `set_item_properties(path, ...)`: Set the properties for a file or folder.
@@ -134,9 +134,9 @@ public=list(
         self$get_item(path)$open()
     },
 
-    delete_item=function(path, confirm=TRUE)
+    delete_item=function(path, confirm=TRUE, by_item=FALSE)
     {
-        self$get_item(path)$delete(confirm=confirm)
+        self$get_item(path)$delete(confirm=confirm, by_item=by_item)
     },
 
     get_item=function(path)

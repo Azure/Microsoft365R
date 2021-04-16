@@ -10,7 +10,7 @@
 #' - `properties`: The item properties (metadata).
 #' @section Methods:
 #' - `new(...)`: Initialize a new object. Do not call this directly; see 'Initialization' below.
-#' - `delete(confirm=TRUE)`: Delete this item. By default, ask for confirmation first. For personal OneDrives, deleting a folder will also automatically delete its contents; for business OneDrives or SharePoint document libraries, you must delete the folder contents first before deleting the folder.
+#' - `delete(confirm=TRUE, by_item=FALSE)`: Delete this item. By default, ask for confirmation first. For personal OneDrive, deleting a folder will also automatically delete its contents; for business OneDrive or SharePoint document libraries, you may need to set `by_item=TRUE` to delete the contents first depending on your organisation's policies. Note that this can be slow for large folders.
 #' - `update(...)`: Update the item's properties (metadata) in Microsoft Graph.
 #' - `do_operation(...)`: Carry out an arbitrary operation on the item.
 #' - `sync_fields()`: Synchronise the R object with the item metadata in Microsoft Graph.
@@ -107,6 +107,40 @@ public=list(
         self$type <- "drive item"
         private$api_type <- file.path("drives", properties$parentReference$driveId, "items")
         super$initialize(token, tenant, properties)
+    },
+
+    delete=function(confirm=TRUE, by_item=FALSE)
+    {
+        if(!by_item || !self$is_folder())
+            return(super$delete(confirm=confirm))
+
+        if (confirm && interactive())
+        {
+            msg <- sprintf("Do you really want to delete the %s '%s'?", self$type, self$properties$name)
+            if (!get_confirmation(msg, FALSE))
+                return(invisible(NULL))
+        }
+
+        children <- self$list_items()
+        dirs <- children$isdir
+        for(d in children$name[dirs])
+            self$get_item(d)$delete(confirm=FALSE, by_item=TRUE)
+
+        deletes <- lapply(children$name[!dirs], function(f)
+        {
+            path <- private$make_absolute_path(f)
+            graph_request$new(path, http_verb="DELETE")
+        })
+        # do in batches of 20
+        i <- length(deletes)
+        while(i > 0)
+        {
+            batch <- seq(from=max(1, i - 19), to=i)
+            call_batch_endpoint(self$token, deletes[batch])
+            i <- max(1, i - 19) - 1
+        }
+
+        super$delete(confirm=FALSE)
     },
 
     is_folder=function()

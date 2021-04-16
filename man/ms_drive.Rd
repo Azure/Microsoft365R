@@ -34,7 +34,7 @@ Class representing a personal OneDrive or SharePoint document library.
 \item \code{create_folder(path)}: Create a folder.
 \item \code{open_item(path)}: Open a file or folder.
 \item \code{create_share_link(...)}: Create a shareable link for a file or folder.
-\item \code{delete_item(path, confirm)}: Delete a file or folder.
+\item \code{delete_item(path, confirm, by_item)}: Delete a file or folder. By default, ask for confirmation first. For personal OneDrive, deleting a folder will also automatically delete its contents; for business OneDrive or SharePoint document libraries, you may need to set \code{by_item=TRUE} to delete the contents first depending on your organisation's policies. Note that this can be slow for large folders.
 \item \code{get_item(path)}: Get an item representing a file or folder.
 \item \code{get_item_properties(path)}: Get the properties (metadata) for a file or folder.
 \item \code{set_item_properties(path, ...)}: Set the properties for a file or folder.

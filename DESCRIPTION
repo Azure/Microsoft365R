@@ -14,7 +14,7 @@ Depends:
     R (>= 3.3)
 Imports:
     AzureAuth,
-    AzureGraph (>= 1.2.1),
+    AzureGraph (>= 1.2.2),
     utils,
     curl,
     httr,

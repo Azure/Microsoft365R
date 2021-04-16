@@ -36,6 +36,8 @@ Class representing a team in Microsoft Teams.
 \item \code{get_drive(drive_id)}: Retrieve a shared document library for this team. If the ID is not specified, this returns the default document library.
 \item \code{get_sharepoint_site()}: Get the SharePoint site associated with the team.
 \item \code{get_group()}: Retrieve the Microsoft 365 group associated with the team.
+\item \code{list_members()}: Retrieves the members of the team, as a list of \code{\link{ms_team_member}} objects.
+\item \code{get_member(name, email, id)}: Retrieve a specific member of the channel, as a \code{ms_team_member} object. Supply only one of the member name, email address or ID.
 }
 }
 
@@ -54,6 +56,11 @@ myteam$get_drive()
 
 myteam$create_channel("Test channel", description="A channel for testing")
 myteam$delete_channel("Test channel")
+
+# team members
+myteam$list_members()
+myteam$get_member("Jane Smith")
+myteam$get_member(email="billg@mycompany.com")
 
 }
 }

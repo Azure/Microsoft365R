@@ -37,6 +37,8 @@ Class representing a Microsoft Teams channel.
 \item \code{upload_file()}: Uploads a file to the channel.
 \item \code{download_file()}: Downloads a file from the channel.
 \item \code{get_folder()}: Retrieves the files folder for the channel, as a \code{\link{ms_drive_item}} object.
+\item \code{list_members()}: Retrieves the members of the channel, as a list of \code{\link{ms_team_member}} objects.
+\item \code{get_member(name, email, id)}: Retrieve a specific member of the channel, as a \code{ms_team_member} object. Supply only one of the member name, email address or ID.
 }
 }
 
@@ -53,6 +55,7 @@ To send a message to a channel, use the \code{send_message()} method. This has a
 \item \code{content_type}: Either "text" (the default) or "html".
 \item \code{attachments}: Optional vector of filenames.
 \item \code{inline}: Optional vector of image filenames that will be inserted into the body of the message. The images must be PNG or JPEG, and the \code{content_type} argument must be "html" to include inline content.
+\item \code{mentions}: Optional vector of @mentions that will be inserted into the body of the message. This should be either an object of one of the following classes, or a list of the same: \code{\link{az_user}}, \code{\link{ms_team}}, \code{\link{ms_channel}}, \code{\link{ms_team_member}}. The \code{content_type} argument must be "html" to include mentions.
 }
 
 Note that message attachments are actually uploaded to the channel's file listing (a directory in the team's primary shared document folder). Support for attachments is somewhat experimental, so if you want to be sure that it works, upload the file separately using the \code{upload_file()} method.
@@ -79,9 +82,25 @@ chan$send_message(msg_text, attachments="myfile.csv")
 # sending an inline image
 chan$send_message("", content_type="html", inline="graph.png")
 
-chan$upload_file("mydocument.docx")
+# channel members
+chan$list_members()
+jane <- chan$get_member("Jane Smith")
+bill <- chan$get_member(email="billg@mycompany.com")
+
+# mentioning a team member
+chan$send_message("Here is a message", content_type="html", mentions=jane)
+
+# mentioning 2 or more members: use a list
+chan$send_message("Here is another message", content_type="html",
+    mentions=list(jane, bill))
+
+# mentioning an entire channel or team
+chan$send_message("FYI to channel", content_type="html", mentions=chan)
+chan$send_message("FYI to everyone", content_type="html", mentions=myteam)
 
 chan$list_files()
+
+chan$upload_file("mydocument.docx")
 
 }
 }

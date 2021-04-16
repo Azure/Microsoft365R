@@ -22,6 +22,8 @@
 #' - `get_drive(drive_id)`: Retrieve a shared document library for this team. If the ID is not specified, this returns the default document library.
 #' - `get_sharepoint_site()`: Get the SharePoint site associated with the team.
 #' - `get_group()`: Retrieve the Microsoft 365 group associated with the team.
+#' - `list_members()`: Retrieves the members of the team, as a list of [`ms_team_member`] objects.
+#' - `get_member(name, email, id)`: Retrieve a specific member of the channel, as a `ms_team_member` object. Supply only one of the member name, email address or ID.
 #'
 #' @section Initialization:
 #' Creating new objects of this class should be done via the `get_team` and `list_teams` methods of the [`ms_graph`], [`az_user`] or [`az_group`] classes. Calling the `new()` method for this class only constructs the R object; it does not call the Microsoft Graph API to retrieve or create the actual team.
@@ -42,6 +44,11 @@
 #'
 #' myteam$create_channel("Test channel", description="A channel for testing")
 #' myteam$delete_channel("Test channel")
+#'
+#' # team members
+#' myteam$list_members()
+#' myteam$get_member("Jane Smith")
+#' myteam$get_member(email="billg@mycompany.com")
 #'
 #' }
 #' @format An R6 object of class `ms_team`, inheriting from `ms_object`.
@@ -123,6 +130,35 @@ public=list(
     get_group=function()
     {
         az_group$new(self$token, self$tenant, private$do_group_operation())
+    },
+
+    list_members=function()
+    {
+        res <- private$get_paged_list(self$do_operation("members"))
+        private$init_list_objects(res, default_generator=ms_team_member,
+            parent_id=self$properties$id, parent_type="team")
+    },
+
+    get_member=function(name=NULL, email=NULL, id=NULL)
+    {
+        assert_one_arg(name, email, id, msg="Supply exactly one of member name, email address, or ID")
+        if(!is.null(id))
+        {
+            res <- self$do_operation(file.path("members", id))
+            ms_team_member$new(self$token, self$tenant, res,
+                parent_id=self$properties$id, parent_type="team")
+        }
+        else
+        {
+            filter <- if(!is.null(name))
+                sprintf("displayName eq '%s'", name)
+            else sprintf("microsoft.graph.aadUserConversationMember/email eq '%s'", email)
+            res <- private$get_paged_list(self$do_operation("members", options=list(`$filter`=filter)))
+            if(length(res) != 1)
+                stop("Invalid name or email address", call.=FALSE)
+            ms_team_member$new(self$token, self$tenant, res[[1]],
+                parent_id=self$properties$id, parent_type="team")
+        }
     },
 
     print=function(...)

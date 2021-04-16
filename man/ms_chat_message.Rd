@@ -48,6 +48,7 @@ To reply to a message, use the \code{send_reply()} method. This has arguments:
 \item \code{content_type}: Either "text" (the default) or "html".
 \item \code{attachments}: Optional vector of filenames.
 \item \code{inline}: Optional vector of image filenames that will be inserted into the body of the message. The images must be PNG or JPEG, and the \code{content_type} argument must be "html" to include inline content.
+\item \code{mentions}: Optional vector of @mentions that will be inserted into the body of the message. This should be either an object of one of the following classes, or a list of the same: \code{\link{az_user}}, \code{\link{ms_team}}, \code{\link{ms_channel}}, \code{\link{ms_team_member}}. The \code{content_type} argument must be "html" to include mentions.
 }
 
 Teams channels don't support nested replies, so any methods dealing with replies will fail if the message object is itself a reply.

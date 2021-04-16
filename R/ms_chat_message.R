@@ -28,6 +28,7 @@
 #' - `content_type`: Either "text" (the default) or "html".
 #' - `attachments`: Optional vector of filenames.
 #' - `inline`: Optional vector of image filenames that will be inserted into the body of the message. The images must be PNG or JPEG, and the `content_type` argument must be "html" to include inline content.
+#' - `mentions`: Optional vector of @mentions that will be inserted into the body of the message. This should be either an object of one of the following classes, or a list of the same: [`az_user`], [`ms_team`], [`ms_channel`], [`ms_team_member`]. The `content_type` argument must be "html" to include mentions.
 #'
 #' Teams channels don't support nested replies, so any methods dealing with replies will fail if the message object is itself a reply.
 #'

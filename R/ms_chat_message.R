@@ -66,11 +66,11 @@ public=list(
         super$initialize(token, tenant, properties)
     },
 
-    send_reply=function(body, content_type=c("text", "html"), attachments=NULL, inline=NULL)
+    send_reply=function(body, content_type=c("text", "html"), attachments=NULL, inline=NULL, mentions=NULL)
     {
         private$assert_not_nested_reply()
         content_type <- match.arg(content_type)
-        call_body <- build_chatmessage_body(private$get_channel(), body, content_type, attachments, inline)
+        call_body <- build_chatmessage_body(private$get_channel(), body, content_type, attachments, inline, mentions)
         res <- self$do_operation("replies", body=call_body, http_verb="POST")
         ms_chat_message$new(self$token, self$tenant, res)
     },

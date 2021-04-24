@@ -33,7 +33,7 @@
 #'
 #' `list_items(path, info, full_names, pagesize)` lists the items under the specified path. It is the analogue of base R's `dir`/`list.files`. Its arguments are
 #' - `path`: The path.
-#' - `info`: The information to return: either "partial", "name" or "all". If "partial", a data frame is returned containing the name, size and whether the item is a file or folder. If "name", a vector of file/folder names is returned. If "all", a data frame is returned containing _all_ the properties for each item (this can be large).
+#' - `info`: The information to return: either "partial", "name" or "all". If "partial", a data frame is returned containing the name, size, ID and whether the item is a file or folder. If "name", a vector of file/folder names is returned. If "all", a data frame is returned containing _all_ the properties for each item (this can be large).
 #' - `full_names`: Whether to prefix the folder path to the names of the items.
 #' - `pagesize`: The number of results to return for each call to the REST endpoint. You can try reducing this argument below the default of 1000 if you are experiencing timeouts.
 #'
@@ -182,7 +182,7 @@ public=list(
             path <- ""
         info <- match.arg(info)
         opts <- switch(info,
-            partial=list(`$select`="name,size,folder", `$top`=pagesize),
+            partial=list(`$select`="name,size,folder,id", `$top`=pagesize),
             name=list(`$select`="name", `$top`=pagesize),
             list(`$top`=pagesize)
         )
@@ -194,7 +194,7 @@ public=list(
         df <- private$get_paged_list(children, simplify=TRUE)
 
         if(is_empty(df))
-            df <- data.frame(name=character(), size=numeric(), isdir=logical())
+            df <- data.frame(name=character(), size=numeric(), isdir=logical(), id=character())
         else if(info != "name")
         {
             df$isdir <- if(!is.null(df$folder))
@@ -205,11 +205,11 @@ public=list(
         if(full_names)
             df$name <- file.path(sub("^/", "", path), df$name)
         switch(info,
-            partial=df[c("name", "size", "isdir")],
+            partial=df[c("name", "size", "isdir", "id")],
             name=df$name,
             all=
             {
-                firstcols <- c("name", "size", "isdir")
+                firstcols <- c("name", "size", "isdir", "id")
                 df[c(firstcols, setdiff(names(df), firstcols))]
             }
         )

@@ -160,6 +160,43 @@ public=list(
         self$get_item(path)$update(...)
     },
 
+    list_shared_items=function(info=c("partial", "name", "all"), full_names=FALSE, allow_external=TRUE, pagesize=1000)
+    {
+        info <- match.arg(info)
+        opts <- switch(info,
+            partial=list(`$select`="name,size,folder", `$top`=pagesize),
+            name=list(`$select`="name", `$top`=pagesize),
+            list(`$top`=pagesize)
+        )
+        if(allow_external)
+            opts$allowExternal <- "true"
+        children <- self$do_operation("sharedWithMe", options=opts, simplify=TRUE)
+
+        # get remote file list as a data frame
+        df <- private$get_paged_list(children, simplify=TRUE)$remoteItem
+
+        if(is_empty(df))
+            df <- data.frame(name=character(), size=numeric(), isdir=logical())
+        else if(info != "name")
+        {
+            df$isdir <- if(!is.null(df$folder))
+                !is.na(df$folder$childCount)
+            else rep(FALSE, nrow(df))
+        }
+
+        if(full_names)
+            df$name <- file.path(sub("^/", "", path), df$name)
+        switch(info,
+            partial=df[c("name", "size", "isdir")],
+            name=df$name,
+            all=
+            {
+                firstcols <- c("name", "size", "isdir")
+                df[c(firstcols, setdiff(names(df), firstcols))]
+            }
+        )
+    },
+
     print=function(...)
     {
         personal <- self$properties$driveType == "personal"

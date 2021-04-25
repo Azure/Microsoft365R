@@ -150,10 +150,17 @@ public=list(
 
     list_emails=function(by="received desc", search=NULL, n=100, pagesize=10)
     {
-        order_by <- email_list_order(by)
-        opts <- if(is.null(search))
-            list(`$orderby`=order_by, `$top`=pagesize)
-        else list(`$search`=search, `$top`=pagesize)
+        if(is.null(search))
+        {
+            order_by <- email_list_order(by)
+            opts <- list(`$orderby`=order_by, `$top`=pagesize)
+        }
+        else
+        {
+            if(substr(search, 1, 1) != "" && substr(search, nchar(search), nchar(search)) != "")
+                search <- paste0('"', search, '"')
+            opts <- list(`$search`=search, `$top`=pagesize)
+        }
         lst <- private$get_paged_list(self$do_operation("messages", options=opts), n=n)
         private$init_list_objects(lst, default_generator=ms_outlook_email, user_id=self$user_id)
     },

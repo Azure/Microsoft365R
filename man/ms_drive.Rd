@@ -38,6 +38,7 @@ Class representing a personal OneDrive or SharePoint document library.
 \item \code{get_item(path)}: Get an item representing a file or folder.
 \item \code{get_item_properties(path)}: Get the properties (metadata) for a file or folder.
 \item \code{set_item_properties(path, ...)}: Set the properties for a file or folder.
+\item \code{list_shared_items(...)}: List the drive items shared with you. See 'Shared items' below.
 }
 }
 
@@ -71,6 +72,20 @@ This class exposes methods for carrying out common operations on files and folde
 \code{set_item_properties} sets the properties of a file or folder. The new properties should be specified as individual named arguments to the method. Any existing properties that aren't listed as arguments will retain their previous values or be recalculated based on changes to other properties, as appropriate. You can also call the \code{update} method on the corresponding \code{ms_drive_item} object.
 }
 
+\section{Shared items}{
+
+The \code{list_shared_items} method lists the files and folders that have been shared with you. This is similar to \code{list_items}, modified to handle the fact that the listed items reside on another drive or document library. The arguments are:
+\itemize{
+\item \code{info}: The information to return: either "partial", "items" or "all". If "partial", a data frame is returned containing the name, size, whether the item is a file or folder, and a list of drive item objects. If "items", only the list of drive items is returned. If "all", a data frame is returned containing all the properties for each item.
+\item \code{allow_external}: Whether to include items that were shared from outside tenants. The default is FALSE.
+\item \code{pagesize}: The number of results to return for each call to the REST endpoint. You can try reducing this argument below the default of 1000 if you are experiencing timeouts.
+}
+
+The returned object will contain a list of drive items, that you can use to access the shared files/folders. If \code{info} is "item", the returned object is the list; if "partial" or "all" it is the \code{remoteItem} column in the data frame.
+
+\code{list_shared_files} is a synonym for \code{list_shared_items}.
+}
+
 \examples{
 \dontrun{
 
@@ -101,6 +116,12 @@ drv$get_item_properties("myfile")
 
 # rename a file
 drv$set_item_properties("myfile", name="newname")
+
+# accessing shared files
+shared_df <- drv$list_shared_items()
+shared_df$remoteItem[[1]]$open()
+shared_items <- drv$list_shared_items(info="items")
+shared_items[[1]]$open()
 
 }
 }

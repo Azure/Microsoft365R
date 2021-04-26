@@ -53,7 +53,7 @@
 #' `set_item_properties` sets the properties of a file or folder. The new properties should be specified as individual named arguments to the method. Any existing properties that aren't listed as arguments will retain their previous values or be recalculated based on changes to other properties, as appropriate. You can also call the `update` method on the corresponding `ms_drive_item` object.
 #'
 #' @section Shared items:
-#' The `list_shared_items` method lists the files and folders that have been shared with you. This is similar to `list_files`, modified to handle the fact that the listed items reside on another drive or document library. The arguments are:
+#' The `list_shared_items` method lists the files and folders that have been shared with you. This is similar to `list_items`, modified to handle the fact that the listed items reside on another drive or document library. The arguments are:
 #' - `info`: The information to return: either "partial", "items" or "all". If "partial", a data frame is returned containing the name, size, whether the item is a file or folder, and a list of drive item objects. If "items", only the list of drive items is returned. If "all", a data frame is returned containing all the properties for each item.
 #' - `allow_external`: Whether to include items that were shared from outside tenants. The default is FALSE.
 #' - `pagesize`: The number of results to return for each call to the REST endpoint. You can try reducing this argument below the default of 1000 if you are experiencing timeouts.

@@ -74,7 +74,7 @@ This class exposes methods for carrying out common operations on files and folde
 
 \section{Shared items}{
 
-The \code{list_shared_items} method lists the files and folders that have been shared with you. This is similar to \code{list_files}, modified to handle the fact that the listed items reside on another drive or document library. The arguments are:
+The \code{list_shared_items} method lists the files and folders that have been shared with you. This is similar to \code{list_items}, modified to handle the fact that the listed items reside on another drive or document library. The arguments are:
 \itemize{
 \item \code{info}: The information to return: either "partial", "items" or "all". If "partial", a data frame is returned containing the name, size, whether the item is a file or folder, and a list of drive item objects. If "items", only the list of drive items is returned. If "all", a data frame is returned containing all the properties for each item.
 \item \code{allow_external}: Whether to include items that were shared from outside tenants. The default is FALSE.

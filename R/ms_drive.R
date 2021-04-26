@@ -163,20 +163,14 @@ public=list(
     list_shared_items=function(info=c("partial", "name", "all"), full_names=FALSE, allow_external=TRUE, pagesize=1000)
     {
         info <- match.arg(info)
-        opts <- switch(info,
-            partial=list(`$select`="name,size,folder", `$top`=pagesize),
-            name=list(`$select`="name", `$top`=pagesize),
-            list(`$top`=pagesize)
-        )
-        if(allow_external)
-            opts$allowExternal <- "true"
+        opts <- if(allow_external) list(allowExternal <- "true")
         children <- self$do_operation("sharedWithMe", options=opts, simplify=TRUE)
 
         # get remote file list as a data frame
-        df <- private$get_paged_list(children, simplify=TRUE)$remoteItem
+        df <- private$get_paged_list(children, simplify=TRUE)
 
         if(is_empty(df))
-            df <- data.frame(name=character(), size=numeric(), isdir=logical())
+            df <- data.frame(name=character(), size=numeric(), isdir=logical(), remoteItem=I(list()))
         else if(info != "name")
         {
             df$isdir <- if(!is.null(df$folder))
@@ -184,14 +178,17 @@ public=list(
             else rep(FALSE, nrow(df))
         }
 
+        df$remoteItem <- lapply(seq_len(nrow(df)),
+            function(i) ms_drive_item$new(self$token, self$tenant, df$remoteItem[i, ]))
+
         if(full_names)
             df$name <- file.path(sub("^/", "", path), df$name)
         switch(info,
-            partial=df[c("name", "size", "isdir")],
+            partial=df[c("name", "size", "isdir", "remoteItem")],
             name=df$name,
             all=
             {
-                firstcols <- c("name", "size", "isdir")
+                firstcols <- c("name", "size", "isdir", "remoteItem")
                 df[c(firstcols, setdiff(names(df), firstcols))]
             }
         )

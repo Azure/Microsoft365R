@@ -29,7 +29,7 @@ Class representing a folder in Outlook.
 \item \code{update(...)}: Update the item's properties (metadata) in Microsoft Graph.
 \item \code{do_operation(...)}: Carry out an arbitrary operation on the item.
 \item \code{sync_fields()}: Synchronise the R object with the item metadata in Microsoft Graph.
-\item \code{list_emails()}: List the emails in this folder.
+\item \code{list_emails(...)}: List the emails in this folder.
 \item \code{get_email(message_id)}: Get the email with the specified ID.
 \item \code{create_email(...)}: Creates a new draft email in this folder, optionally sending it as well. See 'Creating and sending emails'.
 \item \code{delete_email(message_id, confim=TRUE)}: Deletes the specified email. By default, ask for confirmation first.
@@ -68,10 +68,11 @@ To reply to or forward an email, first retrieve it using \code{get_email()} or \
 
 \section{Listing emails}{
 
-To list the emails in a folder, call the \code{list_emails()} method. This returns a list of objects of class \code{\link{ms_outlook_email}}, and has the following signature:\preformatted{list_emails(by = "received desc", n = 100, pagesize = 10)
+To list the emails in a folder, call the \code{list_emails()} method. This returns a list of objects of class \code{\link{ms_outlook_email}}, and has the following signature:\preformatted{list_emails(by = "received desc", search = NULL, n = 100, pagesize = 10)
 }
 \itemize{
 \item \code{by}: The sorting order of the message list. The possible fields are "received" (received date, the default), "from" and "subject". To sort in descending order, add a " desc". You can specify multiple sorting fields, with later fields used to break ties in earlier ones. The last sorting field is always "received desc" unless it appears earlier.
+\item \code{search}: An optional string to search for. Only emails that contain the search string will be returned. See the \href{https://docs.microsoft.com/en-us/graph/query-parameters#search-parameter}{description of this parameter} for more information. Specifying a search string disables the \code{by} argument; the result is always sorted by date.
 \item \code{n}: The total number of emails to retrieve. The default is 100.
 \item \code{pagesize}: The number of emails per page. You can change this to a larger number to increase throughput, at the risk of running into timeouts.
 }

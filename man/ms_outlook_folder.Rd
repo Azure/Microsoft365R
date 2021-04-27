@@ -100,6 +100,9 @@ folder$list_emails(by="subject")
 # sorted by from name in descending order, then by most recent received date
 folder$list_emails(by="from desc")
 
+# searching the list
+folder$list_emails(search="important information")
+
 # retrieve a specific email:
 # note the Outlook ID is NOT the same as the Internet message-id
 email_id <- folder$list_emails()[[1]]$properties$id

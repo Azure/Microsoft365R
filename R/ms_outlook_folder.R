@@ -148,12 +148,12 @@ public=list(
         super$initialize(token, tenant, properties)
     },
 
-    list_emails=function(by="received desc", n=100, pagesize=10)
+    list_emails=function(by="received desc", filter=NULL, n=100, pagesize=10)
     {
         order_by <- email_list_order(by)
-        opts <- list(`$orderby`=order_by, `$top`=pagesize)
+        opts <- list(`$orderby`=order_by, `$filter`=filter, `$top`=pagesize)
         pager <- self$get_list_pager(self$do_operation("messages", options=opts), user_id=self$user_id)
-        extract_list_values(pager)
+        extract_list_values(pager, n)
     },
 
     get_email=function(message_id)

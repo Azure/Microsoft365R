@@ -107,7 +107,7 @@ public=list(
 
     list_drives=function(filter=NULL, n=Inf)
     {
-        make_list(self, "drives", filter, n)
+        make_list(self$get_group(), "drives", filter, n)
     },
 
     get_drive=function(drive_id=NULL)

@@ -175,7 +175,7 @@ public=list(
         else res$link$webUrl
     },
 
-    list_items=function(path="", info=c("partial", "name", "all"), full_names=FALSE, pagesize=1000)
+    list_items=function(path="", info=c("partial", "name", "all"), full_names=FALSE, pagesize=1000, filter=NULL, n=Inf)
     {
         private$assert_is_folder()
         if(path == "/")
@@ -186,12 +186,16 @@ public=list(
             name=list(`$select`="name", `$top`=pagesize),
             list(`$top`=pagesize)
         )
+        if(!is.null(filter))
+            opts$`filter` <- filter
 
         op <- sub("::", "", paste0(private$make_absolute_path(path), ":/children"))
         children <- call_graph_endpoint(self$token, op, options=opts, simplify=TRUE)
 
-        # get file list as a data frame
-        df <- private$get_paged_list(children, simplify=TRUE)
+        # get file list as a data frame, or return the iterator immediately if n is NULL
+        df <- extract_list_values(self$get_list_pager(children), n)
+        if(is.null(n))
+            return(df)
 
         if(is_empty(df))
             df <- data.frame(name=character(), size=numeric(), isdir=logical(), id=character())

@@ -125,10 +125,7 @@ add_user_methods <- function()
     az_user$set("public", "list_drives", overwrite=TRUE,
     function(filter=NULL, n=Inf)
     {
-        opts <- list(`$filter`=filter, `$count`=if(!is.null(filter)) "true")
-        hdrs <- if(!is.null(filter)) httr::add_headers(consistencyLevel="eventual")
-        pager <- self$get_list_pager(self$do_operation("drives", options=opts, hdrs))
-        extract_list_values(pager, n)
+        make_list(self, "drives", filter, n)
     })
 
     az_user$set("public", "get_drive", overwrite=TRUE,
@@ -143,20 +140,16 @@ add_user_methods <- function()
     az_user$set("public", "list_sharepoint_sites", overwrite=TRUE,
     function(filter=NULL, n=Inf)
     {
-        opts <- list(`$filter`=filter, `$count`=if(!is.null(filter)) "true")
-        hdrs <- if(!is.null(filter)) httr::add_headers(consistencyLevel="eventual")
-        pager <- self$get_list_pager(self$do_operation("followedSites", options=opts, hdrs))
-        extract_list_values(pager, n)
+        make_list(self, "followedSites", filter, n)
     })
 
     az_user$set("public", "list_teams", overwrite=TRUE,
     function(filter=NULL, n=Inf)
     {
-        opts <- list(`$filter`=filter, `$count`=if(!is.null(filter)) "true")
-        hdrs <- if(!is.null(filter)) httr::add_headers(consistencyLevel="eventual")
-        pager <- self$get_list_pager(self$do_operation("joinedTeams", options=opts, hdrs))
-        extract_list_values(pager, n)
-        # lapply(private$init_list_objects(res, "team"), function(team) team$sync_fields())
+        lst <- make_list(self, "joinedTeams", filter, n)
+        if(!is.null(n))
+            lapply(lst, function(team) team$sync_fields())  # result from endpoint only contains ID and displayname
+        else lst
     })
 
     az_user$set("public", "get_outlook", overwrite=TRUE,
@@ -178,10 +171,7 @@ add_group_methods <- function()
     az_group$set("public", "list_drives", overwrite=TRUE,
     function(filter=NULL, n=Inf)
     {
-        opts <- list(`$filter`=filter, `$count`=if(!is.null(filter)) "true")
-        hdrs <- if(!is.null(filter)) httr::add_headers(consistencyLevel="eventual")
-        pager <- self$get_list_pager(self$do_operation("drives", options=opts, hdrs))
-        extract_list_values(pager, n)
+        make_list(self, "drives", filter, n)
     })
 
     az_group$set("public", "get_drive", overwrite=TRUE,

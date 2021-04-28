@@ -76,11 +76,10 @@ public=list(
         ms_chat_message$new(self$token, self$tenant, res)
     },
 
-    list_replies=function(n=50)
+    list_replies=function(filter=NULL, n=50)
     {
         private$assert_not_nested_reply()
-        res <- private$get_paged_list(self$do_operation("replies"), n=n)
-        private$init_list_objects(res, "chatMessage")
+        make_list(self, "replies", filter, n)
     },
 
     get_reply=function(message_id)

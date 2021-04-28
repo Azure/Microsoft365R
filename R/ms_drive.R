@@ -119,10 +119,10 @@ public=list(
         super$initialize(token, tenant, properties)
     },
 
-    list_items=function(path="/", info=c("partial", "name", "all"), full_names=FALSE, pagesize=1000)
+    list_items=function(path="/", info=c("partial", "name", "all"), full_names=FALSE, pagesize=1000, filter=NULL, n=Inf)
     {
         info <- match.arg(info)
-        private$get_root()$list_items(path, info, full_names, pagesize)
+        private$get_root()$list_items(path, info, full_names, pagesize, filter, n)
     },
 
     upload_file=function(src, dest, blocksize=32768000)
@@ -177,16 +177,21 @@ public=list(
         self$get_item(path)$update(...)
     },
 
-    list_shared_items=function(info=c("partial", "items", "all"), allow_external=FALSE, pagesize=1000)
+    list_shared_items=function(info=c("partial", "items", "all"), allow_external=FALSE, pagesize=1000,
+                               filter=NULL, n=Inf)
     {
         info <- match.arg(info)
         opts <- list(`$top`=pagesize)
         if(allow_external)
             opts$allowExternal <- "true"
+        if(!is.null(filter))
+            opts$`filter` <- filter
         children <- self$do_operation("sharedWithMe", options=opts, simplify=TRUE)
 
-        # get remote file list as a data frame
-        df <- private$get_paged_list(children, simplify=TRUE)
+        # get file list as a data frame, or return the iterator immediately if n is NULL
+        df <- extract_list_values(self$get_list_pager(children), n)
+        if(is.null(n))
+            return(df)
 
         if(is_empty(df))
             df <- data.frame(name=character(), size=numeric(), isdir=logical(), remoteItem=I(list()))

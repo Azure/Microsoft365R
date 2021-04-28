@@ -77,7 +77,7 @@ public=list(
         super$initialize(token, tenant, properties)
     },
 
-    list_items=function(filter=NULL, select=NULL, all_metadata=FALSE, as_data_frame=TRUE, pagesize=5000)
+    list_items=function(filter=NULL, select=NULL, all_metadata=FALSE, as_data_frame=TRUE, pagesize=5000, n=Inf)
     {
         select <- if(is.null(select))
             "fields"
@@ -86,7 +86,12 @@ public=list(
         headers <- httr::add_headers(Prefer="HonorNonIndexedQueriesWarningMayFailRandomly")
 
         items <- self$do_operation("items", options=options, headers, simplify=as_data_frame)
-        df <- private$get_paged_list(items, simplify=as_data_frame)
+
+        # get item list, or return the iterator immediately if n is NULL
+        df <- extract_list_values(self$get_list_pager(items), n)
+        if(is.null(n))
+            return(df)
+
         if(!as_data_frame)
             lapply(df, function(item) ms_list_item$new(self$token, self$tenant, item,
                 site_id=self$properties$parentReference$siteId,

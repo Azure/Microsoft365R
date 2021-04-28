@@ -113,10 +113,9 @@ public=list(
         ms_chat_message$new(self$token, self$tenant, res)
     },
 
-    list_messages=function(n=50)
+    list_messages=function(filter=NULL, n=50)
     {
-        lst <- private$get_paged_list(self$do_operation("messages"), n=n)
-        private$init_list_objects(lst, "chatMessage")
+        make_list(self, "messages", filter, n)
     },
 
     get_message=function(message_id)
@@ -152,11 +151,9 @@ public=list(
         private$folder
     },
 
-    list_members=function()
+    list_members=function(filter=NULL, n=Inf)
     {
-        res <- private$get_paged_list(self$do_operation("members"))
-        private$init_list_objects(res, default_generator=ms_team_member,
-            parent_id=self$properties$id, parent_type="channel")
+        make_list(self, "members", filter, n, parent_id=self$properties$id, parent_type="channel")
     },
 
     get_member=function(name=NULL, email=NULL, id=NULL)

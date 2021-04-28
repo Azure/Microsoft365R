@@ -292,14 +292,12 @@ public=list(
         assert_one_arg(attachment_name, attachment_id, msg="Supply exactly one of attachment name or ID")
         if(is.null(attachment_id))
         {
-            atts <- self$list_attachments()
-            att_names <- sapply(atts, function(a) a$properties$name)
-            wch <- which(att_names == attachment_name)
-            if(length(wch) == 0)
+            atts <- self$list_attachments(filter=sprintf("name eq '%s'", name))
+            if(length(atts) == 0)
                 stop("Attachment '", attachment_name, "' not found", call.=FALSE)
-            if(length(wch) > 1)
+            if(length(atts) > 1)
                 stop("More than one attachment named '", attachment_name, "'", call.=FALSE)
-            return(atts[[wch]])
+            return(atts[[1]])
         }
 
         fields <- c("id", "name", "contentType", "size", "isInline", "lastModifiedDateTime")
@@ -309,12 +307,15 @@ public=list(
             user_id=self$user_id, message_id=self$properties$id)
     },
 
-    list_attachments=function()
+    list_attachments=function(filter=NULL, n=Inf)
     {
         fields <- c("id", "name", "contentType", "size", "isInline", "lastModifiedDateTime")
-        res <- self$do_operation("attachments", options=list(select=paste(fields, collapse=",")))
-        private$init_list_objects(private$get_paged_list(res), default_generator=ms_outlook_attachment,
-            user_id=self$user_id, message_id=self$properties$id)
+        opts <- list(select=paste(fields, collapse=","))
+        if(!is.null(filter))
+            opts$`filter` <- filter
+        pager <- self$get_list_pager(self$do_operation("attachments", options=opts),
+            user_id=self$user_id, message_id=self$message_id)
+        extract_list_values(pager, n)
     },
 
     remove_attachment=function(attachment_name=NULL, attachment_id=NULL, confirm=TRUE)

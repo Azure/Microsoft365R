@@ -175,7 +175,7 @@ public=list(
         else res$link$webUrl
     },
 
-    list_items=function(path="", info=c("partial", "name", "all"), full_names=FALSE, pagesize=1000, filter=NULL, n=Inf)
+    list_items=function(path="", info=c("partial", "name", "all"), full_names=FALSE, filter=NULL, n=Inf, pagesize=1000)
     {
         private$assert_is_folder()
         if(path == "/")

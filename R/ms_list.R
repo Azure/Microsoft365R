@@ -77,7 +77,7 @@ public=list(
         super$initialize(token, tenant, properties)
     },
 
-    list_items=function(filter=NULL, select=NULL, all_metadata=FALSE, as_data_frame=TRUE, pagesize=5000, n=Inf)
+    list_items=function(filter=NULL, select=NULL, all_metadata=FALSE, as_data_frame=TRUE, n=Inf, pagesize=5000)
     {
         select <- if(is.null(select))
             "fields"

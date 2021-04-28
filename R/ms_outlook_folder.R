@@ -152,8 +152,8 @@ public=list(
     {
         order_by <- email_list_order(by)
         opts <- list(`$orderby`=order_by, `$top`=pagesize)
-        lst <- private$get_paged_list(self$do_operation("messages", options=opts), n=n)
-        private$init_list_objects(lst, default_generator=ms_outlook_email, user_id=self$user_id)
+        pager <- self$get_list_pager(self$do_operation("messages", options=opts), user_id=self$user_id)
+        extract_list_values(pager)
     },
 
     get_email=function(message_id)
@@ -183,10 +183,9 @@ public=list(
         self$get_email(message_id)$delete(confirm=confirm)
     },
 
-    list_folders=function()
+    list_folders=function(filter=NULL, n=Inf)
     {
-        lst <- private$get_paged_list(self$do_operation("childFolders"))
-        private$init_list_objects(lst, default_generator=ms_outlook_folder, user_id=self$user_id)
+        make_basic_list(self, "childFolders", filter, n)
     },
 
     get_folder=function(folder_name=NULL, folder_id=NULL)

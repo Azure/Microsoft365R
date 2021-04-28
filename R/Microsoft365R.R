@@ -56,7 +56,7 @@ utils::globalVariables(c("self", "private"))
 error_message <- get("error_message", getNamespace("AzureGraph"))
 get_confirmation <- get("get_confirmation", getNamespace("AzureGraph"))
 
-make_list <- function(object, op, filter, n, ...)
+make_basic_list <- function(object, op, filter, n, ...)
 {
     opts <- list(`$filter`=filter)
     hdrs <- if(!is.null(filter)) httr::add_headers(consistencyLevel="eventual")

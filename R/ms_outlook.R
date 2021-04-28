@@ -155,10 +155,9 @@ public=list(
         stop("Cannot delete this object", call.=FALSE)
     },
 
-    list_folders=function()
+    list_folders=function(filter=NULL, n=Inf)
     {
-        lst <- private$get_paged_list(self$do_operation("mailFolders"))
-        private$init_list_objects(lst, default_generator=ms_outlook_folder, user_id=self$properties$id)
+        make_basic_list(self, "mailFolders", filter, n)
     },
 
     get_folder=function(folder_name=NULL, folder_id=NULL)

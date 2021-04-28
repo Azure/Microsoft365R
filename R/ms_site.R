@@ -51,10 +51,9 @@ public=list(
         super$initialize(token, tenant, properties)
     },
 
-    list_drives=function()
+    list_drives=function(filter=NULL, n=Inf)
     {
-        res <- private$get_paged_list(self$do_operation("drives"))
-        private$init_list_objects(res, "drive")
+        make_basic_list(self, "drives", filter, n)
     },
 
     get_drive=function(drive_id=NULL)
@@ -65,16 +64,14 @@ public=list(
         ms_drive$new(self$token, self$tenant, self$do_operation(op))
     },
 
-    list_subsites=function()
+    list_subsites=function(filter=NULL, n=Inf)
     {
-        res <- private$get_paged_list(self$do_operation("sites"))
-        private$init_list_objects(res, "site")
+        make_basic_list(self, "sites", filter, n)
     },
 
-    get_lists=function()
+    get_lists=function(filter=NULL, n=Inf)
     {
-        res <- private$get_paged_list(self$do_operation("lists"))
-        private$init_list_objects(res, "list")
+        make_basic_list(self, "lists", filter, n)
     },
 
     get_list=function(list_name=NULL, list_id=NULL)

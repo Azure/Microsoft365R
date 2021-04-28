@@ -66,7 +66,7 @@ public=list(
 
     list_channels=function(filter=NULL, n=Inf)
     {
-        make_list(self, "channels", filter, n, team_id=self$properties$id)
+        make_basic_list(self, "channels", filter, n, team_id=self$properties$id)
     },
 
     get_channel=function(channel_name=NULL, channel_id=NULL)
@@ -107,7 +107,7 @@ public=list(
 
     list_drives=function(filter=NULL, n=Inf)
     {
-        make_list(self$get_group(), "drives", filter, n)
+        make_basic_list(self$get_group(), "drives", filter, n)
     },
 
     get_drive=function(drive_id=NULL)
@@ -131,7 +131,7 @@ public=list(
 
     list_members=function(filter=NULL, n=Inf)
     {
-        make_list(self, "members", filter, n, parent_id=self$properties$id, parent_type="team")
+        make_basic_list(self, "members", filter, n, parent_id=self$properties$id, parent_type="team")
     },
 
     get_member=function(name=NULL, email=NULL, id=NULL)
@@ -148,11 +148,10 @@ public=list(
             filter <- if(!is.null(name))
                 sprintf("displayName eq '%s'", name)
             else sprintf("microsoft.graph.aadUserConversationMember/email eq '%s'", email)
-            res <- private$get_paged_list(self$do_operation("members", options=list(`$filter`=filter)))
+            res <- self$list_members(filter=filter)
             if(length(res) != 1)
                 stop("Invalid name or email address", call.=FALSE)
-            ms_team_member$new(self$token, self$tenant, res[[1]],
-                parent_id=self$properties$id, parent_type="team")
+            res[[1]]
         }
     },
 

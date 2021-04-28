@@ -115,7 +115,7 @@ public=list(
 
     list_messages=function(filter=NULL, n=50)
     {
-        make_list(self, "messages", filter, n)
+        make_basic_list(self, "messages", filter, n)
     },
 
     get_message=function(message_id)
@@ -153,7 +153,7 @@ public=list(
 
     list_members=function(filter=NULL, n=Inf)
     {
-        make_list(self, "members", filter, n, parent_id=self$properties$id, parent_type="channel")
+        make_basic_list(self, "members", filter, n, parent_id=self$properties$id, parent_type="channel")
     },
 
     get_member=function(name=NULL, email=NULL, id=NULL)
@@ -170,11 +170,10 @@ public=list(
             filter <- if(!is.null(name))
                 sprintf("displayName eq '%s'", name)
             else sprintf("microsoft.graph.aadUserConversationMember/email eq '%s'", email)
-            res <- private$get_paged_list(self$do_operation("members", options=list(`$filter`=filter)))
+            res <- self$list_members(filter=filter)
             if(length(res) != 1)
                 stop("Invalid name or email address", call.=FALSE)
-            ms_team_member$new(self$token, self$tenant, res[[1]],
-                parent_id=self$properties$id, parent_type="channel")
+            res[[1]]
         }
     },
 

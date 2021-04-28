@@ -125,7 +125,7 @@ add_user_methods <- function()
     az_user$set("public", "list_drives", overwrite=TRUE,
     function(filter=NULL, n=Inf)
     {
-        make_list(self, "drives", filter, n)
+        make_basic_list(self, "drives", filter, n)
     })
 
     az_user$set("public", "get_drive", overwrite=TRUE,
@@ -140,13 +140,13 @@ add_user_methods <- function()
     az_user$set("public", "list_sharepoint_sites", overwrite=TRUE,
     function(filter=NULL, n=Inf)
     {
-        make_list(self, "followedSites", filter, n)
+        make_basic_list(self, "followedSites", filter, n)
     })
 
     az_user$set("public", "list_teams", overwrite=TRUE,
     function(filter=NULL, n=Inf)
     {
-        lst <- make_list(self, "joinedTeams", filter, n)
+        lst <- make_basic_list(self, "joinedTeams", filter, n)
         if(!is.null(n))
             lapply(lst, function(team) team$sync_fields())  # result from endpoint only contains ID and displayname
         else lst
@@ -171,7 +171,7 @@ add_group_methods <- function()
     az_group$set("public", "list_drives", overwrite=TRUE,
     function(filter=NULL, n=Inf)
     {
-        make_list(self, "drives", filter, n)
+        make_basic_list(self, "drives", filter, n)
     })
 
     az_group$set("public", "get_drive", overwrite=TRUE,

@@ -79,7 +79,7 @@ public=list(
     list_replies=function(filter=NULL, n=50)
     {
         private$assert_not_nested_reply()
-        make_list(self, "replies", filter, n)
+        make_basic_list(self, "replies", filter, n)
     },
 
     get_reply=function(message_id)

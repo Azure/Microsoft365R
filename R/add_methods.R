@@ -123,10 +123,12 @@ add_graph_methods <- function()
 add_user_methods <- function()
 {
     az_user$set("public", "list_drives", overwrite=TRUE,
-    function()
+    function(filter=NULL, n=Inf)
     {
-        res <- private$get_paged_list(self$do_operation("drives"))
-        private$init_list_objects(res, "drive")
+        opts <- list(`$filter`=filter, `$count`=if(!is.null(filter)) "true")
+        hdrs <- if(!is.null(filter)) httr::add_headers(consistencyLevel="eventual")
+        pager <- self$get_list_pager(self$do_operation("drives", options=opts, hdrs))
+        extract_list_values(pager, n)
     })
 
     az_user$set("public", "get_drive", overwrite=TRUE,
@@ -139,19 +141,22 @@ add_user_methods <- function()
     })
 
     az_user$set("public", "list_sharepoint_sites", overwrite=TRUE,
-    function(filter=NULL)
+    function(filter=NULL, n=Inf)
     {
-        opts <- if(!is.null(filter)) list(`$filter`=filter)
-        res <- private$get_paged_list(self$do_operation("followedSites", options=opts))
-        lapply(private$init_list_objects(res, "site"), function(site) site$sync_fields())
+        opts <- list(`$filter`=filter, `$count`=if(!is.null(filter)) "true")
+        hdrs <- if(!is.null(filter)) httr::add_headers(consistencyLevel="eventual")
+        pager <- self$get_list_pager(self$do_operation("followedSites", options=opts, hdrs))
+        extract_list_values(pager, n)
     })
 
     az_user$set("public", "list_teams", overwrite=TRUE,
-    function(filter=NULL)
+    function(filter=NULL, n=Inf)
     {
-        opts <- if(!is.null(filter)) list(`$filter`=filter)
-        res <- private$get_paged_list(self$do_operation("joinedTeams", options=opts))
-        lapply(private$init_list_objects(res, "team"), function(team) team$sync_fields())
+        opts <- list(`$filter`=filter, `$count`=if(!is.null(filter)) "true")
+        hdrs <- if(!is.null(filter)) httr::add_headers(consistencyLevel="eventual")
+        pager <- self$get_list_pager(self$do_operation("joinedTeams", options=opts, hdrs))
+        extract_list_values(pager, n)
+        # lapply(private$init_list_objects(res, "team"), function(team) team$sync_fields())
     })
 
     az_user$set("public", "get_outlook", overwrite=TRUE,
@@ -171,10 +176,12 @@ add_group_methods <- function()
     })
 
     az_group$set("public", "list_drives", overwrite=TRUE,
-    function()
+    function(filter=NULL, n=Inf)
     {
-        res <- private$get_paged_list(self$do_operation("drives"))
-        private$init_list_objects(res, "drive")
+        opts <- list(`$filter`=filter, `$count`=if(!is.null(filter)) "true")
+        hdrs <- if(!is.null(filter)) httr::add_headers(consistencyLevel="eventual")
+        pager <- self$get_list_pager(self$do_operation("drives", options=opts, hdrs))
+        extract_list_values(pager, n)
     })
 
     az_group$set("public", "get_drive", overwrite=TRUE,

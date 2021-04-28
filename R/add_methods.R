@@ -140,7 +140,10 @@ add_user_methods <- function()
     az_user$set("public", "list_sharepoint_sites", overwrite=TRUE,
     function(filter=NULL, n=Inf)
     {
-        make_basic_list(self, "followedSites", filter, n)
+        lst <- make_basic_list(self, "followedSites", filter, n)
+        if(!is.null(n))
+            lapply(lst, function(site) site$sync_fields())  # result from endpoint is incomplete
+        else lst
     })
 
     az_user$set("public", "list_teams", overwrite=TRUE,

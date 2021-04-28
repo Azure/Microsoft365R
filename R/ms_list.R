@@ -85,18 +85,16 @@ public=list(
         options <- list(expand=select, `$filter`=filter, `$top`=pagesize)
         headers <- httr::add_headers(Prefer="HonorNonIndexedQueriesWarningMayFailRandomly")
 
-        items <- self$do_operation("items", options=options, headers, simplify=as_data_frame)
+        pager <- self$get_list_pager(self$do_operation("items", options=options, headers, simplify=as_data_frame),
+            site_id=self$properties$parentReference$siteId,
+            list_id=self$properties$id)
 
         # get item list, or return the iterator immediately if n is NULL
-        df <- extract_list_values(self$get_list_pager(items), n)
+        df <- extract_list_values(pager, n)
         if(is.null(n))
             return(df)
 
-        if(!as_data_frame)
-            lapply(df, function(item) ms_list_item$new(self$token, self$tenant, item,
-                site_id=self$properties$parentReference$siteId,
-                list_id=self$properties$id))
-        else if(!all_metadata)
+        if(as_data_frame && !all_metadata)
             df$fields
         else df
     },

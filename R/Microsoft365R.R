@@ -41,6 +41,9 @@ utils::globalVariables(c("self", "private"))
     register_graph_class("aadUserConversationMember", ms_team_member,
         function(props) "roles" %in% names(props))
 
+    register_graph_class("listItem", ms_list_item,
+        function(props) !is_empty(props$contentType$name))
+
     add_graph_methods()
     add_user_methods()
     add_group_methods()

@@ -55,10 +55,17 @@ test_that("SharePoint methods work",
     site <- get_sharepoint_site(site_name, tenant=tenant, app=app)
     expect_is(site, "ms_site")
 
-    # drive -- functionality tested in test02
+    # drive functionality tested in test02
     drives <- site$list_drives()
     expect_is(drives, "list")
     expect_true(all(sapply(drives, inherits, "ms_drive")))
+
+    # filtering not yet supported for drives
+    # drvpager <- site$list_drives(filter="name eq 'Documents'", n=NULL)
+    # expect_is(drvpager, "ms_graph_pager")
+    # drv0 <- drvpager$value
+    # expect_is(drv0, "list")
+    # expect_true(length(drv0) == 1 && inherits(drv0[[1]], "ms_drive"))
 
     drv <- site$get_drive()
     expect_is(drv, "ms_drive")
@@ -70,6 +77,12 @@ test_that("SharePoint methods work",
     lists <- site$get_lists()
     expect_is(lists, "list")
     expect_true(all(sapply(lists, inherits, "ms_list")))
+
+    # filtering not yet supported
+    # lstpager <- site$get_lists(filter=sprintf("displayName eq '%s'", list_name), n=NULL)
+    # expect_is(lstpager, "ms_graph_pager")
+    # lst0 <- lstpager$value
+    # expect_true(length(lst0) == 1 && inherits(lst0[[1]], "ms_list"))
 
     lst <- site$get_list(list_name=list_name)
     lst2 <- site$get_list(list_id=list_id)
@@ -90,6 +103,11 @@ test_that("SharePoint methods work",
     items3 <- lst$list_items(as_data_frame=FALSE)
     expect_is(items3, "list")
     expect_true(all(sapply(items3, inherits, "ms_list_item")))
+
+    itpager <- lst$list_items(filter=sprintf("fields/Title eq '%s'", items3[[1]]$properties$fields$Title), n=NULL)
+    expect_is(itpager, "ms_graph_pager")
+    items0 <- itpager$value
+    expect_true(is.data.frame(items0) && nrow(items0) == 1)
 
     item_id <- items3[[1]]$properties$id
     item <- lst$get_item(item_id)

@@ -64,11 +64,9 @@ public=list(
         super$initialize(token, tenant, properties)
     },
 
-    list_channels=function(filter=NULL)
+    list_channels=function(filter=NULL, n=Inf)
     {
-        opts <- if(!is.null(filter)) list(`$filter`=filter)
-        res <- private$get_paged_list(self$do_operation("channels", options=opts))
-        private$init_list_objects(res, "channel", team_id=self$properties$id)
+        make_list(self, "channels", filter, n, team_id=self$properties$id)
     },
 
     get_channel=function(channel_name=NULL, channel_id=NULL)
@@ -107,10 +105,9 @@ public=list(
         self$get_channel(channel_name, channel_id)$delete(confirm=confirm)
     },
 
-    list_drives=function()
+    list_drives=function(filter=NULL, n=Inf)
     {
-        res <- private$get_paged_list(private$do_group_operation("drives"))
-        private$init_list_objects(res, "drive")
+        make_list(self, "drives", filter, n)
     },
 
     get_drive=function(drive_id=NULL)
@@ -132,11 +129,9 @@ public=list(
         az_group$new(self$token, self$tenant, private$do_group_operation())
     },
 
-    list_members=function()
+    list_members=function(filter=NULL, n=Inf)
     {
-        res <- private$get_paged_list(self$do_operation("members"))
-        private$init_list_objects(res, default_generator=ms_team_member,
-            parent_id=self$properties$id, parent_type="team")
+        make_list(self, "members", filter, n, parent_id=self$properties$id, parent_type="team")
     },
 
     get_member=function(name=NULL, email=NULL, id=NULL)

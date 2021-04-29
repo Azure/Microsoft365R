@@ -150,7 +150,8 @@ public=list(
 
     list_emails=function(by="received desc", filter=NULL, n=100, pagesize=10)
     {
-        order_by <- email_list_order(by)
+        # by only works with no filter
+        order_by <- if(is.null(filter)) email_list_order(by)
         opts <- list(`$orderby`=order_by, `$filter`=filter, `$top`=pagesize)
         pager <- self$get_list_pager(self$do_operation("messages", options=opts), user_id=self$user_id)
         extract_list_values(pager, n)

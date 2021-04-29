@@ -247,7 +247,6 @@ public=list(
         on.exit(close(con))
 
         op <- paste0(private$make_absolute_path(dest), ":/createUploadSession")
-        # print(op)
         upload_dest <- call_graph_endpoint(self$token, op, http_verb="POST")$uploadUrl
 
         size <- file.size(src)

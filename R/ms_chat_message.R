@@ -15,7 +15,7 @@
 #' - `do_operation(...)`: Carry out an arbitrary operation on the message.
 #' - `sync_fields()`: Synchronise the R object with the message metadata in Microsoft Graph.
 #' - `send_reply(body, content_type, attachments)`: Sends a reply to the message. See below.
-#' - `list_replies(n=50)`: List the replies to this message. By default, this is limited to the 50 most recent replies; set the `n` argument to change this.
+#' - `list_replies(filter=NULL, n=50)`: List the replies to this message. By default, this is limited to the 50 most recent replies; set the `n` argument to change this.
 #' - `get_reply(message_id)`: Retrieves a specific reply to the message.
 #' - `delete_reply(message_id, confirm=TRUE)`: Deletes a reply to the message. Currently the Graph API does not support deleting Teams messages, so this method is disabled.
 #'
@@ -34,6 +34,10 @@
 #'
 #' Note that message attachments are actually uploaded to the channel's file listing (a directory in the team's primary shared document folder). Support for attachments is somewhat experimental, so if you want to be sure that it works, upload the file separately using the channel's `upload_file()` method.
 #'
+#' @section List methods:
+#' All `list_*` methods have `filter` and `n` arguments to limit the number of results. The former should be an [OData expression](https://docs.microsoft.com/en-us/graph/query-parameters#filter-parameter) as a string to filter the result set on. The latter should be a number setting the maximum number of (filtered) results to return. The default values are `filter=NULL` and `n=Inf`. If `n=NULL`, the `ms_graph_pager` iterator object is returned instead to allow manual iteration over the results.
+#'
+#' Support in the underlying Graph API for OData queries is patchy. Not all endpoints that return lists of objects support filtering, and if they do, they may not allow all of the defined operators. If your filtering expression results in an error, you can carry out the operation without filtering and then filter the results on the client side.
 #' @seealso
 #' [`ms_team`], [`ms_channel`]
 #'

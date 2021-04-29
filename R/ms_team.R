@@ -14,20 +14,24 @@
 #' - `update(...)`: Update the team metadata in Microsoft Graph.
 #' - `do_operation(...)`: Carry out an arbitrary operation on the team.
 #' - `sync_fields()`: Synchronise the R object with the team metadata in Microsoft Graph.
-#' - `list_channels(filter=NULL)`: List the channels for this team. Optionally, supply an OData expression to filter the list.
+#' - `list_channels(filter=NULL, n=Inf)`: List the channels for this team.
 #' - `get_channel(channel_name, channel_id)`: Retrieve a channel. If the name and ID are not specified, returns the primary channel.
 #' - `create_channel(channel_name, description, membership)`: Create a new channel. Optionally, you can specify a short text description of the channel, and the type of membership: either standard or private (invitation-only).
 #' - `delete_channel(channel_name, channel_id, confirm=TRUE)`: Delete a channel; by default, ask for confirmation first. You cannot delete the primary channel of a team. Note that Teams keeps track of all channels ever created, even if you delete them (you can see the deleted channels by going to the "Manage team" pane for a team, then the "Channels" tab, and expanding the "Deleted" entry); therefore, try not to create and delete channels unnecessarily.
-#' - `list_drives()`: List the drives (shared document libraries) associated with this team.
+#' - `list_drives(filter=NULL, n=Inf)`: List the drives (shared document libraries) associated with this team.
 #' - `get_drive(drive_id)`: Retrieve a shared document library for this team. If the ID is not specified, this returns the default document library.
 #' - `get_sharepoint_site()`: Get the SharePoint site associated with the team.
 #' - `get_group()`: Retrieve the Microsoft 365 group associated with the team.
-#' - `list_members()`: Retrieves the members of the team, as a list of [`ms_team_member`] objects.
+#' - `list_members(filter=NULL, n=Inf)`: Retrieves the members of the team, as a list of [`ms_team_member`] objects.
 #' - `get_member(name, email, id)`: Retrieve a specific member of the channel, as a `ms_team_member` object. Supply only one of the member name, email address or ID.
 #'
 #' @section Initialization:
 #' Creating new objects of this class should be done via the `get_team` and `list_teams` methods of the [`ms_graph`], [`az_user`] or [`az_group`] classes. Calling the `new()` method for this class only constructs the R object; it does not call the Microsoft Graph API to retrieve or create the actual team.
 #'
+#' @section List methods:
+#' All `list_*` methods have `filter` and `n` arguments to limit the number of results. The former should be an [OData expression](https://docs.microsoft.com/en-us/graph/query-parameters#filter-parameter) as a string to filter the result set on. The latter should be a number setting the maximum number of (filtered) results to return. The default values are `filter=NULL` and `n=Inf`. If `n=NULL`, the `ms_graph_pager` iterator object is returned instead to allow manual iteration over the results.
+#'
+#' Support in the underlying Graph API for OData queries is patchy. Not all endpoints that return lists of objects support filtering, and if they do, they may not allow all of the defined operators. If your filtering expression results in an error, you can carry out the operation without filtering and then filter the results on the client side.
 #' @seealso
 #' [`ms_graph`], [`az_group`], [`ms_channel`], [`ms_site`], [`ms_drive`]
 #'

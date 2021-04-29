@@ -24,7 +24,7 @@
 #' - `get_item(path)`: Get an item representing a file or folder.
 #' - `get_item_properties(path)`: Get the properties (metadata) for a file or folder.
 #' - `set_item_properties(path, ...)`: Set the properties for a file or folder.
-#' - `list_shared_items(...)`: List the drive items shared with you. See 'Shared items' below.
+#' - `list_shared_items(...), list_shared_files(...)`: List the drive items shared with you. See 'Shared items' below.
 #'
 #' @section Initialization:
 #' Creating new objects of this class should be done via the `get_drive` methods of the [`ms_graph`], [`az_user`] or [`ms_site`] classes. Calling the `new()` method for this class only constructs the R object; it does not call the Microsoft Graph API to retrieve or create the actual drive.
@@ -56,12 +56,17 @@
 #' The `list_shared_items` method lists the files and folders that have been shared with you. This is similar to `list_items`, modified to handle the fact that the listed items reside on another drive or document library. The arguments are:
 #' - `info`: The information to return: either "partial", "items" or "all". If "partial", a data frame is returned containing the name, size, whether the item is a file or folder, and a list of drive item objects. If "items", only the list of drive items is returned. If "all", a data frame is returned containing all the properties for each item.
 #' - `allow_external`: Whether to include items that were shared from outside tenants. The default is FALSE.
+#' - `filter, n`: See 'List methods' below.
 #' - `pagesize`: The number of results to return for each call to the REST endpoint. You can try reducing this argument below the default of 1000 if you are experiencing timeouts.
 #'
 #' The returned object will contain a list of drive items, that you can use to access the shared files/folders. If `info` is "item", the returned object is the list; if "partial" or "all" it is the `remoteItem` column in the data frame.
 #'
 #' `list_shared_files` is a synonym for `list_shared_items`.
 #'
+#' @section List methods:
+#' All `list_*` methods have `filter` and `n` arguments to limit the number of results. The former should be an [OData expression](https://docs.microsoft.com/en-us/graph/query-parameters#filter-parameter) as a string to filter the result set on. The latter should be a number setting the maximum number of (filtered) results to return. The default values are `filter=NULL` and `n=Inf`. If `n=NULL`, the `ms_graph_pager` iterator object is returned instead to allow manual iteration over the results.
+#'
+#' Support in the underlying Graph API for OData queries is patchy. Not all endpoints that return lists of objects support filtering, and if they do, they may not allow all of the defined operators. If your filtering expression results in an error, you can carry out the operation without filtering and then filter the results on the client side.
 #' @seealso
 #' [`get_personal_onedrive`], [`get_business_onedrive`], [`ms_site`], [`ms_drive_item`]
 #'

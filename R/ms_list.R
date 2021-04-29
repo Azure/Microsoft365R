@@ -27,7 +27,8 @@
 #'
 #' @section List querying:
 #' `list_items` supports the following arguments to customise results returned by the query.
-#' - `filter`: A string giving a logical expression to filter the rows to return. Note that column names used in the expression must be prefixed with `fields/` to distinguish them from item metadata.
+#' - `filter`: A string giving an [OData expression](https://docs.microsoft.com/en-us/graph/query-parameters#filter-parameter) to filter the rows to return. Note that column names used in the expression must be prefixed with `fields/` to distinguish them from item metadata.
+#' - `n`: The maximum number of (filtered) results to return. If this is NULL, the `ms_graph_pager` iterator object is returned instead to allow manual iteration over the results.
 #' - `select`: A string containing comma-separated column names to include in the returned data frame. If not supplied, includes all columns.
 #' - `all_metadata`: If TRUE, the returned data frame will contain extended metadata as separate columns, while the data fields will be in a nested data frame named `fields`.
 #' - `as_data_frame`: If FALSE, return the result as a list of individual `ms_list_item` objects, rather than a data frame. The `all_metadata` argument is ignored if `as_data_frame=FALSE`.

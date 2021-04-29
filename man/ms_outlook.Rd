@@ -30,7 +30,7 @@ Class representing a user's Outlook email account.
 \item \code{create_email(...)}: Creates a new email in the Drafts folder, optionally sending it as well. See 'Creating and sending emails'.
 \item \code{list_inbox_emails(...)}: List the emails in the Inbox folder. See 'Listing emails'.
 \item \verb{get_inbox(),get_drafts(),get_sent_items(),get_deleted_items()}: Gets the special folder of that name. These folders are created by Outlook and exist in every email account.
-\item \code{list_folders()}: List all folders in this account.
+\item \code{list_folders(filter=NULL, n=Inf)}: List all folders in this account.
 \item \code{get_folder(folder_name, folder_id)}: Get a folder, either by the name or ID.
 \item \code{create_folder(folder_name)}: Create a new folder.
 \item \code{delete_folder(folder_name, folder_id, confirm=TRUE)}: Delete a folder. By default, ask for confirmation first. Note that special folders cannot be deleted.
@@ -68,9 +68,16 @@ To list the emails in the Inbox, call the \code{list_emails()} method. This retu
 }
 \itemize{
 \item \code{by}: The sorting order of the message list. The possible fields are "received" (received date, the default), "from" and "subject". To sort in descending order, add a " desc". You can specify multiple sorting fields, with later fields used to break ties in earlier ones. The last sorting field is always "received desc" unless it appears earlier.
-\item \code{n}: The total number of emails to retrieve. The default is 100.
+\item \verb{filter, n}: See below.
 \item \code{pagesize}: The number of emails per page. You can change this to a larger number to increase throughput, at the risk of running into timeouts.
 }
+}
+
+\section{List methods generally}{
+
+All \verb{list_*} methods have \code{filter} and \code{n} arguments to limit the number of results. The former should be an \href{https://docs.microsoft.com/en-us/graph/query-parameters#filter-parameter}{OData expression} as a string to filter the result set on. The latter should be a number setting the maximum number of (filtered) results to return. The default values are \code{filter=NULL} and \code{n=100} for listing emails, and \code{n=Inf} for listing folders. If \code{n=NULL}, the \code{ms_graph_pager} iterator object is returned instead to allow manual iteration over the results.
+
+Support in the underlying Graph API for OData queries is patchy. Not all endpoints that return lists of objects support filtering, and if they do, they may not allow all of the defined operators. If your filtering expression results in an error, you can carry out the operation without filtering and then filter the results on the client side.
 }
 
 \examples{

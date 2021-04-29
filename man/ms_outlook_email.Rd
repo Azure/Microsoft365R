@@ -36,7 +36,7 @@ Class representing an Outlook mail message. The one class represents both sent a
 \item \code{add_attachment(object, ...)}: Adds an attachment to the email. See 'Attachments' below.
 \item \code{add_image(object)}: Adds an inline image to the email.
 \item \code{get_attachment(attachment_name=NULL, attachment_id=NULL)}: Gets an attachment, either by name or ID. Note that attachments don't need to have unique names; if multiple attachments share the same name, the method throws an error.
-\item \code{list_attachments()}: Lists the current attachments for the email.
+\item \code{list_attachments(filter=NULL, n=Inf)}: Lists the current attachments for the email.
 \item \code{remove_attachment(attachment_name=NULL, attachment_id=NULL, confirm=TRUE)}: Removes an attachment from the email. By default, ask for confirmation first.
 \item \code{download_attachment(attachment_name=NULL, attachment_id=NULL, ...)}: Downloads an attachment. This is only supported for file attachments (not URLs).
 \item \code{send()}: Sends an email.  See 'Sending, replying and forwarding'.
@@ -101,6 +101,13 @@ The methods for replying and forwarding are \code{create_reply()}, \code{create_
 The \code{copy()} and \code{move()} methods copy and move an email to a different folder. The destination should be an object of class \code{ms_outlook_folder}.
 
 The \code{get_message_headers()} method retrieves the Internet message headers for the email, as a named character vector.
+}
+
+\section{List methods}{
+
+All \verb{list_*} methods have \code{filter} and \code{n} arguments to limit the number of results. The former should be an \href{https://docs.microsoft.com/en-us/graph/query-parameters#filter-parameter}{OData expression} as a string to filter the result set on. The latter should be a number setting the maximum number of (filtered) results to return. The default values are \code{filter=NULL} and \code{n=Inf}. If \code{n=NULL}, the \code{ms_graph_pager} iterator object is returned instead to allow manual iteration over the results.
+
+Support in the underlying Graph API for OData queries is patchy. Not all endpoints that return lists of objects support filtering, and if they do, they may not allow all of the defined operators. If your filtering expression results in an error, you can carry out the operation without filtering and then filter the results on the client side.
 }
 
 \examples{

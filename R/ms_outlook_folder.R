@@ -199,11 +199,10 @@ public=list(
             return(ms_outlook_folder$new(self$token, self$tenant, res, user_id=self$properties$id))
         }
 
-        folders <- self$list_folders()
-        wch <- which(sapply(folders, function(f) f$properties$displayName == folder_name))
-        if(length(wch) != 1)
+        folders <- self$list_folders(filter=sprintf("displayName eq '%s'", folder_name))
+        if(length(folders) != 1)
             stop("Invalid folder name '", folder_name, "'", call.=FALSE)
-        else folders[[wch]]
+        else folders[[1]]
     },
 
     create_folder=function(folder_name)

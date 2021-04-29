@@ -292,12 +292,15 @@ public=list(
         assert_one_arg(attachment_name, attachment_id, msg="Supply exactly one of attachment name or ID")
         if(is.null(attachment_id))
         {
-            atts <- self$list_attachments(filter=sprintf("name eq '%s'", name))
-            if(length(atts) == 0)
+            # filter arg not working with attachments?
+            atts <- self$list_attachments()
+            att_names <- sapply(atts, function(a) a$properties$name)
+            wch <- which(att_names == attachment_name)
+            if(length(wch) == 0)
                 stop("Attachment '", attachment_name, "' not found", call.=FALSE)
-            if(length(atts) > 1)
+            if(length(wch) > 1)
                 stop("More than one attachment named '", attachment_name, "'", call.=FALSE)
-            return(atts[[1]])
+            return(atts[[wch]])
         }
 
         fields <- c("id", "name", "contentType", "size", "isInline", "lastModifiedDateTime")
@@ -314,7 +317,7 @@ public=list(
         if(!is.null(filter))
             opts$`filter` <- filter
         pager <- self$get_list_pager(self$do_operation("attachments", options=opts),
-            user_id=self$user_id, message_id=self$message_id)
+            user_id=self$user_id, message_id=self$properties$id)
         extract_list_values(pager, n)
     },
 

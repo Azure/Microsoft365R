@@ -38,6 +38,15 @@ utils::globalVariables(c("self", "private"))
     register_graph_class("attachment", ms_outlook_attachment,
         function(props) "isInline" %in% names(props))
 
+    register_graph_class("fileAttachment", ms_outlook_attachment,
+        function(props) "isInline" %in% names(props))
+
+    register_graph_class("referenceAttachment", ms_outlook_attachment,
+        function(props) "isInline" %in% names(props))
+
+    register_graph_class("itemAttachment", ms_outlook_attachment,
+        function(props) "isInline" %in% names(props))
+
     register_graph_class("aadUserConversationMember", ms_team_member,
         function(props) "roles" %in% names(props))
 

@@ -31,10 +31,11 @@
 #'
 #' `open` opens this file or folder in your browser. If the file has an unrecognised type, most browsers will attempt to download it.
 #'
-#' `list_items(path, info, full_names, pagesize)` lists the items under the specified path. It is the analogue of base R's `dir`/`list.files`. Its arguments are
+#' `list_items(path, info, full_names, filter, n, pagesize)` lists the items under the specified path. It is the analogue of base R's `dir`/`list.files`. Its arguments are
 #' - `path`: The path.
 #' - `info`: The information to return: either "partial", "name" or "all". If "partial", a data frame is returned containing the name, size, ID and whether the item is a file or folder. If "name", a vector of file/folder names is returned. If "all", a data frame is returned containing _all_ the properties for each item (this can be large).
 #' - `full_names`: Whether to prefix the folder path to the names of the items.
+#' - `filter, n`: See 'List methods' below.
 #' - `pagesize`: The number of results to return for each call to the REST endpoint. You can try reducing this argument below the default of 1000 if you are experiencing timeouts.
 #'
 #' `list_files` is a synonym for `list_items`.
@@ -58,6 +59,10 @@
 #'
 #' This method returns a URL to access the item, for `type="view"` or "`type=edit"`. For `type="embed"`, it returns a list with components `webUrl` containing the URL, and `webHtml` containing a HTML fragment to embed the link in an IFRAME. The default is a viewable link, expiring in 7 days.
 #'
+#' @section List methods:
+#' All `list_*` methods have `filter` and `n` arguments to limit the number of results. The former should be an [OData expression](https://docs.microsoft.com/en-us/graph/query-parameters#filter-parameter) as a string to filter the result set on. The latter should be a number setting the maximum number of (filtered) results to return. The default values are `filter=NULL` and `n=Inf`. If `n=NULL`, the `ms_graph_pager` iterator object is returned instead to allow manual iteration over the results.
+#'
+#' Support in the underlying Graph API for OData queries is patchy. Not all endpoints that return lists of objects support filtering, and if they do, they may not allow all of the defined operators. If your filtering expression results in an error, you can carry out the operation without filtering and then filter the results on the client side.
 #' @seealso
 #' [`ms_graph`], [`ms_site`], [`ms_drive`]
 #'
@@ -175,7 +180,7 @@ public=list(
         else res$link$webUrl
     },
 
-    list_items=function(path="", info=c("partial", "name", "all"), full_names=FALSE, pagesize=1000)
+    list_items=function(path="", info=c("partial", "name", "all"), full_names=FALSE, filter=NULL, n=Inf, pagesize=1000)
     {
         private$assert_is_folder()
         if(path == "/")
@@ -186,12 +191,16 @@ public=list(
             name=list(`$select`="name", `$top`=pagesize),
             list(`$top`=pagesize)
         )
+        if(!is.null(filter))
+            opts$`filter` <- filter
 
         op <- sub("::", "", paste0(private$make_absolute_path(path), ":/children"))
         children <- call_graph_endpoint(self$token, op, options=opts, simplify=TRUE)
 
-        # get file list as a data frame
-        df <- private$get_paged_list(children, simplify=TRUE)
+        # get file list as a data frame, or return the iterator immediately if n is NULL
+        df <- extract_list_values(self$get_list_pager(children), n)
+        if(is.null(n))
+            return(df)
 
         if(is_empty(df))
             df <- data.frame(name=character(), size=numeric(), isdir=logical(), id=character())
@@ -243,7 +252,6 @@ public=list(
         on.exit(close(con))
 
         op <- paste0(private$make_absolute_path(dest), ":/createUploadSession")
-        # print(op)
         upload_dest <- call_graph_endpoint(self$token, op, http_verb="POST")$uploadUrl
 
         size <- file.size(src)

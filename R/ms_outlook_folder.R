@@ -19,7 +19,7 @@
 #' - `get_email(message_id)`: Get the email with the specified ID.
 #' - `create_email(...)`: Creates a new draft email in this folder, optionally sending it as well. See 'Creating and sending emails'.
 #' - `delete_email(message_id, confim=TRUE)`: Deletes the specified email. By default, ask for confirmation first.
-#' - `list_folders()`: List subfolders of this folder.
+#' - `list_folders(filter=NULL, n=Inf)`: List subfolders of this folder.
 #' - `get_folder(folder_name, folder_id)`: Get a subfolder, either by the name or ID.
 #' - `create_folder(folder_name)`: Create a new subfolder of this folder.
 #' - `delete_folder(folder_name, folder_id, confirm=TRUE)`: Delete a subfolder. By default, ask for confirmation first.
@@ -49,14 +49,18 @@
 #' @section Listing emails:
 #' To list the emails in a folder, call the `list_emails()` method. This returns a list of objects of class [`ms_outlook_email`], and has the following signature:
 #' ```
-#' list_emails(by = "received desc", n = 100, pagesize = 10)
+#' list_emails(by = "received desc", filter = NULL, n = 100, pagesize = 10)
 #' ```
 #' - `by`: The sorting order of the message list. The possible fields are "received" (received date, the default), "from" and "subject". To sort in descending order, add a " desc". You can specify multiple sorting fields, with later fields used to break ties in earlier ones. The last sorting field is always "received desc" unless it appears earlier.
-#' - `n`: The total number of emails to retrieve. The default is 100.
+#' - `filter, n`: See below.
 #' - `pagesize`: The number of emails per page. You can change this to a larger number to increase throughput, at the risk of running into timeouts.
 #'
 #' This returns a list of objects of class [`ms_outlook_email`].
 #'
+#' @section List methods generally:
+#' All `list_*` methods have `filter` and `n` arguments to limit the number of results. The former should be an [OData expression](https://docs.microsoft.com/en-us/graph/query-parameters#filter-parameter) as a string to filter the result set on. The latter should be a number setting the maximum number of (filtered) results to return. The default values are `filter=NULL` and `n=100` for listing emails, and `n=Inf` for listing folders. If `n=NULL`, the `ms_graph_pager` iterator object is returned instead to allow manual iteration over the results.
+#'
+#' Support in the underlying Graph API for OData queries is patchy. Not all endpoints that return lists of objects support filtering, and if they do, they may not allow all of the defined operators. If your filtering expression results in an error, you can carry out the operation without filtering and then filter the results on the client side.
 #' @seealso
 #' [`ms_outlook`], [`ms_outlook_email`]
 #'
@@ -148,12 +152,13 @@ public=list(
         super$initialize(token, tenant, properties)
     },
 
-    list_emails=function(by="received desc", n=100, pagesize=10)
+    list_emails=function(by="received desc", filter=NULL, n=100, pagesize=10)
     {
-        order_by <- email_list_order(by)
-        opts <- list(`$orderby`=order_by, `$top`=pagesize)
-        lst <- private$get_paged_list(self$do_operation("messages", options=opts), n=n)
-        private$init_list_objects(lst, default_generator=ms_outlook_email, user_id=self$user_id)
+        # by only works with no filter
+        order_by <- if(is.null(filter)) email_list_order(by)
+        opts <- list(`$orderby`=order_by, `$filter`=filter, `$top`=pagesize)
+        pager <- self$get_list_pager(self$do_operation("messages", options=opts), user_id=self$user_id)
+        extract_list_values(pager, n)
     },
 
     get_email=function(message_id)
@@ -183,10 +188,9 @@ public=list(
         self$get_email(message_id)$delete(confirm=confirm)
     },
 
-    list_folders=function()
+    list_folders=function(filter=NULL, n=Inf)
     {
-        lst <- private$get_paged_list(self$do_operation("childFolders"))
-        private$init_list_objects(lst, default_generator=ms_outlook_folder, user_id=self$user_id)
+        make_basic_list(self, "childFolders", filter, n, user_id=self$user_id)
     },
 
     get_folder=function(folder_name=NULL, folder_id=NULL)
@@ -200,11 +204,10 @@ public=list(
             return(ms_outlook_folder$new(self$token, self$tenant, res, user_id=self$properties$id))
         }
 
-        folders <- self$list_folders()
-        wch <- which(sapply(folders, function(f) f$properties$displayName == folder_name))
-        if(length(wch) != 1)
+        folders <- self$list_folders(filter=sprintf("displayName eq '%s'", folder_name))
+        if(length(folders) != 1)
             stop("Invalid folder name '", folder_name, "'", call.=FALSE)
-        else folders[[wch]]
+        else folders[[1]]
     },
 
     create_folder=function(folder_name)

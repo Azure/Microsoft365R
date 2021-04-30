@@ -65,6 +65,11 @@ test_that("Teams methods work",
     expect_is(chans, "list")
     expect_true(all(sapply(chans, inherits, "ms_channel")))
 
+    chanpager <- team$list_channels(filter=sprintf("displayName eq '%s'", channel_name), n=NULL)
+    expect_is(chanpager, "ms_graph_pager")
+    chans0 <- chanpager$value
+    expect_true(length(chans0) == 1 && inherits(chans0[[1]], "ms_channel"))
+
     expect_error(team$get_channel(channel_name, channel_id))
 
     chan0 <- team$get_channel()
@@ -96,6 +101,11 @@ test_that("Team member methods work",
     expect_is(mlst, "list")
     expect_true(all(sapply(mlst, inherits, "ms_team_member")))
     expect_true(all(sapply(mlst, function(obj) obj$type == "team member")))
+
+    mpager <- team$list_members(filter=sprintf("displayName eq '%s'", mlst[[1]]$properties$displayName), n=NULL)
+    expect_is(mpager, "ms_graph_pager")
+    mlst0 <- mpager$value
+    expect_true(length(mlst0) == 1 && inherits(mlst0[[1]], "ms_team_member"))
 
     usr <- mlst[[1]]
     usrname <- usr$properties$displayName

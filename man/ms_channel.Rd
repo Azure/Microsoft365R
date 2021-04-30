@@ -30,14 +30,14 @@ Class representing a Microsoft Teams channel.
 \item \code{do_operation(...)}: Carry out an arbitrary operation on the channel.
 \item \code{sync_fields()}: Synchronise the R object with the channel metadata in Microsoft Graph.
 \item \code{send_message(body, content_type, attachments)}: Sends a new message to the channel. See below.
-\item \code{list_messages(n=50)}: Retrieves the messages in the channel. By default, this is limited to the 50 most recent messages; set the \code{n} argument to change this.
+\item \code{list_messages(filter=NULL, n=50)}: Retrieves the messages in the channel. By default, this is limited to the 50 most recent messages; set the \code{n} argument to change this.
 \item \code{get_message(message_id)}: Retrieves a specific message in the channel.
 \item \code{delete_message(message_id, confirm=TRUE)}: Deletes a message. Currently the Graph API does not support deleting Teams messages, so this method is disabled.
 \item \code{list_files()}: List the files for the channel. See \code{\link{ms_drive}} for the arguments available for this and the file upload/download methods.
 \item \code{upload_file()}: Uploads a file to the channel.
 \item \code{download_file()}: Downloads a file from the channel.
 \item \code{get_folder()}: Retrieves the files folder for the channel, as a \code{\link{ms_drive_item}} object.
-\item \code{list_members()}: Retrieves the members of the channel, as a list of \code{\link{ms_team_member}} objects.
+\item \code{list_members(filter=NULL, n=Inf)}: Retrieves the members of the channel, as a list of \code{\link{ms_team_member}} objects.
 \item \code{get_member(name, email, id)}: Retrieve a specific member of the channel, as a \code{ms_team_member} object. Supply only one of the member name, email address or ID.
 }
 }
@@ -59,6 +59,13 @@ To send a message to a channel, use the \code{send_message()} method. This has a
 }
 
 Note that message attachments are actually uploaded to the channel's file listing (a directory in the team's primary shared document folder). Support for attachments is somewhat experimental, so if you want to be sure that it works, upload the file separately using the \code{upload_file()} method.
+}
+
+\section{List methods}{
+
+All \verb{list_*} methods have \code{filter} and \code{n} arguments to limit the number of results. The former should be an \href{https://docs.microsoft.com/en-us/graph/query-parameters#filter-parameter}{OData expression} as a string to filter the result set on. The latter should be a number setting the maximum number of (filtered) results to return. The default values are \code{filter=NULL} and \code{n=Inf}. If \code{n=NULL}, the \code{ms_graph_pager} iterator object is returned instead to allow manual iteration over the results.
+
+Support in the underlying Graph API for OData queries is patchy. Not all endpoints that return lists of objects support filtering, and if they do, they may not allow all of the defined operators. If your filtering expression results in an error, you can carry out the operation without filtering and then filter the results on the client side.
 }
 
 \examples{

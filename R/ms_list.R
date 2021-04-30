@@ -27,7 +27,8 @@
 #'
 #' @section List querying:
 #' `list_items` supports the following arguments to customise results returned by the query.
-#' - `filter`: A string giving a logical expression to filter the rows to return. Note that column names used in the expression must be prefixed with `fields/` to distinguish them from item metadata.
+#' - `filter`: A string giving an [OData expression](https://docs.microsoft.com/en-us/graph/query-parameters#filter-parameter) to filter the rows to return. Note that column names used in the expression must be prefixed with `fields/` to distinguish them from item metadata.
+#' - `n`: The maximum number of (filtered) results to return. If this is NULL, the `ms_graph_pager` iterator object is returned instead to allow manual iteration over the results.
 #' - `select`: A string containing comma-separated column names to include in the returned data frame. If not supplied, includes all columns.
 #' - `all_metadata`: If TRUE, the returned data frame will contain extended metadata as separate columns, while the data fields will be in a nested data frame named `fields`.
 #' - `as_data_frame`: If FALSE, return the result as a list of individual `ms_list_item` objects, rather than a data frame. The `all_metadata` argument is ignored if `as_data_frame=FALSE`.
@@ -77,7 +78,7 @@ public=list(
         super$initialize(token, tenant, properties)
     },
 
-    list_items=function(filter=NULL, select=NULL, all_metadata=FALSE, as_data_frame=TRUE, pagesize=5000)
+    list_items=function(filter=NULL, select=NULL, all_metadata=FALSE, as_data_frame=TRUE, n=Inf, pagesize=5000)
     {
         select <- if(is.null(select))
             "fields"
@@ -85,13 +86,16 @@ public=list(
         options <- list(expand=select, `$filter`=filter, `$top`=pagesize)
         headers <- httr::add_headers(Prefer="HonorNonIndexedQueriesWarningMayFailRandomly")
 
-        items <- self$do_operation("items", options=options, headers, simplify=as_data_frame)
-        df <- private$get_paged_list(items, simplify=as_data_frame)
-        if(!as_data_frame)
-            lapply(df, function(item) ms_list_item$new(self$token, self$tenant, item,
-                site_id=self$properties$parentReference$siteId,
-                list_id=self$properties$id))
-        else if(!all_metadata)
+        pager <- self$get_list_pager(self$do_operation("items", options=options, headers, simplify=as_data_frame),
+            site_id=self$properties$parentReference$siteId,
+            list_id=self$properties$id)
+
+        # get item list, or return the iterator immediately if n is NULL
+        df <- extract_list_values(pager, n)
+        if(is.null(n))
+            return(df)
+
+        if(as_data_frame && !all_metadata)
             df$fields
         else df
     },

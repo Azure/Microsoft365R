@@ -28,9 +28,21 @@ test_that("Outlook client works",
     expect_is(folders, "list")
     expect_true(all(sapply(folders, inherits, "ms_outlook_folder")))
 
+    f1 <- folders[[1]]$properties$displayName
+    fpager <- outl$list_folders(filter=sprintf("displayName eq '%s'", f1), n=NULL)
+    expect_is(fpager, "ms_graph_pager")
+    folders1 <- fpager$value
+    expect_true(length(folders1) ==1 && inherits(folders1[[1]], "ms_outlook_folder"))
+
     emails <- outl$list_emails()
     expect_is(emails, "list")
     expect_true(all(sapply(emails, inherits, "ms_outlook_email")))
+
+    subj1 <- emails[[1]]$properties$subject
+    empager <- outl$list_emails(filter=sprintf("subject eq '%s'", subj1), n=NULL)
+    expect_is(empager, "ms_graph_pager")
+    emails1 <- empager$value
+    expect_true(length(emails1) == 1 && inherits(emails1[[1]], "ms_outlook_email"))
 
     f1name <- make_name()
     f1 <- outl$create_folder(f1name)

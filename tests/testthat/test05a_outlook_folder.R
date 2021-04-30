@@ -68,6 +68,12 @@ test_that("Outlook folder methods work",
     expect_is(flist, "list")
     expect_true(all(sapply(flist, inherits, "ms_outlook_folder")))
 
+    f1 <- flist[[1]]$properties$displayName
+    fpager <- outl$list_folders(filter=sprintf("displayName eq '%s'", f1), n=NULL)
+    expect_is(fpager, "ms_graph_pager")
+    flist1 <- fpager$value
+    expect_true(length(flist1) ==1 && inherits(flist1[[1]], "ms_outlook_folder"))
+
     expect_silent(folder$delete_folder(fname2, confirm=FALSE))
     expect_silent(folder$delete(confirm=FALSE))
 })

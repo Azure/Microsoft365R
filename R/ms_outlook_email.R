@@ -22,7 +22,7 @@
 #' - `add_attachment(object, ...)`: Adds an attachment to the email. See 'Attachments' below.
 #' - `add_image(object)`: Adds an inline image to the email.
 #' - `get_attachment(attachment_name=NULL, attachment_id=NULL)`: Gets an attachment, either by name or ID. Note that attachments don't need to have unique names; if multiple attachments share the same name, the method throws an error.
-#' - `list_attachments()`: Lists the current attachments for the email.
+#' - `list_attachments(filter=NULL, n=Inf)`: Lists the current attachments for the email.
 #' - `remove_attachment(attachment_name=NULL, attachment_id=NULL, confirm=TRUE)`: Removes an attachment from the email. By default, ask for confirmation first.
 #' - `download_attachment(attachment_name=NULL, attachment_id=NULL, ...)`: Downloads an attachment. This is only supported for file attachments (not URLs).
 #' - `send()`: Sends an email.  See 'Sending, replying and forwarding'.
@@ -75,6 +75,10 @@
 #'
 #' The `get_message_headers()` method retrieves the Internet message headers for the email, as a named character vector.
 #'
+#' @section List methods:
+#' All `list_*` methods have `filter` and `n` arguments to limit the number of results. The former should be an [OData expression](https://docs.microsoft.com/en-us/graph/query-parameters#filter-parameter) as a string to filter the result set on. The latter should be a number setting the maximum number of (filtered) results to return. The default values are `filter=NULL` and `n=Inf`. If `n=NULL`, the `ms_graph_pager` iterator object is returned instead to allow manual iteration over the results.
+#'
+#' Support in the underlying Graph API for OData queries is patchy. Not all endpoints that return lists of objects support filtering, and if they do, they may not allow all of the defined operators. If your filtering expression results in an error, you can carry out the operation without filtering and then filter the results on the client side.
 #' @seealso
 #' [`ms_outlook`], [`ms_outlook_folder`], [`ms_outlook_attachment`]
 #'
@@ -292,6 +296,7 @@ public=list(
         assert_one_arg(attachment_name, attachment_id, msg="Supply exactly one of attachment name or ID")
         if(is.null(attachment_id))
         {
+            # filter arg not working with attachments?
             atts <- self$list_attachments()
             att_names <- sapply(atts, function(a) a$properties$name)
             wch <- which(att_names == attachment_name)
@@ -309,12 +314,15 @@ public=list(
             user_id=self$user_id, message_id=self$properties$id)
     },
 
-    list_attachments=function()
+    list_attachments=function(filter=NULL, n=Inf)
     {
         fields <- c("id", "name", "contentType", "size", "isInline", "lastModifiedDateTime")
-        res <- self$do_operation("attachments", options=list(select=paste(fields, collapse=",")))
-        private$init_list_objects(private$get_paged_list(res), default_generator=ms_outlook_attachment,
+        opts <- list(select=paste(fields, collapse=","))
+        if(!is.null(filter))
+            opts$`filter` <- filter
+        pager <- self$get_list_pager(self$do_operation("attachments", options=opts),
             user_id=self$user_id, message_id=self$properties$id)
+        extract_list_values(pager, n)
     },
 
     remove_attachment=function(attachment_name=NULL, attachment_id=NULL, confirm=TRUE)

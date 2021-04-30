@@ -16,14 +16,14 @@
 #' - `do_operation(...)`: Carry out an arbitrary operation on the channel.
 #' - `sync_fields()`: Synchronise the R object with the channel metadata in Microsoft Graph.
 #' - `send_message(body, content_type, attachments)`: Sends a new message to the channel. See below.
-#' - `list_messages(n=50)`: Retrieves the messages in the channel. By default, this is limited to the 50 most recent messages; set the `n` argument to change this.
+#' - `list_messages(filter=NULL, n=50)`: Retrieves the messages in the channel. By default, this is limited to the 50 most recent messages; set the `n` argument to change this.
 #' - `get_message(message_id)`: Retrieves a specific message in the channel.
 #' - `delete_message(message_id, confirm=TRUE)`: Deletes a message. Currently the Graph API does not support deleting Teams messages, so this method is disabled.
 #' - `list_files()`: List the files for the channel. See [`ms_drive`] for the arguments available for this and the file upload/download methods.
 #' - `upload_file()`: Uploads a file to the channel.
 #' - `download_file()`: Downloads a file from the channel.
 #' - `get_folder()`: Retrieves the files folder for the channel, as a [`ms_drive_item`] object.
-#' - `list_members()`: Retrieves the members of the channel, as a list of [`ms_team_member`] objects.
+#' - `list_members(filter=NULL, n=Inf)`: Retrieves the members of the channel, as a list of [`ms_team_member`] objects.
 #' - `get_member(name, email, id)`: Retrieve a specific member of the channel, as a `ms_team_member` object. Supply only one of the member name, email address or ID.
 #'
 #' @section Initialization:
@@ -39,6 +39,10 @@
 #'
 #' Note that message attachments are actually uploaded to the channel's file listing (a directory in the team's primary shared document folder). Support for attachments is somewhat experimental, so if you want to be sure that it works, upload the file separately using the `upload_file()` method.
 #'
+#' @section List methods:
+#' All `list_*` methods have `filter` and `n` arguments to limit the number of results. The former should be an [OData expression](https://docs.microsoft.com/en-us/graph/query-parameters#filter-parameter) as a string to filter the result set on. The latter should be a number setting the maximum number of (filtered) results to return. The default values are `filter=NULL` and `n=Inf`. If `n=NULL`, the `ms_graph_pager` iterator object is returned instead to allow manual iteration over the results.
+#'
+#' Support in the underlying Graph API for OData queries is patchy. Not all endpoints that return lists of objects support filtering, and if they do, they may not allow all of the defined operators. If your filtering expression results in an error, you can carry out the operation without filtering and then filter the results on the client side.
 #' @seealso
 #' [`ms_team`], [`ms_drive`], [`ms_chat_message`]
 #'
@@ -113,10 +117,9 @@ public=list(
         ms_chat_message$new(self$token, self$tenant, res)
     },
 
-    list_messages=function(n=50)
+    list_messages=function(filter=NULL, n=50)
     {
-        lst <- private$get_paged_list(self$do_operation("messages"), n=n)
-        private$init_list_objects(lst, "chatMessage")
+        make_basic_list(self, "messages", filter, n)
     },
 
     get_message=function(message_id)
@@ -152,11 +155,9 @@ public=list(
         private$folder
     },
 
-    list_members=function()
+    list_members=function(filter=NULL, n=Inf)
     {
-        res <- private$get_paged_list(self$do_operation("members"))
-        private$init_list_objects(res, default_generator=ms_team_member,
-            parent_id=self$properties$id, parent_type="channel")
+        make_basic_list(self, "members", filter, n, parent_id=self$properties$id, parent_type="channel")
     },
 
     get_member=function(name=NULL, email=NULL, id=NULL)
@@ -173,11 +174,10 @@ public=list(
             filter <- if(!is.null(name))
                 sprintf("displayName eq '%s'", name)
             else sprintf("microsoft.graph.aadUserConversationMember/email eq '%s'", email)
-            res <- private$get_paged_list(self$do_operation("members", options=list(`$filter`=filter)))
+            res <- self$list_members(filter=filter)
             if(length(res) != 1)
                 stop("Invalid name or email address", call.=FALSE)
-            ms_team_member$new(self$token, self$tenant, res[[1]],
-                parent_id=self$properties$id, parent_type="channel")
+            res[[1]]
         }
     },
 

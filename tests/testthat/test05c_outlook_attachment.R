@@ -35,6 +35,12 @@ test_that("Outlook email attachment methods work",
     expect_is(atts, "list")
     expect_true(!is_empty(atts) && all(sapply(atts, inherits, "ms_outlook_attachment")))
 
+    name1 <- atts[[1]]$properties$name
+    attpager <- em$list_attachments(filter=sprintf("name eq '%s'", name1), n=NULL)
+    expect_is(attpager, "ms_graph_pager")
+    atts1 <- attpager$value
+    expect_true(length(atts1) ==1 && inherits(atts1[[1]], "ms_outlook_attachment"))
+
     id1 <- atts[[1]]$properties$id
     att1 <- em$get_attachment("logo_small.jpg")
     expect_is(att1, "ms_outlook_attachment")

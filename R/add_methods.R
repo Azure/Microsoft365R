@@ -123,10 +123,9 @@ add_graph_methods <- function()
 add_user_methods <- function()
 {
     az_user$set("public", "list_drives", overwrite=TRUE,
-    function()
+    function(filter=NULL, n=Inf)
     {
-        res <- private$get_paged_list(self$do_operation("drives"))
-        private$init_list_objects(res, "drive")
+        make_basic_list(self, "drives", filter, n)
     })
 
     az_user$set("public", "get_drive", overwrite=TRUE,
@@ -139,19 +138,21 @@ add_user_methods <- function()
     })
 
     az_user$set("public", "list_sharepoint_sites", overwrite=TRUE,
-    function(filter=NULL)
+    function(filter=NULL, n=Inf)
     {
-        opts <- if(!is.null(filter)) list(`$filter`=filter)
-        res <- private$get_paged_list(self$do_operation("followedSites", options=opts))
-        lapply(private$init_list_objects(res, "site"), function(site) site$sync_fields())
+        lst <- make_basic_list(self, "followedSites", filter, n)
+        if(!is.null(n))
+            lapply(lst, function(site) site$sync_fields())  # result from endpoint is incomplete
+        else lst
     })
 
     az_user$set("public", "list_teams", overwrite=TRUE,
-    function(filter=NULL)
+    function(filter=NULL, n=Inf)
     {
-        opts <- if(!is.null(filter)) list(`$filter`=filter)
-        res <- private$get_paged_list(self$do_operation("joinedTeams", options=opts))
-        lapply(private$init_list_objects(res, "team"), function(team) team$sync_fields())
+        lst <- make_basic_list(self, "joinedTeams", filter, n)
+        if(!is.null(n))
+            lapply(lst, function(team) team$sync_fields())  # result from endpoint only contains ID and displayname
+        else lst
     })
 
     az_user$set("public", "get_outlook", overwrite=TRUE,
@@ -171,10 +172,9 @@ add_group_methods <- function()
     })
 
     az_group$set("public", "list_drives", overwrite=TRUE,
-    function()
+    function(filter=NULL, n=Inf)
     {
-        res <- private$get_paged_list(self$do_operation("drives"))
-        private$init_list_objects(res, "drive")
+        make_basic_list(self, "drives", filter, n)
     })
 
     az_group$set("public", "get_drive", overwrite=TRUE,

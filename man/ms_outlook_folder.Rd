@@ -77,9 +77,7 @@ To list the emails in a folder, call the \code{list_emails()} method. This retur
 \item \code{pagesize}: The number of emails per page. You can change this to a larger number to increase throughput, at the risk of running into timeouts.
 }
 
-Currently searching and filtering the message list is subject to some limitations in the underlying Graph API. You can only specify one of \code{search} and \code{filter}; searching and filtering at the same time will not work. Ordering the results is only allowed if neither a search term nor a filtering expression is present. If searching or filtering is done, the result is always sorted by date.
-
-This returns a list of objects of class \code{\link{ms_outlook_email}}.
+Currently, searching and filtering the message list is subject to some limitations. You can only specify one of \code{search} and \code{filter}; searching and filtering at the same time will not work. Ordering the results is only allowed if neither a search term nor a filtering expression is present. If searching or filtering is done, the result is always sorted by date.
 }
 
 \section{List methods generally}{

@@ -56,9 +56,7 @@
 #' - `filter, n`: See below.
 #' - `pagesize`: The number of emails per page. You can change this to a larger number to increase throughput, at the risk of running into timeouts.
 #'
-#' Currently searching and filtering the message list is subject to some limitations in the underlying Graph API. You can only specify one of `search` and `filter`; searching and filtering at the same time will not work. Ordering the results is only allowed if neither a search term nor a filtering expression is present. If searching or filtering is done, the result is always sorted by date.
-#'
-#' This returns a list of objects of class [`ms_outlook_email`].
+#' Currently, searching and filtering the message list is subject to some limitations. You can only specify one of `search` and `filter`; searching and filtering at the same time will not work. Ordering the results is only allowed if neither a search term nor a filtering expression is present. If searching or filtering is done, the result is always sorted by date.
 #'
 #' @section List methods generally:
 #' All `list_*` methods have `filter` and `n` arguments to limit the number of results. The former should be an [OData expression](https://docs.microsoft.com/en-us/graph/query-parameters#filter-parameter) as a string to filter the result set on. The latter should be a number setting the maximum number of (filtered) results to return. The default values are `filter=NULL` and `n=100` for listing emails, and `n=Inf` for listing folders. If `n=NULL`, the `ms_graph_pager` iterator object is returned instead to allow manual iteration over the results.

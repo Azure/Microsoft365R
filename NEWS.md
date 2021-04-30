@@ -1,6 +1,7 @@
 # Microsoft365R 2.1.0.9000
 
 - All `list_*` class methods now have `filter` and `n` arguments to filter the result set and cap the number of results, following the pattern in AzureGraph 1.3.0. The default values are `filter=NULL` and `n=Inf`. If `n=NULL`, an `ms_graph_pager` iterator object is returned instead to allow manual iteration over the results. Note that support for filtering in the underlying Graph API is somewhat uneven at the moment.
+- Add `search` argument to the `ms_outlook_folder$list_emails()` method. The default is to search in the from, subject and body of the emails.
 - Add a `list_shared_items()` method for the `ms_drive` class to access files and folders shared with you (#45).
 - Add `list_members()` and `get_member()` methods for teams and channels.
 - Add support for @mentions in Teams channel messages (#26).

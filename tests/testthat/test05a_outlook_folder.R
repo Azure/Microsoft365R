@@ -57,6 +57,16 @@ test_that("Outlook folder methods work",
 
     expect_error(folder$list_emails(by="reply_to"))  # unsupported field
 
+    lst4 <- folder$list_emails(search="email 3")
+    expect_is(lst4, "list")
+    expect_true(length(lst4) == 1 && inherits(lst4[[1]], "ms_outlook_email"))
+
+    subj1 <- e1$properties$subject
+    empager <- folder$list_emails(filter=sprintf("subject eq '%s'", subj1), n=NULL)
+    expect_is(empager, "ms_graph_pager")
+    lst5 <- empager$value
+    expect_true(length(lst5) == 1 && inherits(lst5[[1]], "ms_outlook_email"))
+
     expect_silent(folder$delete_email(e11$properties$id, confirm=FALSE))
 
     fname2 <- make_name()

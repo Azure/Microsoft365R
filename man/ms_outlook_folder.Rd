@@ -29,7 +29,7 @@ Class representing a folder in Outlook.
 \item \code{update(...)}: Update the item's properties (metadata) in Microsoft Graph.
 \item \code{do_operation(...)}: Carry out an arbitrary operation on the item.
 \item \code{sync_fields()}: Synchronise the R object with the item metadata in Microsoft Graph.
-\item \code{list_emails()}: List the emails in this folder.
+\item \code{list_emails(...)}: List the emails in this folder.
 \item \code{get_email(message_id)}: Get the email with the specified ID.
 \item \code{create_email(...)}: Creates a new draft email in this folder, optionally sending it as well. See 'Creating and sending emails'.
 \item \code{delete_email(message_id, confim=TRUE)}: Deletes the specified email. By default, ask for confirmation first.
@@ -68,15 +68,16 @@ To reply to or forward an email, first retrieve it using \code{get_email()} or \
 
 \section{Listing emails}{
 
-To list the emails in a folder, call the \code{list_emails()} method. This returns a list of objects of class \code{\link{ms_outlook_email}}, and has the following signature:\preformatted{list_emails(by = "received desc", filter = NULL, n = 100, pagesize = 10)
+To list the emails in a folder, call the \code{list_emails()} method. This returns a list of objects of class \code{\link{ms_outlook_email}}, and has the following signature:\preformatted{list_emails(by = "received desc", search = NULL, filter = NULL, n = 100, pagesize = 10)
 }
 \itemize{
 \item \code{by}: The sorting order of the message list. The possible fields are "received" (received date, the default), "from" and "subject". To sort in descending order, add a " desc". You can specify multiple sorting fields, with later fields used to break ties in earlier ones. The last sorting field is always "received desc" unless it appears earlier.
+\item \code{search}: An optional string to search for. Only emails that contain the search string will be returned. See the \href{https://docs.microsoft.com/en-us/graph/query-parameters#search-parameter}{description of this parameter} for more information.
 \item \verb{filter, n}: See below.
 \item \code{pagesize}: The number of emails per page. You can change this to a larger number to increase throughput, at the risk of running into timeouts.
 }
 
-This returns a list of objects of class \code{\link{ms_outlook_email}}.
+Currently, searching and filtering the message list is subject to some limitations. You can only specify one of \code{search} and \code{filter}; searching and filtering at the same time will not work. Ordering the results is only allowed if neither a search term nor a filtering expression is present. If searching or filtering is done, the result is always sorted by date.
 }
 
 \section{List methods generally}{
@@ -105,6 +106,9 @@ folder$list_emails(by="subject")
 
 # sorted by from name in descending order, then by most recent received date
 folder$list_emails(by="from desc")
+
+# searching the list
+folder$list_emails(search="important information")
 
 # retrieve a specific email:
 # note the Outlook ID is NOT the same as the Internet message-id

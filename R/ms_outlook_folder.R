@@ -15,7 +15,7 @@
 #' - `update(...)`: Update the item's properties (metadata) in Microsoft Graph.
 #' - `do_operation(...)`: Carry out an arbitrary operation on the item.
 #' - `sync_fields()`: Synchronise the R object with the item metadata in Microsoft Graph.
-#' - `list_emails()`: List the emails in this folder.
+#' - `list_emails(...)`: List the emails in this folder.
 #' - `get_email(message_id)`: Get the email with the specified ID.
 #' - `create_email(...)`: Creates a new draft email in this folder, optionally sending it as well. See 'Creating and sending emails'.
 #' - `delete_email(message_id, confim=TRUE)`: Deletes the specified email. By default, ask for confirmation first.
@@ -49,13 +49,14 @@
 #' @section Listing emails:
 #' To list the emails in a folder, call the `list_emails()` method. This returns a list of objects of class [`ms_outlook_email`], and has the following signature:
 #' ```
-#' list_emails(by = "received desc", filter = NULL, n = 100, pagesize = 10)
+#' list_emails(by = "received desc", search = NULL, filter = NULL, n = 100, pagesize = 10)
 #' ```
 #' - `by`: The sorting order of the message list. The possible fields are "received" (received date, the default), "from" and "subject". To sort in descending order, add a " desc". You can specify multiple sorting fields, with later fields used to break ties in earlier ones. The last sorting field is always "received desc" unless it appears earlier.
+#' - `search`: An optional string to search for. Only emails that contain the search string will be returned. See the [description of this parameter](https://docs.microsoft.com/en-us/graph/query-parameters#search-parameter) for more information.
 #' - `filter, n`: See below.
 #' - `pagesize`: The number of emails per page. You can change this to a larger number to increase throughput, at the risk of running into timeouts.
 #'
-#' This returns a list of objects of class [`ms_outlook_email`].
+#' Currently, searching and filtering the message list is subject to some limitations. You can only specify one of `search` and `filter`; searching and filtering at the same time will not work. Ordering the results is only allowed if neither a search term nor a filtering expression is present. If searching or filtering is done, the result is always sorted by date.
 #'
 #' @section List methods generally:
 #' All `list_*` methods have `filter` and `n` arguments to limit the number of results. The former should be an [OData expression](https://docs.microsoft.com/en-us/graph/query-parameters#filter-parameter) as a string to filter the result set on. The latter should be a number setting the maximum number of (filtered) results to return. The default values are `filter=NULL` and `n=100` for listing emails, and `n=Inf` for listing folders. If `n=NULL`, the `ms_graph_pager` iterator object is returned instead to allow manual iteration over the results.
@@ -86,6 +87,9 @@
 #'
 #' # sorted by from name in descending order, then by most recent received date
 #' folder$list_emails(by="from desc")
+#'
+#' # searching the list
+#' folder$list_emails(search="important information")
 #'
 #' # retrieve a specific email:
 #' # note the Outlook ID is NOT the same as the Internet message-id
@@ -152,11 +156,16 @@ public=list(
         super$initialize(token, tenant, properties)
     },
 
-    list_emails=function(by="received desc", filter=NULL, n=100, pagesize=10)
+    list_emails=function(by="received desc", search=NULL, filter=NULL, n=100, pagesize=10)
     {
-        # by only works with no filter
-        order_by <- if(is.null(filter)) email_list_order(by)
-        opts <- list(`$orderby`=order_by, `$filter`=filter, `$top`=pagesize)
+        # search term must have double quotes around it
+        if(!is.null(search) && substr(search, 1, 1) != "" && substr(search, nchar(search), nchar(search)) != "")
+            search <- paste0('"', search, '"')
+
+        # by only works with no filter and no search
+        order_by <- if(is.null(filter) && is.null(search)) email_list_order(by)
+
+        opts <- list(`$orderby`=order_by, `$search`=search, `$filter`=filter, `$top`=pagesize)
         pager <- self$get_list_pager(self$do_operation("messages", options=opts), user_id=self$user_id)
         extract_list_values(pager, n)
     },

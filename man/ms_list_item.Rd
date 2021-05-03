@@ -16,7 +16,7 @@ Class representing an item in a SharePoint list.
 \item \code{token}: The token used to authenticate with the Graph host.
 \item \code{tenant}: The Azure Active Directory tenant for the parent drive.
 \item \code{type}: always "drive item" for a drive item object.
-\item \code{properties}: The item properties (metadata).
+\item \code{properties}: The item properties (data and metadata). This is a list; the item data can be found in the \code{fields} component.
 }
 }
 
@@ -27,7 +27,7 @@ Class representing an item in a SharePoint list.
 \item \code{delete(confirm=TRUE)}: Delete this item. By default, ask for confirmation first.
 \item \code{update(...)}: Update the item's properties (metadata) in Microsoft Graph. To update the list \emph{data}, update the \code{fields} property. See the examples below.
 \item \code{do_operation(...)}: Carry out an arbitrary operation on the item.
-\item \code{sync_fields()}: Synchronise the R object with the item metadata in Microsoft Graph.
+\item \code{sync_fields()}: Synchronise the R object with the item data and metadata in Microsoft Graph.
 }
 }
 
@@ -47,6 +47,9 @@ lst_items <- lst$list_items(as_data_frame=FALSE)
 item <- lst_items[[1]]
 
 item$update(fields=list(firstname="Mary"))
+
+# item data (plus some metadata mixed in)
+item$properties$fields
 
 item$delete()
 

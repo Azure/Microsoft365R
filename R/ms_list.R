@@ -30,11 +30,11 @@
 #' - `filter`: A string giving an [OData expression](https://docs.microsoft.com/en-us/graph/query-parameters#filter-parameter) to filter the rows to return. Note that column names used in the expression must be prefixed with `fields/` to distinguish them from item metadata.
 #' - `n`: The maximum number of (filtered) results to return. If this is NULL, the `ms_graph_pager` iterator object is returned instead to allow manual iteration over the results.
 #' - `select`: A string containing comma-separated column names to include in the returned data frame. If not supplied, includes all columns.
-#' - `all_metadata`: If TRUE, the returned data frame will contain extended metadata as separate columns, while the data fields will be in a nested data frame named `fields`.
-#' - `as_data_frame`: If FALSE, return the result as a list of individual `ms_list_item` objects, rather than a data frame. The `all_metadata` argument is ignored if `as_data_frame=FALSE`.
+#' - `all_metadata`: If TRUE, the returned data frame will contain extended metadata as separate columns, while the data fields will be in a nested data frame named `fields`. This is always set to FALSE if `n=NULL` or `as_data_frame=FALSE`.
+#' - `as_data_frame`: If FALSE, return the result as a list of individual `ms_list_item` objects, rather than a data frame.
 #' - `pagesize`: The number of results to return for each call to the REST endpoint. You can try reducing this argument below the default of 5000 if you are experiencing timeouts.
 #'
-#' For more information, see [Use query parameters](https://docs.microsoft.com/en-us/graph/query-parameters?view=graph-rest-1.0) at the Graph API reference.
+#' Note that the Graph API currently doesn't support retrieving item attachments.
 #'
 #' @seealso
 #' [`get_sharepoint_site`], [`ms_site`], [`ms_list_item`]
@@ -111,7 +111,7 @@ public=list(
 
     get_item=function(id)
     {
-        res <- self$do_operation(file.path("items", id))
+        res <- self$do_operation(file.path("items", id), options=list(expand="fields"))
         ms_list_item$new(self$token, self$tenant, res,
             site_id=self$properties$parentReference$siteId,
             list_id=self$properties$id)

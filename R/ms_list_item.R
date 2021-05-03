@@ -7,13 +7,13 @@
 #' - `token`: The token used to authenticate with the Graph host.
 #' - `tenant`: The Azure Active Directory tenant for the parent drive.
 #' - `type`: always "drive item" for a drive item object.
-#' - `properties`: The item properties (metadata).
+#' - `properties`: The item properties (data and metadata). This is a list; the item data can be found in the `fields` component.
 #' @section Methods:
 #' - `new(...)`: Initialize a new object. Do not call this directly; see 'Initialization' below.
 #' - `delete(confirm=TRUE)`: Delete this item. By default, ask for confirmation first.
 #' - `update(...)`: Update the item's properties (metadata) in Microsoft Graph. To update the list _data_, update the `fields` property. See the examples below.
 #' - `do_operation(...)`: Carry out an arbitrary operation on the item.
-#' - `sync_fields()`: Synchronise the R object with the item metadata in Microsoft Graph.
+#' - `sync_fields()`: Synchronise the R object with the item data and metadata in Microsoft Graph.
 #'
 #' @section Initialization:
 #' Creating new objects of this class should be done via the `get_item` method of the [`ms_list`] class. Calling the `new()` method for this class only constructs the R object; it does not call the Microsoft Graph API to retrieve or create the actual item.
@@ -35,6 +35,9 @@
 #' item <- lst_items[[1]]
 #'
 #' item$update(fields=list(firstname="Mary"))
+#'
+#' # item data (plus some metadata mixed in)
+#' item$properties$fields
 #'
 #' item$delete()
 #'

@@ -112,6 +112,7 @@ test_that("SharePoint methods work",
     item_id <- items3[[1]]$properties$id
     item <- lst$get_item(item_id)
     expect_is(item, "ms_list_item")
+    expect_false(is_empty(item$properties$fields))
 
     newtitle <- make_name(10)
     newitem <- lst$create_item(Title=newtitle)

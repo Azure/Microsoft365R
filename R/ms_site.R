@@ -60,8 +60,16 @@ public=list(
         make_basic_list(self, "drives", filter, n)
     },
 
-    get_drive=function(drive_id=NULL)
+    get_drive=function(drive_name=NULL, drive_id=NULL)
     {
+        assert_one_arg(drive_name, drive_id, msg="Supply exactly one of drive name or ID")
+        if(!is.null(drive_name))
+        {
+            drives <- self$list_drives(filter=sprintf("name eq '%s'", drive_name))
+            if(length(drives) != 1)
+                stop("Invalid drive name", call.=FALSE)
+            return(drives[[1]])
+        }
         op <- if(is.null(drive_id))
             "drive"
         else file.path("drives", drive_id)

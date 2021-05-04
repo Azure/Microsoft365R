@@ -15,7 +15,7 @@
 #' get_drive(drive_id = NULL)
 #'
 #' ## R6 method for class 'az_group'
-#' get_drive(drive_id = NULL)
+#' get_drive(drive_name = NULL, drive_id = NULL)
 #'
 #' ## R6 method for class 'ms_graph'
 #' get_sharepoint_site(site_url = NULL, site_id = NULL)
@@ -30,22 +30,22 @@
 #' get_team()
 #'
 #' ## R6 method for class 'az_user'
-#' list_drives()
+#' list_drives(filter = NULL, n = Inf)
 #'
 #' ## R6 method for class 'az_group'
-#' list_drives()
+#' list_drives(filter = NULL, n = Inf)
 #'
 #' ## R6 method for class 'az_user'
-#' list_sharepoint_sites(filter = NULL)
+#' list_sharepoint_sites(filter = NULL, n = Inf)
 #'
 #' ## R6 method for class 'az_user'
-#' list_teams(filter = NULL)
+#' list_teams(filter = NULL, n = Inf)
 #' ```
 #' @section Arguments:
 #' - `drive_id`: For `get_drive`, the ID of the drive or shared document library. For the `az_user` and `az_group` methods, if this is NULL the default drive/document library is returned.
 #' - `site_url`,`site_id`: For `ms_graph$get_sharepoint_site()`, the URL and ID of the site. Provide one or the other, but not both.
 #' - `team_name`,`team_id`: For `az_user$get_team()`, the name and ID of the site. Provide one or the other, but not both. For `ms_graph$get_team`, you must provide the team ID.
-#' - `filter`: For `az_user$list_sharepoint_sites()` and `az_user$list_teams()`, an optional OData expression to filter the list.
+#' - `filter, n`: See 'List methods' below.
 #' @section Details:
 #' `get_sharepoint_site` retrieves a SharePoint site object. The method for the top-level Graph client class requires that you provide either the site URL or ID. The method for the `az_group` class will retrieve the site associated with that group, if applicable.
 #'
@@ -55,6 +55,10 @@
 #'
 #' Note that Teams, SharePoint and OneDrive for Business require a Microsoft 365 Business license, and are available for organisational tenants only.
 #'
+#' @section List methods:
+#' All `list_*` methods have `filter` and `n` arguments to limit the number of results. The former should be an [OData expression](https://docs.microsoft.com/en-us/graph/query-parameters#filter-parameter) as a string to filter the result set on. The latter should be a number setting the maximum number of (filtered) results to return. The default values are `filter=NULL` and `n=Inf`. If `n=NULL`, the `ms_graph_pager` iterator object is returned instead to allow manual iteration over the results.
+#'
+#' Support in the underlying Graph API for OData queries is patchy. Not all endpoints that return lists of objects support filtering, and if they do, they may not allow all of the defined operators. If your filtering expression results in an error, you can carry out the operation without filtering and then filter the results on the client side.
 #' @section Value:
 #' For `get_sharepoint_site`, an object of class `ms_site`.
 #'
@@ -180,7 +184,8 @@ add_group_methods <- function()
     az_group$set("public", "get_drive", overwrite=TRUE,
     function(drive_name=NULL, drive_id=NULL)
     {
-        assert_one_arg(drive_name, drive_id, msg="Supply exactly one of drive name or ID")
+        if(!is.null(drive_name) && !is.null(drive_id))
+            stop("Supply at most one of drive name or ID", call.=FALSE)
         if(!is.null(drive_name))
         {
             drives <- self$list_drives(filter=sprintf("name eq '%s'", drive_name))

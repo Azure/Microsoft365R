@@ -19,7 +19,7 @@
 #' - `create_channel(channel_name, description, membership)`: Create a new channel. Optionally, you can specify a short text description of the channel, and the type of membership: either standard or private (invitation-only).
 #' - `delete_channel(channel_name, channel_id, confirm=TRUE)`: Delete a channel; by default, ask for confirmation first. You cannot delete the primary channel of a team. Note that Teams keeps track of all channels ever created, even if you delete them (you can see the deleted channels by going to the "Manage team" pane for a team, then the "Channels" tab, and expanding the "Deleted" entry); therefore, try not to create and delete channels unnecessarily.
 #' - `list_drives(filter=NULL, n=Inf)`: List the drives (shared document libraries) associated with this team.
-#' - `get_drive(drive_id)`: Retrieve a shared document library for this team. If the ID is not specified, this returns the default document library.
+#' - `get_drive(drive_name, drive_id)`: Retrieve a shared document library for this team. If the name and ID are not specified, this returns the default document library.
 #' - `get_sharepoint_site()`: Get the SharePoint site associated with the team.
 #' - `get_group()`: Retrieve the Microsoft 365 group associated with the team.
 #' - `list_members(filter=NULL, n=Inf)`: Retrieves the members of the team, as a list of [`ms_team_member`] objects.
@@ -116,7 +116,8 @@ public=list(
 
     get_drive=function(drive_name=NULL, drive_id=NULL)
     {
-        assert_one_arg(drive_name, drive_id, msg="Supply exactly one of drive name or ID")
+        if(!is.null(drive_name) && !is.null(drive_id))
+            stop("Supply at most one of drive name or ID", call.=FALSE)
         if(!is.null(drive_name))
         {
             drives <- self$list_drives(filter=sprintf("name eq '%s'", drive_name))

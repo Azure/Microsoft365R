@@ -15,7 +15,7 @@
 #' - `do_operation(...)`: Carry out an arbitrary operation on the site.
 #' - `sync_fields()`: Synchronise the R object with the site metadata in Microsoft Graph.
 #' - `list_drives(filter=NULL, n=Inf)`: List the drives (shared document libraries) associated with this site.
-#' - `get_drive(drive_id)`: Retrieve a shared document library for this site. If the ID is not specified, this returns the default document library.
+#' - `get_drive(drive_name, drive_id)`: Retrieve a shared document library for this site. If the name and ID are not specified, this returns the default document library.
 #' - `list_subsites(filter=NULL, n=Inf)`: List the subsites of this site.
 #' - `get_lists(filter=NULL, n=Inf)`: Returns the lists that are part of this site.
 #' - `get_list(list_name, list_id)`: Returns a specific list, either by name or ID.
@@ -62,7 +62,8 @@ public=list(
 
     get_drive=function(drive_name=NULL, drive_id=NULL)
     {
-        assert_one_arg(drive_name, drive_id, msg="Supply exactly one of drive name or ID")
+        if(!is.null(drive_name) && !is.null(drive_id))
+            stop("Supply at most one of drive name or ID", call.=FALSE)
         if(!is.null(drive_name))
         {
             drives <- self$list_drives(filter=sprintf("name eq '%s'", drive_name))

@@ -6,6 +6,7 @@
 - Add `list_members()` and `get_member()` methods for teams and channels.
 - Add support for @mentions in Teams channel messages (#26).
 - Add a `by_item` argument to the `delete_item()` method for drives and the `delete()` method for drive items. This is to allow deletion of non-empty folders on SharePoint sites with data protection policies in place. Use with caution (#21).
+- Allow getting drives for groups, sites and teams by name. The first argument to the `get_drive()` method for these classes is now `drive_name`; to get a drive by ID, specify the argument name explicitly: `get_drive(drive_id=*)`
 
 # Microsoft365R 2.1.0
 

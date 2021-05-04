@@ -42,7 +42,7 @@
 #' list_teams(filter = NULL, n = Inf)
 #' ```
 #' @section Arguments:
-#' - `drive_id`: For `get_drive`, the ID of the drive or shared document library. For the `az_user` and `az_group` methods, if this is NULL the default drive/document library is returned.
+#' - `drive_name`,`drive_id`: For `get_drive`, the name or ID of the drive or shared document library. Note that only the `az_group` method  has the `drive_name` argument. For the `az_user` and `az_group` methods, leaving the argument(s) blank will return the default drive/document library.
 #' - `site_url`,`site_id`: For `ms_graph$get_sharepoint_site()`, the URL and ID of the site. Provide one or the other, but not both.
 #' - `team_name`,`team_id`: For `az_user$get_team()`, the name and ID of the site. Provide one or the other, but not both. For `ms_graph$get_team`, you must provide the team ID.
 #' - `filter, n`: See 'List methods' below.

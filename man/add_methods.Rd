@@ -45,7 +45,7 @@ list_teams(filter = NULL, n = Inf)
 \section{Arguments}{
 
 \itemize{
-\item \code{drive_id}: For \code{get_drive}, the ID of the drive or shared document library. For the \code{az_user} and \code{az_group} methods, if this is NULL the default drive/document library is returned.
+\item \code{drive_name},\code{drive_id}: For \code{get_drive}, the name or ID of the drive or shared document library. Note that only the \code{az_group} method  has the \code{drive_name} argument. For the \code{az_user} and \code{az_group} methods, leaving the argument(s) blank will return the default drive/document library.
 \item \code{site_url},\code{site_id}: For \code{ms_graph$get_sharepoint_site()}, the URL and ID of the site. Provide one or the other, but not both.
 \item \code{team_name},\code{team_id}: For \code{az_user$get_team()}, the name and ID of the site. Provide one or the other, but not both. For \code{ms_graph$get_team}, you must provide the team ID.
 \item \verb{filter, n}: See 'List methods' below.

@@ -66,8 +66,9 @@ public=list(
             stop("Supply at most one of drive name or ID", call.=FALSE)
         if(!is.null(drive_name))
         {
-            drives <- self$list_drives(filter=sprintf("name eq '%s'", drive_name))
-            if(length(drives) != 1)
+            drives <- self$list_drives()
+            wch <- which(sapply(drives, function(drv) drv$properties$name == drive_name))
+            if(length(wch) != 1)
                 stop("Invalid drive name", call.=FALSE)
             return(drives[[1]])
         }

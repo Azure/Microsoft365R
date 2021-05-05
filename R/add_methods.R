@@ -188,6 +188,7 @@ add_group_methods <- function()
             stop("Supply at most one of drive name or ID", call.=FALSE)
         if(!is.null(drive_name))
         {
+            # filtering not yet supported for drives, do it in R
             drives <- self$list_drives()
             wch <- which(sapply(drives, function(drv) drv$properties$name == drive_name))
             if(length(wch) != 1)

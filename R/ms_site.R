@@ -15,7 +15,7 @@
 #' - `do_operation(...)`: Carry out an arbitrary operation on the site.
 #' - `sync_fields()`: Synchronise the R object with the site metadata in Microsoft Graph.
 #' - `list_drives(filter=NULL, n=Inf)`: List the drives (shared document libraries) associated with this site.
-#' - `get_drive(drive_id)`: Retrieve a shared document library for this site. If the ID is not specified, this returns the default document library.
+#' - `get_drive(drive_name, drive_id)`: Retrieve a shared document library for this site. If the name and ID are not specified, this returns the default document library.
 #' - `list_subsites(filter=NULL, n=Inf)`: List the subsites of this site.
 #' - `get_lists(filter=NULL, n=Inf)`: Returns the lists that are part of this site.
 #' - `get_list(list_name, list_id)`: Returns a specific list, either by name or ID.
@@ -60,8 +60,19 @@ public=list(
         make_basic_list(self, "drives", filter, n)
     },
 
-    get_drive=function(drive_id=NULL)
+    get_drive=function(drive_name=NULL, drive_id=NULL)
     {
+        if(!is.null(drive_name) && !is.null(drive_id))
+            stop("Supply at most one of drive name or ID", call.=FALSE)
+        if(!is.null(drive_name))
+        {
+            # filtering not yet supported for drives, do it in R
+            drives <- self$list_drives()
+            wch <- which(sapply(drives, function(drv) drv$properties$name == drive_name))
+            if(length(wch) != 1)
+                stop("Invalid drive name", call.=FALSE)
+            return(drives[[1]])
+        }
         op <- if(is.null(drive_id))
             "drive"
         else file.path("drives", drive_id)

@@ -70,8 +70,14 @@ test_that("SharePoint methods work",
     drv <- site$get_drive()
     expect_is(drv, "ms_drive")
 
+    drv2 <- site$get_drive("Documents")
+    expect_is(drv2, "ms_drive")
+
     grp <- site$get_group()
     expect_is(grp, "az_group")
+
+    drv3 <- grp$get_drive("Documents")
+    expect_is(drv3, "ms_drive")
 
     # list
     lists <- site$get_lists()

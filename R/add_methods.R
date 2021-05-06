@@ -42,7 +42,7 @@
 #' list_teams(filter = NULL, n = Inf)
 #' ```
 #' @section Arguments:
-#' - `drive_name`,`drive_id`: For `get_drive`, the name or ID of the drive or shared document library. Note that only the `az_group` method  has the `drive_name` argument. For the `az_user` and `az_group` methods, leaving the argument(s) blank will return the default drive/document library.
+#' - `drive_name`,`drive_id`: For `get_drive`, the name or ID of the drive or shared document library. Note that only the `az_group` method  has the `drive_name` argument, as user drives do not have individual names (and most users will only have one drive anyway). For the `az_user` and `az_group` methods, leaving the argument(s) blank will return the default drive/document library.
 #' - `site_url`,`site_id`: For `ms_graph$get_sharepoint_site()`, the URL and ID of the site. Provide one or the other, but not both.
 #' - `team_name`,`team_id`: For `az_user$get_team()`, the name and ID of the site. Provide one or the other, but not both. For `ms_graph$get_team`, you must provide the team ID.
 #' - `filter, n`: See 'List methods' below.
@@ -53,7 +53,7 @@
 #'
 #' `get_team` retrieves a team. The method for the Graph client class requires the team ID. The method for the `az_user` class requires either the team name or ID. The method for the `az_group` class retrieves the team associated with the group, if it exists.
 #'
-#' Note that Teams, SharePoint and OneDrive for Business require a Microsoft 365 Business license, and are available for organisational tenants only.
+#' Note that Teams, SharePoint and OneDrive for Business require a Microsoft 365 Business license, and are available for organisational tenants only. Similarly, only Microsoft 365 groups can have associated sites/teams/drives, not any other kind of group.
 #'
 #' @section List methods:
 #' All `list_*` methods have `filter` and `n` arguments to limit the number of results. The former should be an [OData expression](https://docs.microsoft.com/en-us/graph/query-parameters#filter-parameter) as a string to filter the result set on. The latter should be a number setting the maximum number of (filtered) results to return. The default values are `filter=NULL` and `n=Inf`. If `n=NULL`, the `ms_graph_pager` iterator object is returned instead to allow manual iteration over the results.

@@ -45,7 +45,7 @@ list_teams(filter = NULL, n = Inf)
 \section{Arguments}{
 
 \itemize{
-\item \code{drive_name},\code{drive_id}: For \code{get_drive}, the name or ID of the drive or shared document library. Note that only the \code{az_group} method  has the \code{drive_name} argument. For the \code{az_user} and \code{az_group} methods, leaving the argument(s) blank will return the default drive/document library.
+\item \code{drive_name},\code{drive_id}: For \code{get_drive}, the name or ID of the drive or shared document library. Note that only the \code{az_group} method  has the \code{drive_name} argument, as user drives do not have individual names (and most users will only have one drive anyway). For the \code{az_user} and \code{az_group} methods, leaving the argument(s) blank will return the default drive/document library.
 \item \code{site_url},\code{site_id}: For \code{ms_graph$get_sharepoint_site()}, the URL and ID of the site. Provide one or the other, but not both.
 \item \code{team_name},\code{team_id}: For \code{az_user$get_team()}, the name and ID of the site. Provide one or the other, but not both. For \code{ms_graph$get_team}, you must provide the team ID.
 \item \verb{filter, n}: See 'List methods' below.
@@ -60,7 +60,7 @@ list_teams(filter = NULL, n = Inf)
 
 \code{get_team} retrieves a team. The method for the Graph client class requires the team ID. The method for the \code{az_user} class requires either the team name or ID. The method for the \code{az_group} class retrieves the team associated with the group, if it exists.
 
-Note that Teams, SharePoint and OneDrive for Business require a Microsoft 365 Business license, and are available for organisational tenants only.
+Note that Teams, SharePoint and OneDrive for Business require a Microsoft 365 Business license, and are available for organisational tenants only. Similarly, only Microsoft 365 groups can have associated sites/teams/drives, not any other kind of group.
 }
 
 \section{List methods}{

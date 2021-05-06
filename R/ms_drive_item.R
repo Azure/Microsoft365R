@@ -150,7 +150,8 @@ public=list(
 
     is_folder=function()
     {
-        !is.null(self$properties$folder)
+        children <- self$properties$folder$childCount
+        !is.null(children) && !is.na(children)
     },
 
     open=function()

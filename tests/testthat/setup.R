@@ -19,3 +19,9 @@ files_identical <- function(set1, set2)
         s1 == s2 && identical(readBin(f1, "raw", s1), readBin(f2, "raw", s2))
     }, set1, set2))
 }
+
+filter_esc <- function(x)
+{
+    gsub("'", "''", x)
+}
+

@@ -60,12 +60,10 @@ test_that("SharePoint methods work",
     expect_is(drives, "list")
     expect_true(all(sapply(drives, inherits, "ms_drive")))
 
-    # filtering not yet supported for drives
-    # drvpager <- site$list_drives(filter="name eq 'Documents'", n=NULL)
-    # expect_is(drvpager, "ms_graph_pager")
-    # drv0 <- drvpager$value
-    # expect_is(drv0, "list")
-    # expect_true(length(drv0) == 1 && inherits(drv0[[1]], "ms_drive"))
+    # filtering not yet supported for drives; detect when this is changed
+    drvfilt <- site$list_drives(filter="name eq 'Documents'")
+    expect_is(drvfilt, "list")
+    expect_identical(length(drvfilt), length(drives))  # this will fail when filtering is implemented
 
     drv <- site$get_drive()
     expect_is(drv, "ms_drive")
@@ -84,11 +82,10 @@ test_that("SharePoint methods work",
     expect_is(lists, "list")
     expect_true(all(sapply(lists, inherits, "ms_list")))
 
-    # filtering not yet supported
-    # lstpager <- site$get_lists(filter=sprintf("displayName eq '%s'", list_name), n=NULL)
-    # expect_is(lstpager, "ms_graph_pager")
-    # lst0 <- lstpager$value
-    # expect_true(length(lst0) == 1 && inherits(lst0[[1]], "ms_list"))
+    lstpager <- site$get_lists(filter=sprintf("displayName eq '%s'", filter_esc(list_name)), n=NULL)
+    expect_is(lstpager, "ms_graph_pager")
+    lst0 <- lstpager$value
+    expect_true(length(lst0) == 1 && inherits(lst0[[1]], "ms_list"))
 
     lst <- site$get_list(list_name=list_name)
     lst2 <- site$get_list(list_id=list_id)

@@ -26,19 +26,20 @@ team <- try(call_graph_endpoint(tok, file.path("teams", team_id)), silent=TRUE)
 if(inherits(team, "try-error"))
     skip("Channel tests skipped: service not available")
 
+channel_name <- sprintf("Test channel %s", make_name(10))
+
 test_that("Channel methods work",
 {
     team <- get_team(team_id=team_id, tenant=tenant, app=app)
     expect_is(team, "ms_team")
 
-    channel_name <- sprintf("Test channel %s", make_name(10))
     expect_error(team$get_channel(channel_name=channel_name))
 
-    chan <- team$create_channel(channel_name, description="Temporary testing channel")
+    chan <- team$create_channel(channel_name, description="Temporary testing channel", membership="private")
     expect_is(chan, "ms_channel")
     expect_false(inherits(chan$properties, "xml_document"))
 
-    Sys.sleep(5)
+    Sys.sleep(10)
     folder <- chan$get_folder()
     expect_is(folder, "ms_drive_item")
 
@@ -109,10 +110,6 @@ test_that("Channel methods work",
     expect_is(mmsg2, "ms_chat_message")
     expect_false(is.null(mmsg2$properties$mentions))
 
+    lapply(flist, function(f) folder$get_item(f)$delete(confirm=FALSE))
     expect_silent(chan$delete(confirm=FALSE))
-
-    drv <- team$get_drive()
-    flist2 <- drv$list_files(channel_name, info="name", full_names=TRUE)
-    lapply(flist2, function(f) drv$delete_item(f, confirm=FALSE))
-    drv$delete_item(channel_name, confirm=FALSE)
 })

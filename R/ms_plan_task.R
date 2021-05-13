@@ -15,11 +15,11 @@
 #' - `sync_fields()`: Synchronise the R object with the plan task metadata in Microsoft Graph.
 #'
 #' @section Initialization:
-#' Creating new objects of this class should be done via the `list_tasks` methods of the [`ms_plan`] class. 
+#' Creating new objects of this class should be done via the `list_tasks` methods of the [`ms_plan`] class.
 #' Calling the `new()` method for this class only constructs the R object; it does not call the Microsoft Graph API to retrieve or create the actual plan task.
 #'
 #' @section Plan task operations:
-#' This class exposes methods for carrying out common operations on a plan task. 
+#' This class exposes methods for carrying out common operations on a plan task.
 #'
 #' [Microsoft Graph overview](https://docs.microsoft.com/en-us/graph/overview),
 #' [OneDrive API reference](https://docs.microsoft.com/en-us/graph/api/resources/planner?view=graph-rest-1.0)
@@ -30,25 +30,22 @@
 #' @format An R6 object of class `ms_plan_task`, inheriting from `ms_object`.
 #' @export
 ms_plan_task <- R6::R6Class("ms_plan_task", inherit=ms_object,
-                       
-                       public=list(
-                         
-                         initialize=function(token, tenant=NULL, properties=NULL)
-                         {
-                           self$type <- "plan_task"
-                           private$api_type <- "planner/tasks"
-                           super$initialize(token, tenant, properties)
-                         },
-                         
-                         print=function(...)
-                         {
-                           name <- paste0("<Task ", self$properties$title, ">\n")
-                           cat(name)
-                           cat("---\n")
-                           cat(format_public_methods(self))
-                           invisible(self)
-                         }
-                       ),
-                       
-                       private=list(
-                       ))
+
+public=list(
+
+    initialize=function(token, tenant=NULL, properties=NULL)
+    {
+        self$type <- "plan_task"
+        private$api_type <- "planner/tasks"
+        super$initialize(token, tenant, properties)
+    },
+
+    print=function(...)
+    {
+        name <- paste0("<Task ", self$properties$title, ">\n")
+        cat(name)
+        cat("---\n")
+        cat(format_public_methods(self))
+        invisible(self)
+    }
+))

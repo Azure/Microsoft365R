@@ -211,8 +211,8 @@ add_group_methods <- function()
     az_group$set("public", "list_plans", overwrite=TRUE,
     function()
     {
-     op <- "planner/plans"
-     res <- private$get_paged_list(self$do_operation(op))
-     private$init_list_objects(res, "plan")
+        op <- "planner/plans"
+        res <- private$get_paged_list(self$do_operation(op))
+        private$init_list_objects(res, "plan")
     })
 }

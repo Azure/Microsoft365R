@@ -18,6 +18,7 @@
 ## Other
 
 - All `list_*` class methods now have `filter` and `n` arguments to filter the result set and cap the number of results, following the pattern in AzureGraph 1.3.0. The default values are `filter=NULL` and `n=Inf`. If `n=NULL`, an `ms_graph_pager` iterator object is returned instead to allow manual iteration over the results. Note that support for filtering in the underlying Graph API is somewhat uneven at the moment.
+- Experimental **read-only** support for plans, contributed by Roman Zenka.
 
 # Microsoft365R 2.1.0
 

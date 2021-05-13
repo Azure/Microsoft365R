@@ -16,21 +16,21 @@ tok <- try(AzureAuth::get_azure_token(
 if(inherits(tok, "try-error"))
     skip("OneDrive for Business tests skipped: no access to tenant")
 
+gr <- AzureGraph::ms_graph$new(token=tok)
+drv <- try(call_graph_endpoint(tok, "me/drive"), silent=TRUE)
+if(inherits(drv, "try-error"))
+    skip("OneDrive for Business tests skipped: service not available")
+
 test_that("OneDrive for Business works",
 {
-    gr <- AzureGraph::ms_graph$new(token=tok)
-    drv <- try(gr$get_user()$get_drive(), silent=TRUE)
-    if(inherits(drv, "try-error"))
-        skip("OneDrive for Business tests skipped: service not available")
-
     od <- get_business_onedrive(tenant=tenant)
     expect_is(od, "ms_drive")
 
     od2 <- get_business_onedrive(tenant=tenant, app=app)
     expect_is(od2, "ms_drive")
 
-    ls <- od$list_items()
-    expect_is(ls, "data.frame")
+    lst <- od$list_items()
+    expect_is(lst, "data.frame")
 
     newfolder <- make_name()
     expect_silent(od$create_folder(newfolder))
@@ -45,6 +45,12 @@ test_that("OneDrive for Business works",
 
     item <- od$get_item(dest)
     expect_is(item, "ms_drive_item")
+
+    pager <- od$list_files(newfolder, filter=sprintf("name eq '%s'", basename(src)), n=NULL)
+    expect_is(pager, "ms_graph_pager")
+    lst1 <- pager$value
+    expect_is(lst1, "data.frame")
+    expect_identical(nrow(lst1), 1L)
 
     expect_silent(od$set_item_properties(dest, name="newname"))
     expect_silent(item$sync_fields())
@@ -142,4 +148,27 @@ test_that("Methods work with filenames with special characters",
     expect_silent(item <- od$get_item(basename(test_name)))
     expect_true(item$properties$name == basename(test_name))
     expect_silent(item$delete(confirm=FALSE))
+})
+
+
+test_that("Nested folder creation/deletion works",
+{
+    od <- get_business_onedrive()
+
+    f1 <- make_name(10)
+    f2 <- make_name(10)
+    f3 <- make_name(10)
+
+    it12 <- od$create_folder(file.path(f1, f2))
+    expect_is(it12, "ms_drive_item")
+
+    it1 <- od$get_item(f1)
+    expect_is(it1, "ms_drive_item")
+
+    replicate(30, it1$upload(write_file()))
+
+    it123 <- it1$create_folder(file.path(f2, f3))
+    expect_is(it123, "ms_drive_item")
+
+    expect_silent(it1$delete(confirm=FALSE, by_item=TRUE))
 })

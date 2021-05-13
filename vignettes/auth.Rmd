@@ -10,17 +10,28 @@ vignette: >
 
 ## Authentication
 
-The first time you call one of the Microsoft365R client functions, it will use your Internet browser to authenticate you with Azure Active Directory, in a similar manner to other web apps. You will get a dialog box asking for permission to access your information. Your login information is saved, so you should only have to authenticate once.
+To authenticate with Azure Active Directory, simply call one of the Microsoft365R client functions.
+
+```r
+get_personal_onedrive()
+get_business_onedrive()
+get_personal_outlook()
+get_business_outlook()
+get_sharepoint_site()
+get_team()
+```
+
+Notice that you do _not_ provide your username and password in the function call. Instead, Microsoft365R will use your Internet browser to obtain your credentials, in a similar manner to other web apps. You will get a dialog box asking for permission to access your information. Your login information is saved, so you should only have to authenticate once.
 
 ### Using the device code flow
 
-Microsoft365R's default authentication method assumes that your R session can access the Internet via a browser. If this is not the case, for example if you are using Databricks or RStudio Server, you can switch to the _device code_ flow by passing the `auth_type="device_code"` argument:
+The default authentication method assumes that your R session can access the Internet via a browser. If this is not the case, for example if you are using Databricks or RStudio Server, you can switch to the _device code_ flow by passing the `auth_type="device_code"` argument:
 
 ```r
 get_personal_onedrive(auth_type="device_code")
 ```
 
-This will print an access code and URL on the screen. You login to the URL using a browser on another device, and type in the code. Once this is done, Microsoft365R will complete the authentication process.
+This will print an access code and URL on the screen. You login to the URL using a browser on another device, and type in the code. Once this is done, Microsoft365R will complete the authentication process. Again, you do _not_ provide your username and password in the function call.
 
 ### Specifying the tenant
 
@@ -28,6 +39,7 @@ When authenticating to the Microsoft 365 Business services, Microsoft365R will d
 
 ```r
 get_business_onedrive(tenant="mytenant")
+get_business_outlook(tenant="mytenant")
 get_sharepoint_site("My site", tenant="mytenant")
 get_team("My team", tenant="mytenant")
 ```
@@ -54,18 +66,27 @@ Once the app has been registered, you can pass the app ID to Microsoft365R in a 
 
 The above methods are the **recommended solutions** to dealing with access restrictions on Microsoft365R. If they are not feasible, it's possible to work around these issues by piggybacking on other apps:
 
-- By setting the R option `microsoft365r_use_cli_app_id` to a non-NULL value, Microsoft365R will authenticate using the app ID for the CLI for Microsoft 365---effectively pretending to be the CLI itself. Technically this app still requires admin approval, but it is in widespread use and is maintained by Microsoft employees, and so may already be allowed in your organisation. The CLI supports most Microsoft 365 services except for personal OneDrive.
+- By setting the R option `microsoft365r_use_cli_app_id` to a non-NULL value, Microsoft365R will authenticate using the app ID for the CLI for Microsoft 365---effectively pretending to be the CLI itself. Technically this app still requires admin approval, but it is in widespread use and is maintained by Microsoft employees, and so may already be allowed in your organisation. The CLI supports most Microsoft 365 services, but not Outlook or personal OneDrive.
 
   ```r
   options(microsoft365r_use_cli_app_id=TRUE)
   get_team("My team")
   ```
 
-- You can authenticate using the Azure CLI's app ID: `04b07795-8ddb-461a-bbee-02f9e1bf7b46`. This is a first-party Microsoft app, and hence can be used in any tenant. It is not intended for use with Microsoft 365, so not all functionality may be supported; however it should be possible to access Teams and SharePoint sites (but not personal OneDrive or OneDrive for Business).
+- You can authenticate using the Azure CLI's app ID: `04b07795-8ddb-461a-bbee-02f9e1bf7b46`. This is a first-party Microsoft app, and hence can be used in any tenant. It is not intended for use with Microsoft 365, so not all functionality may be supported; however it should be possible to access Teams and SharePoint sites (but not Outlook, personal OneDrive or OneDrive for Business).
 
   ```r
   get_sharepoint_site("My site", app="04b07795-8ddb-461a-bbee-02f9e1bf7b46")
   ```
 
 Be warned that these workarounds may draw the attention of your admin!
+
+## Other issues
+
+The AzureR packages save your login sessions so that you don't need to reauthenticate each time. If you're experiencing authentication failures, you can try clearing the saved data by running the following code:
+
+```r
+AzureAuth::clean_token_directory()
+AzureGraph::delete_graph_login(tenant="mytenant")
+```
 

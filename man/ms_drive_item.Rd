@@ -24,7 +24,7 @@ Class representing an item (file or folder) in a OneDrive or SharePoint document
 
 \itemize{
 \item \code{new(...)}: Initialize a new object. Do not call this directly; see 'Initialization' below.
-\item \code{delete(confirm=TRUE)}: Delete this item. By default, ask for confirmation first. For personal OneDrives, deleting a folder will also automatically delete its contents; for business OneDrives or SharePoint document libraries, you must delete the folder contents first before deleting the folder.
+\item \code{delete(confirm=TRUE, by_item=FALSE)}: Delete this item. By default, ask for confirmation first. For personal OneDrive, deleting a folder will also automatically delete its contents; for business OneDrive or SharePoint document libraries, you may need to set \code{by_item=TRUE} to delete the contents first depending on your organisation's policies. Note that this can be slow for large folders.
 \item \code{update(...)}: Update the item's properties (metadata) in Microsoft Graph.
 \item \code{do_operation(...)}: Carry out an arbitrary operation on the item.
 \item \code{sync_fields()}: Synchronise the R object with the item metadata in Microsoft Graph.
@@ -50,11 +50,12 @@ This class exposes methods for carrying out common operations on files and folde
 
 \code{open} opens this file or folder in your browser. If the file has an unrecognised type, most browsers will attempt to download it.
 
-\code{list_items(path, info, full_names, pagesize)} lists the items under the specified path. It is the analogue of base R's \code{dir}/\code{list.files}. Its arguments are
+\code{list_items(path, info, full_names, filter, n, pagesize)} lists the items under the specified path. It is the analogue of base R's \code{dir}/\code{list.files}. Its arguments are
 \itemize{
 \item \code{path}: The path.
-\item \code{info}: The information to return: either "partial", "name" or "all". If "partial", a data frame is returned containing the name, size and whether the item is a file or folder. If "name", a vector of file/folder names is returned. If "all", a data frame is returned containing \emph{all} the properties for each item (this can be large).
+\item \code{info}: The information to return: either "partial", "name" or "all". If "partial", a data frame is returned containing the name, size, ID and whether the item is a file or folder. If "name", a vector of file/folder names is returned. If "all", a data frame is returned containing \emph{all} the properties for each item (this can be large).
 \item \code{full_names}: Whether to prefix the folder path to the names of the items.
+\item \verb{filter, n}: See 'List methods' below.
 \item \code{pagesize}: The number of results to return for each call to the REST endpoint. You can try reducing this argument below the default of 1000 if you are experiencing timeouts.
 }
 
@@ -80,6 +81,13 @@ It is an error to try to upload to a file item, or to upload a source directory.
 }
 
 This method returns a URL to access the item, for \code{type="view"} or "\verb{type=edit"}. For \code{type="embed"}, it returns a list with components \code{webUrl} containing the URL, and \code{webHtml} containing a HTML fragment to embed the link in an IFRAME. The default is a viewable link, expiring in 7 days.
+}
+
+\section{List methods}{
+
+All \verb{list_*} methods have \code{filter} and \code{n} arguments to limit the number of results. The former should be an \href{https://docs.microsoft.com/en-us/graph/query-parameters#filter-parameter}{OData expression} as a string to filter the result set on. The latter should be a number setting the maximum number of (filtered) results to return. The default values are \code{filter=NULL} and \code{n=Inf}. If \code{n=NULL}, the \code{ms_graph_pager} iterator object is returned instead to allow manual iteration over the results.
+
+Support in the underlying Graph API for OData queries is patchy. Not all endpoints that return lists of objects support filtering, and if they do, they may not allow all of the defined operators. If your filtering expression results in an error, you can carry out the operation without filtering and then filter the results on the client side.
 }
 
 \examples{

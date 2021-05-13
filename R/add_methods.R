@@ -15,7 +15,7 @@
 #' get_drive(drive_id = NULL)
 #'
 #' ## R6 method for class 'az_group'
-#' get_drive(drive_id = NULL)
+#' get_drive(drive_name = NULL, drive_id = NULL)
 #'
 #' ## R6 method for class 'ms_graph'
 #' get_sharepoint_site(site_url = NULL, site_id = NULL)
@@ -30,22 +30,22 @@
 #' get_team()
 #'
 #' ## R6 method for class 'az_user'
-#' list_drives()
+#' list_drives(filter = NULL, n = Inf)
 #'
 #' ## R6 method for class 'az_group'
-#' list_drives()
+#' list_drives(filter = NULL, n = Inf)
 #'
 #' ## R6 method for class 'az_user'
-#' list_sharepoint_sites(filter = NULL)
+#' list_sharepoint_sites(filter = NULL, n = Inf)
 #'
 #' ## R6 method for class 'az_user'
-#' list_teams(filter = NULL)
+#' list_teams(filter = NULL, n = Inf)
 #' ```
 #' @section Arguments:
-#' - `drive_id`: For `get_drive`, the ID of the drive or shared document library. For the `az_user` and `az_group` methods, if this is NULL the default drive/document library is returned.
+#' - `drive_name`,`drive_id`: For `get_drive`, the name or ID of the drive or shared document library. Note that only the `az_group` method  has the `drive_name` argument, as user drives do not have individual names (and most users will only have one drive anyway). For the `az_user` and `az_group` methods, leaving the argument(s) blank will return the default drive/document library.
 #' - `site_url`,`site_id`: For `ms_graph$get_sharepoint_site()`, the URL and ID of the site. Provide one or the other, but not both.
 #' - `team_name`,`team_id`: For `az_user$get_team()`, the name and ID of the site. Provide one or the other, but not both. For `ms_graph$get_team`, you must provide the team ID.
-#' - `filter`: For `az_user$list_sharepoint_sites()` and `az_user$list_teams()`, an optional OData expression to filter the list.
+#' - `filter, n`: See 'List methods' below.
 #' @section Details:
 #' `get_sharepoint_site` retrieves a SharePoint site object. The method for the top-level Graph client class requires that you provide either the site URL or ID. The method for the `az_group` class will retrieve the site associated with that group, if applicable.
 #'
@@ -53,8 +53,12 @@
 #'
 #' `get_team` retrieves a team. The method for the Graph client class requires the team ID. The method for the `az_user` class requires either the team name or ID. The method for the `az_group` class retrieves the team associated with the group, if it exists.
 #'
-#' Note that Teams, SharePoint and OneDrive for Business require a Microsoft 365 Business license, and are available for organisational tenants only.
+#' Note that Teams, SharePoint and OneDrive for Business require a Microsoft 365 Business license, and are available for organisational tenants only. Similarly, only Microsoft 365 groups can have associated sites/teams/drives, not any other kind of group.
 #'
+#' @section List methods:
+#' All `list_*` methods have `filter` and `n` arguments to limit the number of results. The former should be an [OData expression](https://docs.microsoft.com/en-us/graph/query-parameters#filter-parameter) as a string to filter the result set on. The latter should be a number setting the maximum number of (filtered) results to return. The default values are `filter=NULL` and `n=Inf`. If `n=NULL`, the `ms_graph_pager` iterator object is returned instead to allow manual iteration over the results.
+#'
+#' Support in the underlying Graph API for OData queries is patchy. Not all endpoints that return lists of objects support filtering, and if they do, they may not allow all of the defined operators. If your filtering expression results in an error, you can carry out the operation without filtering and then filter the results on the client side.
 #' @section Value:
 #' For `get_sharepoint_site`, an object of class `ms_site`.
 #'
@@ -123,10 +127,9 @@ add_graph_methods <- function()
 add_user_methods <- function()
 {
     az_user$set("public", "list_drives", overwrite=TRUE,
-    function()
+    function(filter=NULL, n=Inf)
     {
-        res <- private$get_paged_list(self$do_operation("drives"))
-        private$init_list_objects(res, "drive")
+        make_basic_list(self, "drives", filter, n)
     })
 
     az_user$set("public", "get_drive", overwrite=TRUE,
@@ -139,19 +142,27 @@ add_user_methods <- function()
     })
 
     az_user$set("public", "list_sharepoint_sites", overwrite=TRUE,
-    function(filter=NULL)
+    function(filter=NULL, n=Inf)
     {
-        opts <- if(!is.null(filter)) list(`$filter`=filter)
-        res <- private$get_paged_list(self$do_operation("followedSites", options=opts))
-        lapply(private$init_list_objects(res, "site"), function(site) site$sync_fields())
+        lst <- make_basic_list(self, "followedSites", filter, n)
+        if(!is.null(n))
+            lapply(lst, function(site) site$sync_fields())  # result from endpoint is incomplete
+        else lst
     })
 
     az_user$set("public", "list_teams", overwrite=TRUE,
-    function(filter=NULL)
+    function(filter=NULL, n=Inf)
     {
-        opts <- if(!is.null(filter)) list(`$filter`=filter)
-        res <- private$get_paged_list(self$do_operation("joinedTeams", options=opts))
-        lapply(private$init_list_objects(res, "team"), function(team) team$sync_fields())
+        lst <- make_basic_list(self, "joinedTeams", filter, n)
+        if(!is.null(n))
+            lapply(lst, function(team) team$sync_fields())  # result from endpoint only contains ID and displayname
+        else lst
+    })
+
+    az_user$set("public", "get_outlook", overwrite=TRUE,
+    function()
+    {
+        ms_outlook$new(self$token, self$tenant, self$properties)
     })
 }
 
@@ -165,15 +176,25 @@ add_group_methods <- function()
     })
 
     az_group$set("public", "list_drives", overwrite=TRUE,
-    function()
+    function(filter=NULL, n=Inf)
     {
-        res <- private$get_paged_list(self$do_operation("drives"))
-        private$init_list_objects(res, "drive")
+        make_basic_list(self, "drives", filter, n)
     })
 
     az_group$set("public", "get_drive", overwrite=TRUE,
-    function(drive_id=NULL)
+    function(drive_name=NULL, drive_id=NULL)
     {
+        if(!is.null(drive_name) && !is.null(drive_id))
+            stop("Supply at most one of drive name or ID", call.=FALSE)
+        if(!is.null(drive_name))
+        {
+            # filtering not yet supported for drives, do it in R
+            drives <- self$list_drives()
+            wch <- which(sapply(drives, function(drv) drv$properties$name == drive_name))
+            if(length(wch) != 1)
+                stop("Invalid drive name", call.=FALSE)
+            return(drives[[1]])
+        }
         op <- if(is.null(drive_id))
             "drive"
         else file.path("drives", drive_id)

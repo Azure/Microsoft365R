@@ -21,14 +21,16 @@ tok <- try(AzureAuth::get_azure_token(
 if(inherits(tok, "try-error"))
     skip("SharePoint tests skipped: no access to tenant")
 
+site <- try(call_graph_endpoint(tok, file.path("sites", site_id)), silent=TRUE)
+if(inherits(site, "try-error"))
+    skip("SharePoint tests skipped: service not available")
+
 test_that("SharePoint client works",
 {
     expect_error(get_sharepoint_site(site_name=site_name, site_url=site_url, site_id=site_id,
                                      tenant=tenant, app=app))
 
-    site1 <- try(get_sharepoint_site(site_name=site_name, tenant=tenant, app=app), silent=TRUE)
-    if(inherits(site1, "try-error"))
-        skip("SharePoint tests skipped: service not available")
+    site1 <- get_sharepoint_site(site_name=site_name, tenant=tenant, app=app)
     expect_is(site1, "ms_site")
     expect_identical(site1$properties$displayName, site_name)
 
@@ -53,21 +55,37 @@ test_that("SharePoint methods work",
     site <- get_sharepoint_site(site_name, tenant=tenant, app=app)
     expect_is(site, "ms_site")
 
-    # drive -- functionality tested in test02
+    # drive functionality tested in test02
     drives <- site$list_drives()
     expect_is(drives, "list")
     expect_true(all(sapply(drives, inherits, "ms_drive")))
 
+    # filtering not yet supported for drives; detect when this is changed
+    drvfilt <- site$list_drives(filter="name eq 'Documents'")
+    expect_is(drvfilt, "list")
+    expect_identical(length(drvfilt), length(drives))  # this will fail when filtering is implemented
+
     drv <- site$get_drive()
     expect_is(drv, "ms_drive")
 
+    drv2 <- site$get_drive("Documents")
+    expect_is(drv2, "ms_drive")
+
     grp <- site$get_group()
     expect_is(grp, "az_group")
+
+    drv3 <- grp$get_drive("Documents")
+    expect_is(drv3, "ms_drive")
 
     # list
     lists <- site$get_lists()
     expect_is(lists, "list")
     expect_true(all(sapply(lists, inherits, "ms_list")))
+
+    lstpager <- site$get_lists(filter=sprintf("displayName eq '%s'", filter_esc(list_name)), n=NULL)
+    expect_is(lstpager, "ms_graph_pager")
+    lst0 <- lstpager$value
+    expect_true(length(lst0) == 1 && inherits(lst0[[1]], "ms_list"))
 
     lst <- site$get_list(list_name=list_name)
     lst2 <- site$get_list(list_id=list_id)
@@ -89,9 +107,15 @@ test_that("SharePoint methods work",
     expect_is(items3, "list")
     expect_true(all(sapply(items3, inherits, "ms_list_item")))
 
+    itpager <- lst$list_items(filter=sprintf("fields/Title eq '%s'", items3[[1]]$properties$fields$Title), n=NULL)
+    expect_is(itpager, "ms_graph_pager")
+    items0 <- itpager$value
+    expect_true(is.data.frame(items0) && nrow(items0) == 1)
+
     item_id <- items3[[1]]$properties$id
     item <- lst$get_item(item_id)
     expect_is(item, "ms_list_item")
+    expect_false(is_empty(item$properties$fields))
 
     newtitle <- make_name(10)
     newitem <- lst$create_item(Title=newtitle)

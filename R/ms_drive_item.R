@@ -10,7 +10,7 @@
 #' - `properties`: The item properties (metadata).
 #' @section Methods:
 #' - `new(...)`: Initialize a new object. Do not call this directly; see 'Initialization' below.
-#' - `delete(confirm=TRUE)`: Delete this item. By default, ask for confirmation first. For personal OneDrives, deleting a folder will also automatically delete its contents; for business OneDrives or SharePoint document libraries, you must delete the folder contents first before deleting the folder.
+#' - `delete(confirm=TRUE, by_item=FALSE)`: Delete this item. By default, ask for confirmation first. For personal OneDrive, deleting a folder will also automatically delete its contents; for business OneDrive or SharePoint document libraries, you may need to set `by_item=TRUE` to delete the contents first depending on your organisation's policies. Note that this can be slow for large folders.
 #' - `update(...)`: Update the item's properties (metadata) in Microsoft Graph.
 #' - `do_operation(...)`: Carry out an arbitrary operation on the item.
 #' - `sync_fields()`: Synchronise the R object with the item metadata in Microsoft Graph.
@@ -31,10 +31,11 @@
 #'
 #' `open` opens this file or folder in your browser. If the file has an unrecognised type, most browsers will attempt to download it.
 #'
-#' `list_items(path, info, full_names, pagesize)` lists the items under the specified path. It is the analogue of base R's `dir`/`list.files`. Its arguments are
+#' `list_items(path, info, full_names, filter, n, pagesize)` lists the items under the specified path. It is the analogue of base R's `dir`/`list.files`. Its arguments are
 #' - `path`: The path.
-#' - `info`: The information to return: either "partial", "name" or "all". If "partial", a data frame is returned containing the name, size and whether the item is a file or folder. If "name", a vector of file/folder names is returned. If "all", a data frame is returned containing _all_ the properties for each item (this can be large).
+#' - `info`: The information to return: either "partial", "name" or "all". If "partial", a data frame is returned containing the name, size, ID and whether the item is a file or folder. If "name", a vector of file/folder names is returned. If "all", a data frame is returned containing _all_ the properties for each item (this can be large).
 #' - `full_names`: Whether to prefix the folder path to the names of the items.
+#' - `filter, n`: See 'List methods' below.
 #' - `pagesize`: The number of results to return for each call to the REST endpoint. You can try reducing this argument below the default of 1000 if you are experiencing timeouts.
 #'
 #' `list_files` is a synonym for `list_items`.
@@ -58,6 +59,10 @@
 #'
 #' This method returns a URL to access the item, for `type="view"` or "`type=edit"`. For `type="embed"`, it returns a list with components `webUrl` containing the URL, and `webHtml` containing a HTML fragment to embed the link in an IFRAME. The default is a viewable link, expiring in 7 days.
 #'
+#' @section List methods:
+#' All `list_*` methods have `filter` and `n` arguments to limit the number of results. The former should be an [OData expression](https://docs.microsoft.com/en-us/graph/query-parameters#filter-parameter) as a string to filter the result set on. The latter should be a number setting the maximum number of (filtered) results to return. The default values are `filter=NULL` and `n=Inf`. If `n=NULL`, the `ms_graph_pager` iterator object is returned instead to allow manual iteration over the results.
+#'
+#' Support in the underlying Graph API for OData queries is patchy. Not all endpoints that return lists of objects support filtering, and if they do, they may not allow all of the defined operators. If your filtering expression results in an error, you can carry out the operation without filtering and then filter the results on the client side.
 #' @seealso
 #' [`ms_graph`], [`ms_site`], [`ms_drive`]
 #'
@@ -109,9 +114,44 @@ public=list(
         super$initialize(token, tenant, properties)
     },
 
+    delete=function(confirm=TRUE, by_item=FALSE)
+    {
+        if(!by_item || !self$is_folder())
+            return(super$delete(confirm=confirm))
+
+        if (confirm && interactive())
+        {
+            msg <- sprintf("Do you really want to delete the %s '%s'?", self$type, self$properties$name)
+            if (!get_confirmation(msg, FALSE))
+                return(invisible(NULL))
+        }
+
+        children <- self$list_items()
+        dirs <- children$isdir
+        for(d in children$name[dirs])
+            self$get_item(d)$delete(confirm=FALSE, by_item=TRUE)
+
+        deletes <- lapply(children$name[!dirs], function(f)
+        {
+            path <- private$make_absolute_path(f)
+            graph_request$new(path, http_verb="DELETE")
+        })
+        # do in batches of 20
+        i <- length(deletes)
+        while(i > 0)
+        {
+            batch <- seq(from=max(1, i - 19), to=i)
+            call_batch_endpoint(self$token, deletes[batch])
+            i <- max(1, i - 19) - 1
+        }
+
+        super$delete(confirm=FALSE)
+    },
+
     is_folder=function()
     {
-        !is.null(self$properties$folder)
+        children <- self$properties$folder$childCount
+        !is.null(children) && !is.na(children)
     },
 
     open=function()
@@ -141,26 +181,30 @@ public=list(
         else res$link$webUrl
     },
 
-    list_items=function(path="", info=c("partial", "name", "all"), full_names=FALSE, pagesize=1000)
+    list_items=function(path="", info=c("partial", "name", "all"), full_names=FALSE, filter=NULL, n=Inf, pagesize=1000)
     {
         private$assert_is_folder()
         if(path == "/")
             path <- ""
         info <- match.arg(info)
         opts <- switch(info,
-            partial=list(`$select`="name,size,folder", `$top`=pagesize),
+            partial=list(`$select`="name,size,folder,id", `$top`=pagesize),
             name=list(`$select`="name", `$top`=pagesize),
             list(`$top`=pagesize)
         )
+        if(!is.null(filter))
+            opts$`filter` <- filter
 
         op <- sub("::", "", paste0(private$make_absolute_path(path), ":/children"))
         children <- call_graph_endpoint(self$token, op, options=opts, simplify=TRUE)
 
-        # get file list as a data frame
-        df <- private$get_paged_list(children, simplify=TRUE)
+        # get file list as a data frame, or return the iterator immediately if n is NULL
+        df <- extract_list_values(self$get_list_pager(children), n)
+        if(is.null(n))
+            return(df)
 
         if(is_empty(df))
-            df <- data.frame(name=character(), size=numeric(), isdir=logical())
+            df <- data.frame(name=character(), size=numeric(), isdir=logical(), id=character())
         else if(info != "name")
         {
             df$isdir <- if(!is.null(df$folder))
@@ -171,11 +215,11 @@ public=list(
         if(full_names)
             df$name <- file.path(sub("^/", "", path), df$name)
         switch(info,
-            partial=df[c("name", "size", "isdir")],
+            partial=df[c("name", "size", "isdir", "id")],
             name=df$name,
             all=
             {
-                firstcols <- c("name", "size", "isdir")
+                firstcols <- c("name", "size", "isdir", "id")
                 df[c(firstcols, setdiff(names(df), firstcols))]
             }
         )
@@ -191,12 +235,14 @@ public=list(
     create_folder=function(path)
     {
         private$assert_is_folder()
+
+        # see https://stackoverflow.com/a/66686842/474349
+        op <- private$make_absolute_path(path)
         body <- list(
-            name=enc2utf8(path),
             folder=named_list(),
             `@microsoft.graph.conflictBehavior`="fail"
         )
-        res <- self$do_operation("children", body=body, http_verb="POST")
+        res <- call_graph_endpoint(self$token, op, body=body, http_verb="PATCH")
         invisible(ms_drive_item$new(self$token, self$tenant, res))
     },
 
@@ -207,7 +253,6 @@ public=list(
         on.exit(close(con))
 
         op <- paste0(private$make_absolute_path(dest), ":/createUploadSession")
-        # print(op)
         upload_dest <- call_graph_endpoint(self$token, op, http_verb="POST")$uploadUrl
 
         size <- file.size(src)
@@ -225,7 +270,7 @@ public=list(
             headers <- httr::add_headers(
                 `Content-Length`=thisblock,
                 `Content-Range`=sprintf("bytes %.0f-%.0f/%.0f",
-                    next_blockstart, next_blockstart + next_blocksize - 1, size)
+                    next_blockstart, next_blockstart + thisblock - 1, size)
             )
             res <- httr::PUT(upload_dest, headers, body=body)
             httr::stop_for_status(res)
@@ -242,7 +287,6 @@ public=list(
     download=function(dest=self$properties$name, overwrite=FALSE)
     {
         private$assert_is_file()
-        filepath <- file.path(self$parentReference$path, self$properties$name)
         res <- self$do_operation("content", config=httr::write_disk(dest, overwrite=overwrite),
                                  http_status_handler="pass")
         if(httr::status_code(res) >= 300)
@@ -271,6 +315,8 @@ private=list(
 
     make_absolute_path=function(dest)
     {
+        if(dest == ".")
+            dest <- ""
         parent <- self$properties$parentReference
         name <- self$properties$name
         op <- if(name == "root")
@@ -283,7 +329,7 @@ private=list(
                 parent$path <- sprintf("/drives/%s/root:", parent$driveId)
             file.path(parent$path, name)
         }
-        utils::URLencode(enc2utf8(file.path(op, dest)))
+        utils::URLencode(enc2utf8(sub("/$", "", file.path(op, dest))))
     },
 
     assert_is_folder=function()

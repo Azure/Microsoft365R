@@ -2,8 +2,9 @@ tenant <- Sys.getenv("AZ_TEST_TENANT_ID")
 app <- Sys.getenv("AZ_TEST_NATIVE_APP_ID")
 team_name <- Sys.getenv("AZ_TEST_TEAM_NAME")
 team_id <- Sys.getenv("AZ_TEST_TEAM_ID")
+mention_name <- Sys.getenv("AZ_TEST_CHANNEL_MENTION_NAME")
 
-if(tenant == "" || app == "" || team_name == "" || team_id == "")
+if(tenant == "" || app == "" || team_name == "" || team_id == "" || mention_name == "")
     skip("Channel tests skipped: Microsoft Graph credentials not set")
 
 if(Sys.getenv("AZ_TEST_CHANNEL_FLAG") == "")
@@ -21,19 +22,24 @@ tok <- try(AzureAuth::get_azure_token(
 if(inherits(tok, "try-error"))
     skip("Channel tests skipped: no access to tenant")
 
+team <- try(call_graph_endpoint(tok, file.path("teams", team_id)), silent=TRUE)
+if(inherits(team, "try-error"))
+    skip("Channel tests skipped: service not available")
+
+channel_name <- sprintf("Test channel %s", make_name(10))
+
 test_that("Channel methods work",
 {
     team <- get_team(team_id=team_id, tenant=tenant, app=app)
     expect_is(team, "ms_team")
 
-    channel_name <- sprintf("Test channel %s", make_name(10))
     expect_error(team$get_channel(channel_name=channel_name))
 
-    chan <- team$create_channel(channel_name, description="Temporary testing channel")
+    chan <- team$create_channel(channel_name, description="Temporary testing channel", membership="private")
     expect_is(chan, "ms_channel")
     expect_false(inherits(chan$properties, "xml_document"))
 
-    Sys.sleep(5)
+    Sys.sleep(10)
     folder <- chan$get_folder()
     expect_is(folder, "ms_drive_item")
 
@@ -82,10 +88,28 @@ test_that("Channel methods work",
     expect_silent(chan$download_file(basename(f1), f_dl))
     expect_true(files_identical(f1, f_dl))
 
-    expect_silent(chan$delete(confirm=FALSE))
+    # members, message mentions
+    mlst <- chan$list_members()
+    expect_is(mlst, "list")
+    expect_true(all(sapply(mlst, inherits, "ms_team_member")))
+    expect_true(all(sapply(mlst, function(obj) obj$type == "channel member")))
 
-    drv <- team$get_drive()
-    flist2 <- drv$list_files(channel_name, info="name", full_names=TRUE)
-    lapply(flist2, function(f) drv$delete_item(f, confirm=FALSE))
-    drv$delete_item(channel_name, confirm=FALSE)
+    usr <- chan$get_member(mention_name)
+    usrname <- usr$properties$displayName
+    usremail <- usr$properties$email
+    usrid <- usr$properties$id
+    expect_false(is.null(usrname))
+    expect_false(is.null(usremail))
+    expect_false(is.null(usrid))
+
+    mmsg <- chan$send_message("Mention test", content_type="html", mentions=usr)
+    expect_is(mmsg, "ms_chat_message")
+    expect_false(is.null(mmsg$properties$mentions))
+
+    mmsg2 <- chan$send_message("Mention test 2", content_type="html", mentions=list(chan, team))
+    expect_is(mmsg2, "ms_chat_message")
+    expect_false(is.null(mmsg2$properties$mentions))
+
+    lapply(flist, function(f) folder$get_item(f)$delete(confirm=FALSE))
+    expect_silent(chan$delete(confirm=FALSE))
 })

@@ -138,11 +138,13 @@ get_team <- function(team_name=NULL, team_id=NULL,
     {
         filter <- sprintf("displayName eq '%s'", team_name)
         myteams <- login$get_user()$list_teams(filter=filter)
-        if(length(myteams) == 0)
+        # robustify against filter not working
+        wch <- which(sapply(myteams, function(obj) obj$properties$displayName == team_name))
+        if(length(wch) == 0)
             stop("Team '", team_name, "' not found", call.=FALSE)
-        else if(length(myteams) > 1)
+        else if(length(wch) > 1)
             stop("Team name '", team_name, "' is not unique", call.=FALSE)
-        myteams[[1]]
+        myteams[[wch]]
     }
     else login$get_team(team_id)
 }
@@ -158,6 +160,26 @@ list_teams <- function(tenant=Sys.getenv("CLIMICROSOFT365_TENANT", "common"),
     login <- do_login(tenant, app, scopes, ...)
 
     login$get_user()$list_teams()
+}
+
+#' @rdname client
+#' @export
+get_personal_outlook <- function(app=.microsoft365r_app_id,
+                                 scopes=c("Mail.Send", "Mail.ReadWrite", "User.Read"),
+                                 ...)
+{
+    do_login("consumers", app, scopes, ...)$get_user()$get_outlook()
+}
+
+#' @rdname client
+#' @export
+get_business_outlook <- function(tenant=Sys.getenv("CLIMICROSOFT365_TENANT", "common"),
+                                 app=Sys.getenv("CLIMICROSOFT365_AADAPPID"),
+                                 scopes=".default",
+                                 ...)
+{
+    app <- choose_app(app)
+    do_login(tenant, app, scopes, ...)$get_user()$get_outlook()
 }
 
 

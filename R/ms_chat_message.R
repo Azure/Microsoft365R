@@ -15,7 +15,7 @@
 #' - `do_operation(...)`: Carry out an arbitrary operation on the message.
 #' - `sync_fields()`: Synchronise the R object with the message metadata in Microsoft Graph.
 #' - `send_reply(body, content_type, attachments)`: Sends a reply to the message. See below.
-#' - `list_replies(n=50)`: List the replies to this message. By default, this is limited to the 50 most recent replies; set the `n` argument to change this.
+#' - `list_replies(filter=NULL, n=50)`: List the replies to this message. By default, this is limited to the 50 most recent replies; set the `n` argument to change this.
 #' - `get_reply(message_id)`: Retrieves a specific reply to the message.
 #' - `delete_reply(message_id, confirm=TRUE)`: Deletes a reply to the message. Currently the Graph API does not support deleting Teams messages, so this method is disabled.
 #'
@@ -28,11 +28,16 @@
 #' - `content_type`: Either "text" (the default) or "html".
 #' - `attachments`: Optional vector of filenames.
 #' - `inline`: Optional vector of image filenames that will be inserted into the body of the message. The images must be PNG or JPEG, and the `content_type` argument must be "html" to include inline content.
+#' - `mentions`: Optional vector of @mentions that will be inserted into the body of the message. This should be either an object of one of the following classes, or a list of the same: [`az_user`], [`ms_team`], [`ms_channel`], [`ms_team_member`]. The `content_type` argument must be "html" to include mentions.
 #'
 #' Teams channels don't support nested replies, so any methods dealing with replies will fail if the message object is itself a reply.
 #'
 #' Note that message attachments are actually uploaded to the channel's file listing (a directory in the team's primary shared document folder). Support for attachments is somewhat experimental, so if you want to be sure that it works, upload the file separately using the channel's `upload_file()` method.
 #'
+#' @section List methods:
+#' All `list_*` methods have `filter` and `n` arguments to limit the number of results. The former should be an [OData expression](https://docs.microsoft.com/en-us/graph/query-parameters#filter-parameter) as a string to filter the result set on. The latter should be a number setting the maximum number of (filtered) results to return. The default values are `filter=NULL` and `n=Inf`. If `n=NULL`, the `ms_graph_pager` iterator object is returned instead to allow manual iteration over the results.
+#'
+#' Support in the underlying Graph API for OData queries is patchy. Not all endpoints that return lists of objects support filtering, and if they do, they may not allow all of the defined operators. If your filtering expression results in an error, you can carry out the operation without filtering and then filter the results on the client side.
 #' @seealso
 #' [`ms_team`], [`ms_channel`]
 #'
@@ -66,20 +71,19 @@ public=list(
         super$initialize(token, tenant, properties)
     },
 
-    send_reply=function(body, content_type=c("text", "html"), attachments=NULL, inline=NULL)
+    send_reply=function(body, content_type=c("text", "html"), attachments=NULL, inline=NULL, mentions=NULL)
     {
         private$assert_not_nested_reply()
         content_type <- match.arg(content_type)
-        call_body <- build_chatmessage_body(private$get_channel(), body, content_type, attachments, inline)
+        call_body <- build_chatmessage_body(private$get_channel(), body, content_type, attachments, inline, mentions)
         res <- self$do_operation("replies", body=call_body, http_verb="POST")
         ms_chat_message$new(self$token, self$tenant, res)
     },
 
-    list_replies=function(n=50)
+    list_replies=function(filter=NULL, n=50)
     {
         private$assert_not_nested_reply()
-        res <- private$get_paged_list(self$do_operation("replies"), n=n)
-        private$init_list_objects(res, "chatMessage")
+        make_basic_list(self, "replies", filter, n)
     },
 
     get_reply=function(message_id)
@@ -128,49 +132,3 @@ private=list(
         stopifnot("Nested replies not allowed in Teams channels"=is.null(self$properties$replyToId))
     }
 ))
-
-
-build_chatmessage_body <- function(channel, body, content_type, attachments, inline)
-{
-    call_body <- list(body=list(content=paste(body, collapse="\n"), contentType=content_type))
-    if(!is_empty(attachments))
-    {
-        call_body$attachments <- lapply(attachments, function(f)
-        {
-            att <- channel$upload_file(f, dest=basename(f))
-            et <- att$properties$eTag
-            list(
-                id=regmatches(et, regexpr("[A-Za-z0-9\\-]{10,}", et)),
-                name=att$properties$name,
-                contentUrl=att$properties$webUrl,
-                contentType="reference"
-            )
-        })
-        att_tags <- lapply(call_body$attachments,
-            function(att) paste0('<attachment id="', att$id, '"></attachment>'))
-        call_body$body$content <- paste(call_body$body$content, paste(att_tags, collapse=""))
-    }
-    if(!is_empty(inline))
-    {
-        if(call_body$body$contentType != "html")
-            stop("Content type must be 'html' to include inline content", .call=FALSE)
-
-        call_body$hostedContents <- lapply(seq_along(inline), function(i)
-        {
-            f <- inline[i]
-            cont <- openssl::base64_encode(readBin(f, "raw", file.size(f)))
-            list(
-                `@microsoft.graph.temporaryId`=as.character(i),
-                contentBytes=cont,
-                contentType=mime::guess_type(f)
-            )
-        })
-        inline_tags <- lapply(seq_along(inline), function(i)
-        {
-            sprintf('<div><span><img src="../hostedContents/%d/$value" style="vertical-align:bottom"></span>\n</div>',
-                    i)
-        })
-        call_body$body$content <- paste(call_body$body$content, paste(inline_tags, collapse=""))
-    }
-    call_body
-}

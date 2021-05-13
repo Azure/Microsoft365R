@@ -47,14 +47,15 @@ Creating new objects of this class should be done via the \code{get_list} method
 
 \code{list_items} supports the following arguments to customise results returned by the query.
 \itemize{
-\item \code{filter}: A string giving a logical expression to filter the rows to return. Note that column names used in the expression must be prefixed with \verb{fields/} to distinguish them from item metadata.
+\item \code{filter}: A string giving an \href{https://docs.microsoft.com/en-us/graph/query-parameters#filter-parameter}{OData expression} to filter the rows to return. Note that column names used in the expression must be prefixed with \verb{fields/} to distinguish them from item metadata.
+\item \code{n}: The maximum number of (filtered) results to return. If this is NULL, the \code{ms_graph_pager} iterator object is returned instead to allow manual iteration over the results.
 \item \code{select}: A string containing comma-separated column names to include in the returned data frame. If not supplied, includes all columns.
-\item \code{all_metadata}: If TRUE, the returned data frame will contain extended metadata as separate columns, while the data fields will be in a nested data frame named \code{fields}.
-\item \code{as_data_frame}: If FALSE, return the result as a list of individual \code{ms_list_item} objects, rather than a data frame. The \code{all_metadata} argument is ignored if \code{as_data_frame=FALSE}.
+\item \code{all_metadata}: If TRUE, the returned data frame will contain extended metadata as separate columns, while the data fields will be in a nested data frame named \code{fields}. This is always set to FALSE if \code{n=NULL} or \code{as_data_frame=FALSE}.
+\item \code{as_data_frame}: If FALSE, return the result as a list of individual \code{ms_list_item} objects, rather than a data frame.
 \item \code{pagesize}: The number of results to return for each call to the REST endpoint. You can try reducing this argument below the default of 5000 if you are experiencing timeouts.
 }
 
-For more information, see \href{https://docs.microsoft.com/en-us/graph/query-parameters?view=graph-rest-1.0}{Use query parameters} at the Graph API reference.
+Note that the Graph API currently doesn't support retrieving item attachments.
 }
 
 \examples{

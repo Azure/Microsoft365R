@@ -38,6 +38,30 @@ utils::globalVariables(c("self", "private"))
     register_graph_class("plan_bucket", ms_plan_bucket,
                          function(props) !is_empty(props$planId) && !is_empty(props$orderHint) && !is_empty(props$name))
 
+    register_graph_class("mailFolder", ms_outlook_folder,
+        function(props) "unreadItemCount" %in% names(props))
+
+    register_graph_class("message", ms_outlook_email,
+        function(props) "bodyPreview" %in% names(props))
+
+    register_graph_class("attachment", ms_outlook_attachment,
+        function(props) "isInline" %in% names(props))
+
+    register_graph_class("fileAttachment", ms_outlook_attachment,
+        function(props) "isInline" %in% names(props))
+
+    register_graph_class("referenceAttachment", ms_outlook_attachment,
+        function(props) "isInline" %in% names(props))
+
+    register_graph_class("itemAttachment", ms_outlook_attachment,
+        function(props) "isInline" %in% names(props))
+
+    register_graph_class("aadUserConversationMember", ms_team_member,
+        function(props) "roles" %in% names(props))
+
+    register_graph_class("listItem", ms_list_item,
+        function(props) !is_empty(props$contentType$name))
+
     add_graph_methods()
     add_user_methods()
     add_group_methods()
@@ -49,8 +73,17 @@ utils::globalVariables(c("self", "private"))
 # CLI for Microsoft 365 app ID
 .cli_microsoft365_app_id <- "31359c7f-bd7e-475c-86db-fdb8c937548e"
 
-# helper function
+# helper functions
 error_message <- get("error_message", getNamespace("AzureGraph"))
+get_confirmation <- get("get_confirmation", getNamespace("AzureGraph"))
+
+make_basic_list <- function(object, op, filter, n, ...)
+{
+    opts <- list(`$filter`=filter)
+    hdrs <- if(!is.null(filter)) httr::add_headers(consistencyLevel="eventual")
+    pager <- object$get_list_pager(object$do_operation(op, options=opts, hdrs), ...)
+    extract_list_values(pager, n)
+}
 
 # dummy mention to keep CRAN happy
 # we need to ensure that vctrs is loaded so that AzureGraph will use vec_rbind

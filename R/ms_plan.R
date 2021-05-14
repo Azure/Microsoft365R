@@ -48,16 +48,14 @@ public=list(
         super$initialize(token, tenant, properties)
     },
 
-    list_tasks=function()
+    list_tasks=function(filter=NULL, n=Inf)
     {
-        res <- private$get_paged_list(self$do_operation("tasks"))
-        private$init_list_objects(res, "plan_task")
+        make_basic_list(self, "tasks", filter, n)
     },
 
-    list_buckets=function()
+    list_buckets=function(filter=NULL, n=Inf)
     {
-        res <- private$get_paged_list(self$do_operation("buckets"))
-        private$init_list_objects(res, "plan_bucket")
+        make_basic_list(self, "buckets", filter, n)
     },
 
     print=function(...)

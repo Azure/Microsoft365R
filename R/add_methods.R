@@ -209,10 +209,8 @@ add_group_methods <- function()
     })
 
     az_group$set("public", "list_plans", overwrite=TRUE,
-    function()
+    function(filter=NULL, n=Inf)
     {
-        op <- "planner/plans"
-        res <- private$get_paged_list(self$do_operation(op))
-        private$init_list_objects(res, "plan")
+        make_basic_list(self, "planner/plans", filter, n)
     })
 }

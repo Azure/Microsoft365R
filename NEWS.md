@@ -19,6 +19,9 @@
 
 - All `list_*` class methods now have `filter` and `n` arguments to filter the result set and cap the number of results, following the pattern in AzureGraph 1.3.0. The default values are `filter=NULL` and `n=Inf`. If `n=NULL`, an `ms_graph_pager` iterator object is returned instead to allow manual iteration over the results. Note that support for filtering in the underlying Graph API is somewhat uneven at the moment.
 - Experimental **read-only** support for plans, contributed by Roman Zenka.
+  - Add `get_plan()` and `list_plans()` methods to the `az_group` class. Note that only Microsoft 365 groups can have  plans, not any other type of group.
+  - To get the plan(s) for a site or team, call its `get_group()` method to retrieve the associated group, and then get the plan from the group.
+  - A plan has methods to retrieve tasks and buckets, as well as plan details.
 
 # Microsoft365R 2.1.0
 

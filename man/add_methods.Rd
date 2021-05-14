@@ -16,6 +16,9 @@ get_drive(drive_id = NULL)
 ## R6 method for class 'az_group'
 get_drive(drive_name = NULL, drive_id = NULL)
 
+## R6 method for class 'az_group'
+get_plan(plan_title = NULL, plan_id = NULL)
+
 ## R6 method for class 'ms_graph'
 get_sharepoint_site(site_url = NULL, site_id = NULL)
 
@@ -34,6 +37,9 @@ list_drives(filter = NULL, n = Inf)
 ## R6 method for class 'az_group'
 list_drives(filter = NULL, n = Inf)
 
+## R6 method for class 'az_group'
+list_plans(filter = NULL, n = Inf)
+
 ## R6 method for class 'az_user'
 list_sharepoint_sites(filter = NULL, n = Inf)
 
@@ -48,6 +54,7 @@ list_teams(filter = NULL, n = Inf)
 \item \code{drive_name},\code{drive_id}: For \code{get_drive}, the name or ID of the drive or shared document library. Note that only the \code{az_group} method  has the \code{drive_name} argument, as user drives do not have individual names (and most users will only have one drive anyway). For the \code{az_user} and \code{az_group} methods, leaving the argument(s) blank will return the default drive/document library.
 \item \code{site_url},\code{site_id}: For \code{ms_graph$get_sharepoint_site()}, the URL and ID of the site. Provide one or the other, but not both.
 \item \code{team_name},\code{team_id}: For \code{az_user$get_team()}, the name and ID of the site. Provide one or the other, but not both. For \code{ms_graph$get_team}, you must provide the team ID.
+\item \code{plan_title},\code{plan_id}: For \code{az_group$get_plan()}, the title and ID of the site. Provide one or the other, but not both.
 \item \verb{filter, n}: See 'List methods' below.
 }
 }
@@ -58,9 +65,11 @@ list_teams(filter = NULL, n = Inf)
 
 \code{get_drive} retrieves a OneDrive or shared document library, and \code{list_drives} retrieves all such drives/libraries that the user or group has access to. Whether these are personal or business drives depends on the tenant that was specified in \code{AzureGraph::get_graph_login()}/\code{create_graph_login()}: if this was "consumers" or "9188040d-6c67-4c5b-b112-36a304b66dad" (the equivalent GUID), it will be the personal OneDrive. See the examples below.
 
+\code{get_plan} retrieves a plan (not to be confused with a Todo task list), and \code{list_plans} retrieves all plans for a group.
+
 \code{get_team} retrieves a team. The method for the Graph client class requires the team ID. The method for the \code{az_user} class requires either the team name or ID. The method for the \code{az_group} class retrieves the team associated with the group, if it exists.
 
-Note that Teams, SharePoint and OneDrive for Business require a Microsoft 365 Business license, and are available for organisational tenants only. Similarly, only Microsoft 365 groups can have associated sites/teams/drives, not any other kind of group.
+Note that Teams, SharePoint and OneDrive for Business require a Microsoft 365 Business license, and are available for organisational tenants only. Similarly, only Microsoft 365 groups can have associated sites/teams/plans/drives, not any other kind of group.
 }
 
 \section{List methods}{
@@ -75,6 +84,8 @@ Support in the underlying Graph API for OData queries is patchy. Not all endpoin
 For \code{get_sharepoint_site}, an object of class \code{ms_site}.
 
 For \code{get_drive}, an object of class \code{ms_drive}. For \code{list_drives}, a list of \code{ms_drive} objects.
+
+For \code{get_plan}, an object of class \code{ms_plan}. For \code{list_plans}, a list of \code{ms_plan} objects.
 
 For \code{get_team}, an object of class \code{ms_team}. For \code{list_teams}, a list of \code{ms_team} objects.
 }
@@ -105,5 +116,5 @@ grp$get_drive()
 }
 }
 \seealso{
-\code{\link{ms_site}}, \code{\link{ms_drive}}, \code{\link{az_user}}, \code{\link{az_group}}
+\code{\link{ms_site}}, \code{\link{ms_drive}}, \code{\link{ms_plan}}, \code{\link{ms_team}}, \code{\link{az_user}}, \code{\link{az_group}}
 }

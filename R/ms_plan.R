@@ -26,7 +26,9 @@
 #' Calling the `new()` method for this class only constructs the R object; it does not call the Microsoft Graph API to retrieve or create the actual plan.
 #'
 #' @section Planner operations:
-#' This class exposes methods for carrying out common operations on a plan. Call `list_tasks()` to list the tasks under the plan, and `get_task()` to retrieve a specific task. Similarly, call `list_buckets()` to list the buckets, and `get_bucket()` to retrieve a specific bucket.
+#' This class exposes methods for carrying out common operations on a plan. Currently only read operations are supported.
+#'
+#' Call `list_tasks()` to list the tasks under the plan, and `get_task()` to retrieve a specific task. Similarly, call `list_buckets()` to list the buckets, and `get_bucket()` to retrieve a specific bucket.
 #'
 #' Call `get_details()` to get a list containing the details for the plan.
 #'

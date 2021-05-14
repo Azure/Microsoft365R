@@ -46,7 +46,9 @@ Calling the \code{new()} method for this class only constructs the R object; it 
 
 \section{Planner operations}{
 
-This class exposes methods for carrying out common operations on a plan. Call \code{list_tasks()} to list the tasks under the plan, and \code{get_task()} to retrieve a specific task. Similarly, call \code{list_buckets()} to list the buckets, and \code{get_bucket()} to retrieve a specific bucket.
+This class exposes methods for carrying out common operations on a plan. Currently only read operations are supported.
+
+Call \code{list_tasks()} to list the tasks under the plan, and \code{get_task()} to retrieve a specific task. Similarly, call \code{list_buckets()} to list the buckets, and \code{get_bucket()} to retrieve a specific bucket.
 
 Call \code{get_details()} to get a list containing the details for the plan.
 }

@@ -3,6 +3,7 @@ Title: Interface to the 'Microsoft 365' Suite of Cloud Services
 Version: 2.1.0.9000
 Authors@R: c(
     person("Hong", "Ooi", , "hongooi73@gmail.com", role = c("aut", "cre")),
+    person("Roman", "Zenka", role="ctb"),
     person("Microsoft", role="cph")
     )
 Description: An interface to the 'Microsoft 365' (formerly known as 'Office 365') suite of cloud services, building on the framework supplied by the 'AzureGraph' package. Enables access from R to data stored in 'Teams', 'SharePoint Online' and 'OneDrive', including the ability to list drive folder contents, upload and download files, send messages, and retrieve data lists. Also provides a full-featured 'Outlook' email client, with the ability to send emails and manage emails and mail folders.

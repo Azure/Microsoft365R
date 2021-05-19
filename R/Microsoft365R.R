@@ -29,6 +29,15 @@ utils::globalVariables(c("self", "private"))
     register_graph_class("chatMessage", ms_chat_message,
         function(props) "body" %in% names(props) && "messageType" %in% names(props))
 
+    register_graph_class("plan", ms_plan,
+        function(props) !is_empty(props$container) && props$container$type=='group')
+
+    register_graph_class("plan_task", ms_plan_task,
+        function(props) !is_empty(props$bucketId) && !is_empty(props$planId))
+
+    register_graph_class("plan_bucket", ms_plan_bucket,
+        function(props) !is_empty(props$planId) && !is_empty(props$orderHint) && !is_empty(props$name))
+
     register_graph_class("mailFolder", ms_outlook_folder,
         function(props) "unreadItemCount" %in% names(props))
 

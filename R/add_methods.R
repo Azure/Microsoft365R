@@ -236,10 +236,11 @@ add_group_methods <- function()
         }
         else
         {
-            plans <- self$list_plans(filter=sprintf("title eq '%s'", plan_title))
-            if(length(plans) != 1)
+            plans <- self$list_plans()
+            wch <- which(sapply(plans, function(pl) pl$properties$title == plan_title))
+            if(length(wch) != 1)
                 stop("Invalid plan title", call.=FALSE)
-            plans[[1]]
+            plans[[wch]]
         }
     })
 }

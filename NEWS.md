@@ -1,4 +1,4 @@
-# Microsoft365R 2.1.0.9000
+# Microsoft365R 2.2.0
 
 ## OneDrive/SharePoint
 

@@ -50,7 +50,7 @@ For authentication purposes, the package is registered as an app in the 'aicatr'
 
 ### Using your own app registration
 
-Rather than getting the Microsoft365R app approved, you can also use your own app registration for authentication. If you want to use the default authorization code flow, the app registration should have a redirect URI of `https://localhost:1410`, and if you want to use the device code flow, the "Allow native client" setting should be enabled. It should also have the same default permissions as the Microsoft365R app (see above).
+Rather than getting the Microsoft365R app approved, you can also use your own app registration for authentication. If you want to use the default authorization code flow, the app registration should have a mobile & desktop redirect URI of `https://localhost:1410` (not a web or SPA redirect). If you want to use the device code flow, the "Allow native client" setting should be enabled. Your app should also have the same default permissions as the Microsoft365R app (see above).
 
 Once the app has been registered, you can pass the app ID to Microsoft365R in a couple of ways.
 
@@ -90,3 +90,7 @@ AzureAuth::clean_token_directory()
 AzureGraph::delete_graph_login(tenant="mytenant")
 ```
 
+You can also consult the vignettes from the AzureAuth and AzureGraph packages for more information on this topic.
+
+- [AzureAuth: Authentication scenarios](https://cran.r-project.org/package=AzureAuth/vignettes/scenarios.html)
+- [AzureGraph: Authentication](https://cran.r-project.org/package=AzureGraph/vignettes/auth.html)

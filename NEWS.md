@@ -1,3 +1,7 @@
+# Microsoft365R 2.2.1
+
+- Hotfix for `could not find function "make_basic_list"` error when calling `list_*` methods and functions (#58, #56).
+
 # Microsoft365R 2.2.0
 
 ## OneDrive/SharePoint

@@ -77,14 +77,6 @@ utils::globalVariables(c("self", "private"))
 error_message <- get("error_message", getNamespace("AzureGraph"))
 get_confirmation <- get("get_confirmation", getNamespace("AzureGraph"))
 
-make_basic_list <- function(object, op, filter, n, ...)
-{
-    opts <- list(`$filter`=filter)
-    hdrs <- if(!is.null(filter)) httr::add_headers(consistencyLevel="eventual")
-    pager <- object$get_list_pager(object$do_operation(op, options=opts, hdrs), ...)
-    extract_list_values(pager, n)
-}
-
 # dummy mention to keep CRAN happy
 # we need to ensure that vctrs is loaded so that AzureGraph will use vec_rbind
 # to combine paged results into a single data frame: individual pages can have

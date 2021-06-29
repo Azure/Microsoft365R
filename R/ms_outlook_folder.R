@@ -166,7 +166,8 @@ public=list(
         order_by <- if(is.null(filter) && is.null(search)) email_list_order(by)
 
         opts <- list(`$orderby`=order_by, `$search`=search, `$filter`=filter, `$top`=pagesize)
-        pager <- self$get_list_pager(self$do_operation("messages", options=opts), user_id=self$user_id)
+        pager <- self$get_list_pager(self$do_operation("messages", options=opts), default_generator=ms_outlook_email,
+                                     user_id=self$user_id)
         extract_list_values(pager, n)
     },
 

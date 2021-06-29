@@ -415,7 +415,7 @@ public=list(
             cat("  from:", format_email_recipient(self$properties$from), "\n")
         else cat("  from:\n")
 
-        if(!self$properties$isDraft)
+        if(!is_empty(self$properties$isDraft) && !self$properties$isDraft)
             cat("  sent:", format_email_date(self$properties$sentDateTime), "\n")
         else cat("  sent:\n")
 
@@ -433,10 +433,13 @@ public=list(
         cat("  subject:", self$properties$subject, "\n")
         cat("---\n")
 
-        cat(self$properties$bodyPreview)
-        if(nchar(self$properties$bodyPreview) >= 255)
-            cat(" ...\n")
-        else cat("\n")
+        if(!is.null(self$properties$bodyPreview))
+        {
+            preview <- substr(self$properties$bodyPreview, 1, 255)
+            if(nchar(self$properties$bodyPreview) >= 255)
+                cat(preview, "...\n")
+            else cat(preview, "\n")
+        }
         invisible(self)
     }
 ),

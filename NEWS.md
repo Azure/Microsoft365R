@@ -1,3 +1,7 @@
+# Microsoft365R 2.2.1.9000
+
+- Fix a bug where the presence of calendar invites in an email folder caused `list_emails()` to fail (#60).
+
 # Microsoft365R 2.2.1
 
 - Hotfix for `could not find function "make_basic_list"` error when calling `list_*` methods and functions (#58, #56).

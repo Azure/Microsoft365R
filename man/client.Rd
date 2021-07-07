@@ -66,7 +66,10 @@ get_personal_outlook(
 get_business_outlook(
   tenant = Sys.getenv("CLIMICROSOFT365_TENANT", "common"),
   app = Sys.getenv("CLIMICROSOFT365_AADAPPID"),
-  scopes = ".default",
+  shared_mbox_id = NULL,
+  shared_mbox_name = NULL,
+  shared_mbox_email = NULL,
+  scopes = c("User.Read", "Mail.Send", "Mail.ReadWrite"),
   ...
 )
 }
@@ -82,6 +85,8 @@ get_business_outlook(
 \item{site_name, site_url, site_id}{For \code{get_sharepoint_site}, either the name, web URL or ID of the SharePoint site to retrieve. Supply exactly one of these.}
 
 \item{team_name, team_id}{For \code{get_team}, either the name or ID of the team to retrieve. Supply exactly one of these.}
+
+\item{shared_mbox_id, shared_mbox_name, shared_mbox_email}{For \code{get_business_outlook}, an ID/principal name/email address. Supply exactly one of these to retrieve a shared mailbox. If all are NULL (the default), retrieve your own mailbox.}
 }
 \value{
 For \code{get_personal_onedrive} and \code{get_business_onedrive}, an R6 object of class \code{ms_drive}.

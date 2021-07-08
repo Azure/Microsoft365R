@@ -64,8 +64,16 @@ public=list(
     initialize=function(token, tenant=NULL, properties=NULL)
     {
         self$type <- "Teams message"
-        parent <- properties$channelIdentity
-        private$api_type <- file.path("teams", parent[[1]], "channels", parent[[2]], "messages")
+
+        if(!is.null(properties$channelIdentity))
+        {
+            parent <- properties$channelIdentity
+            private$api_type <- file.path("teams", parent[[1]], "channels", parent[[2]], "messages")
+        }
+        else if(!is.null(properties$chatId))
+            private$api_type <- file.path("chats", properties$chatId, "messages")
+        else stop("Unable to get parent", call=FALSE)
+
         if(!is.null(properties$replyToId))
             private$api_type <- file.path(private$api_type, properties$replyToId, "replies")
         super$initialize(token, tenant, properties)
@@ -75,7 +83,7 @@ public=list(
     {
         private$assert_not_nested_reply()
         content_type <- match.arg(content_type)
-        call_body <- build_chatmessage_body(private$get_channel(), body, content_type, attachments, inline, mentions)
+        call_body <- build_chatmessage_body(private$get_parent(), body, content_type, attachments, inline, mentions)
         res <- self$do_operation("replies", body=call_body, http_verb="POST")
         ms_chat_message$new(self$token, self$tenant, res)
     },
@@ -106,11 +114,15 @@ public=list(
 
     print=function(...)
     {
-        parent <- self$properties$channelIdentity
         cat("<Teams message>\n", sep="")
         cat("  directory id:", self$properties$id, "\n")
-        cat("  team:", parent[[1]], "\n")
-        cat("  channel:", parent[[2]], "\n")
+        if(!is.null(self$properties$channelIdentity))
+        {
+            parent <- self$properties$channelIdentity
+            cat("  team:", parent[[1]], "\n")
+            cat("  channel:", parent[[2]], "\n")
+        }
+        else cat("  chat:", self$properties$chatId, "\n")
         if(!is_empty(self$properties$replyToId))
             cat("  in-reply-to:", self$properties$replyToId, "\n")
         cat("---\n")
@@ -121,10 +133,15 @@ public=list(
 
 private=list(
 
-    get_channel=function()
+    get_parent=function()
     {
-        channel <- self$properties$channelIdentity
-        ms_channel$new(self$token, self$tenant, list(id=channel$channelId), team_id=channel$teamId)$sync_fields()
+        parent <- if(!is.null(self$properties$channelIdentity))
+        {
+            channel <- self$properties$channelIdentity
+            ms_channel$new(self$token, self$tenant, list(id=channel$channelId), team_id=channel$teamId)
+        }
+        else ms_channel$new(self$token, self$tenant, list(id=self$properties$chatId))
+        parent$sync_fields()
     },
 
     assert_not_nested_reply=function()

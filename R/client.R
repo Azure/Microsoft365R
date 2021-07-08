@@ -8,6 +8,7 @@
 #' @param site_name,site_url,site_id For `get_sharepoint_site`, either the name, web URL or ID of the SharePoint site to retrieve. Supply exactly one of these.
 #' @param team_name,team_id For `get_team`, either the name or ID of the team to retrieve. Supply exactly one of these.
 #' @param shared_mbox_id,shared_mbox_name,shared_mbox_email For `get_business_outlook`, an ID/principal name/email address. Supply exactly one of these to retrieve a shared mailbox. If all are NULL (the default), retrieve your own mailbox.
+#' @param chat_id For `get_chat`, the ID of a group, one-on-one or meeting chat in Teams.
 #' @param ... Optional arguments that will ultimately be passed to [`AzureAuth::get_azure_token`].
 #' @details
 #' These functions provide easy access to the various collaboration services that are part of Microsoft 365. On first use, they will call your web browser to authenticate with Azure Active Directory, in a similar manner to other web apps. You will get a dialog box asking for permission to access your information. You only have to authenticate once; your credentials will be saved and reloaded in subsequent sessions.
@@ -28,7 +29,7 @@
 #'
 #' For `get_team`, an R6 object of class `ms_team`; for `list_teams`, a list of such objects.
 #' @seealso
-#' [`ms_drive`], [`ms_site`], [`ms_team`]
+#' [`ms_drive`], [`ms_site`], [`ms_team`], [`ms_chat`]
 #'
 #' [`add_methods`] for the associated methods that this package adds to the base AzureGraph classes.
 #'
@@ -53,6 +54,10 @@
 #' myteam <- get_team("My team", tenant="mycompany")
 #' myteam$list_channels()
 #' myteam$get_drive()$list_items()
+#'
+#' # retrieving chats
+#' get_chat("chat-id")
+#' list_chats()
 #'
 #' # you can also use your own app registration ID:
 #' get_business_onedrive(app="app_id")
@@ -188,7 +193,8 @@ get_business_outlook <- function(tenant=Sys.getenv("CLIMICROSOFT365_TENANT", "co
         get_outlook()
 }
 
-
+#' @rdname client
+#' @export
 get_chat <- function(chat_id,
                      tenant=Sys.getenv("CLIMICROSOFT365_TENANT", "common"),
                      app=.microsoft365r_app_id,
@@ -199,6 +205,8 @@ get_chat <- function(chat_id,
 }
 
 
+#' @rdname client
+#' @export
 list_chats <- function(tenant=Sys.getenv("CLIMICROSOFT365_TENANT", "common"),
                        app=.microsoft365r_app_id,
                        scopes=c("User.Read", "Directory.Read.All", "Chat.ReadWrite"),

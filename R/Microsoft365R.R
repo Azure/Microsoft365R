@@ -63,7 +63,7 @@ utils::globalVariables(c("self", "private"))
         function(props) !is_empty(props$contentType$name))
 
     register_graph_class("chat", ms_chat,
-        function(props) chatType %in% names(props))
+        function(props) "chatType" %in% names(props))
 
     add_graph_methods()
     add_user_methods()

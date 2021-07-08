@@ -175,6 +175,19 @@ add_user_methods <- function()
     {
         ms_outlook$new(self$token, self$tenant, self$properties)
     })
+
+    az_user$set("public", "list_chats", overwrite=TRUE,
+    function(filter=NULL, n=Inf)
+    {
+        make_basic_list(self, "chats", filter, n)
+    })
+
+    az_user$set("public", "get_chat", overwrite=TRUE,
+    function(chat_id)
+    {
+        op <- file.path("chats", chat_id)
+        ms_chat$new(self$token, self$tenant, self$do_operation(op))
+    })
 }
 
 add_group_methods <- function()

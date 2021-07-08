@@ -175,18 +175,36 @@ get_personal_outlook <- function(app=.microsoft365r_app_id,
 #' @rdname client
 #' @export
 get_business_outlook <- function(tenant=Sys.getenv("CLIMICROSOFT365_TENANT", "common"),
-                                 app=Sys.getenv("CLIMICROSOFT365_AADAPPID"),
+                                 app=.microsoft365r_app_id,
                                  shared_mbox_id=NULL, shared_mbox_name=NULL, shared_mbox_email=NULL,
                                  scopes=c("User.Read", "Mail.Send", "Mail.ReadWrite"),
                                  ...)
 {
-    app <- choose_app(app)
     if(!is.null(shared_mbox_id) || !is.null(shared_mbox_name) || !is.null(shared_mbox_email))
         scopes <- c(scopes, "Mail.Send.Shared", "Mail.ReadWrite.Shared")
 
     do_login(tenant, app, scopes, ...)$
         get_user(user_id=shared_mbox_id, name=shared_mbox_name, email=shared_mbox_email)$
         get_outlook()
+}
+
+
+get_chat <- function(chat_id,
+                     tenant=Sys.getenv("CLIMICROSOFT365_TENANT", "common"),
+                     app=.microsoft365r_app_id,
+                     scopes=c("User.Read", "Directory.Read.All", "Chat.ReadWrite"),
+                     ...)
+{
+    do_login(tenant, app, scopes, ...)$get_user()$get_chat(chat_id)
+}
+
+
+list_chats <- function(tenant=Sys.getenv("CLIMICROSOFT365_TENANT", "common"),
+                       app=.microsoft365r_app_id,
+                       scopes=c("User.Read", "Directory.Read.All", "Chat.ReadWrite"),
+                       ...)
+{
+    do_login(tenant, app, scopes, ...)$get_user()$list_chats()
 }
 
 

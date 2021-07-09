@@ -8,7 +8,7 @@ vignette: >
   %\VignetteEncoding{utf8}
 ---
 
-Microsoft365R is a simple yet powerful R interface to [Microsoft 365](https://www.microsoft.com/en-us/microsoft-365) (formerly known as Office 365), leveraging the facilities provided by the [AzureGraph](https://cran.r-project.org/package=AzureGraph) package. This vignette describes how to interact with [Microsoft Teams](https://www.microsoft.com/en-au/microsoft-teams/group-chat-software), including sending messages and transferring files.
+Microsoft365R is a simple yet powerful R interface to [Microsoft 365](https://www.microsoft.com/en-us/microsoft-365) (formerly known as Office 365), leveraging the facilities provided by the [AzureGraph](https://cran.r-project.org/package=AzureGraph) package. This vignette describes how to interact with [Microsoft Teams](https://www.microsoft.com/en-au/microsoft-teams/group-chat-software).
 
 See the "Authenticating to Microsoft 365" vignette for more details on authentication if required.
 
@@ -60,9 +60,17 @@ site_drv <- site$get_drive()
 site_drv$list_files("My channel")
 ```
 
+You can also retrieve the team members with the `list_members()` and `get_member()` methods. For the latter, you can retrieve a member using either their display name, email address, or internal ID.
+
+```r
+team$list_members()
+team$get_member("Joe Smith")
+team$get_member(email="joesmith@mytenant.com")
+```
+
 ## Channels
 
-A team object has methods for listing, retrieving, creating and deleting channels. However you should not create and delete channels unnecessarily, since Teams tracks all channels ever created, even after you delete them. In turn, a channel object has methods for listing and sending messages, and uploading and deleting files.
+A team object has methods for listing, retrieving, creating and deleting channels. However you should not create and delete channels unnecessarily, since Teams tracks all channels ever created, even after you delete them. In turn, a channel object has methods for retrieving members, listing and sending messages, and uploading and deleting files.
 
 ### Channel messages
 
@@ -95,7 +103,7 @@ repl_list <- msg$list_replies(n=10)
 repl_list[[1]]$properties$body
 ```
 
-You can send a message to a channel as plain text (the default) or HTML. For the latter, Teams imposes security restrictions on which HTML tags are allowed; you should limit your message to contain only basic formatting and no embedded scripts. You can also include files as attachments, or as inline images (JPEG or PNG only). For the latter, the message must be HTML and not plain text.
+You can send a message to a channel as plain text (the default) or HTML. For the latter, Teams imposes security restrictions on which HTML tags are allowed; you should limit your message to contain only basic formatting and no embedded scripts. You can also include files as attachments, or as inline images (JPEG or PNG only). Similarly, you can @mention a team, channel, or an individual team or channel member. For the latter, the message must be HTML and not plain text.
 
 ```r
 # sending messages to a channel
@@ -114,9 +122,11 @@ msg$send_reply("Reply from R")
 
 # send a reply with an attachment
 msg$send_reply("See attached file", attachments="reply.md")
-```
 
-Currently, Microsoft365R only supports messaging in channels. Support for chats between individuals may come later.
+# mention a channel member
+usr <- chan$get_member("Joe Smith")
+msg$send_message("FYI Joe", mentions=usr, content_type="html")
+```
 
 ### Channel files
 
@@ -144,3 +154,50 @@ item$create_share_link()
 ### Private channels
 
 Private channels function much the same way as regular public channels, and the methods described above should also work with them. The main difference is that a private channel's files are stored in a separate SharePoint site to the public channels, so any files you upload to the private channel won't appear in the file listings for the main site.
+
+## Chats
+
+Microsoft365R also supports messaging in chats. There are three types of chats: group, meeting and one-on-one, but the same interface applies to all types. To access the chats that you are part of, use the `list_chats()` function. You can also retrieve a specific chat with `get_chat()`, passing it the chat ID.
+
+```r
+chats <- list_chats()
+chat_id <- chats[[1]]$properties$id
+chat <- get_chat(chat_id)
+```
+
+In general, the functionality is very similar to messaging in channels:
+
+```r
+# by default, retrieve only the 50 most recent messages
+msgs <- chat$list_messages()
+
+# retrieve the 100 most recent messages
+chat$list_messages(n=100)
+
+# retrieve all messages: set n = infinity
+chat$list_messages(n=Inf)
+
+# sending messages to a chat
+chat$send_message("Hello from R")
+chat$send_message("<div>Hello from <em>R</em></div>", content_type="html")
+
+# send attachments by including a vector of filenames
+chat$send_message("Hello with attachments", attachments=c("intro.md", "myfile.csv"))
+
+# images can be sent inline rather than as attachments: set content_type to 'html'
+chat$send_message("", content_type="html", inline="graph.png")
+
+# send a reply to a message
+msg <- chat$send_message("Starting a new thread in R")
+msg$send_reply("Reply from R")
+
+# list participants in a chat
+chat$list_members()
+
+# mention someone
+usr <- chat$get_member("Joe Smith")
+msg$send_message("FYI Joe", mentions=usr, content_type="html")
+```
+
+Note that unlike a team channel, there is no drive folder associated with a chat.
+

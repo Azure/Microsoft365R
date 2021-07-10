@@ -7,7 +7,10 @@
 Methods for the \code{\link[AzureGraph:ms_graph]{AzureGraph::ms_graph}}, \code{\link[AzureGraph:az_user]{AzureGraph::az_user}} and \code{\link[AzureGraph:az_group]{AzureGraph::az_group}} classes.
 }
 \section{Usage}{
-\preformatted{## R6 method for class 'ms_graph'
+\preformatted{## R6 method for class 'az_user'
+get_chat(chat_id)
+
+## R6 method for class 'ms_graph'
 get_drive(drive_id)
 
 ## R6 method for class 'az_user'
@@ -30,6 +33,9 @@ get_team(team_id = NULL)
 
 ## R6 method for class 'az_group'
 get_team()
+
+## R6 method for class 'az_user'
+list_chats(filter = NULL, n = Inf)
 
 ## R6 method for class 'az_user'
 list_drives(filter = NULL, n = Inf)
@@ -69,6 +75,8 @@ list_teams(filter = NULL, n = Inf)
 
 \code{get_team} retrieves a team. The method for the Graph client class requires the team ID. The method for the \code{az_user} class requires either the team name or ID. The method for the \code{az_group} class retrieves the team associated with the group, if it exists.
 
+\code{get_chat} retrieves a one-on-one, group or meeting chat, by ID. \code{list_chats} retrieves all chats that the user is part of.
+
 Note that Teams, SharePoint and OneDrive for Business require a Microsoft 365 Business license, and are available for organisational tenants only. Similarly, only Microsoft 365 groups can have associated sites/teams/plans/drives, not any other kind of group.
 }
 
@@ -88,6 +96,8 @@ For \code{get_drive}, an object of class \code{ms_drive}. For \code{list_drives}
 For \code{get_plan}, an object of class \code{ms_plan}. For \code{list_plans}, a list of \code{ms_plan} objects.
 
 For \code{get_team}, an object of class \code{ms_team}. For \code{list_teams}, a list of \code{ms_team} objects.
+
+For \code{get_chat}, an object of class \code{ms_chat}. For \code{list_chats}, a list of \code{ms_chat} objects.
 }
 
 \examples{
@@ -116,5 +126,5 @@ grp$get_drive()
 }
 }
 \seealso{
-\code{\link{ms_site}}, \code{\link{ms_drive}}, \code{\link{ms_plan}}, \code{\link{ms_team}}, \code{\link{az_user}}, \code{\link{az_group}}
+\code{\link{ms_site}}, \code{\link{ms_drive}}, \code{\link{ms_plan}}, \code{\link{ms_team}}, \code{\link{ms_chat}}, \code{\link{az_user}}, \code{\link{az_group}}
 }

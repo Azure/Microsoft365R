@@ -11,7 +11,13 @@ Microsoft365R is registered as an app in the `aicatr` AAD tenant. Depending on y
 - AllSites.Manage
 - email, profile, openid, offline_access
 
-These are delegated permissions, not application-level permissions, so a signed-in user is required.
+In addition, some functions request the following permissions:
+
+- Mail.Send.Shared
+- Mail.ReadWrite.Shared
+- Chat.ReadWrite
+
+These are all delegated permissions, not application-level permissions, so a signed-in user is required.
 
 Alternatively, if the environment variable `CLIMICROSOFT365_AADAPPID` is set, Microsoft365R will use its value as the app ID for authenticating to the Microsoft 365 Business services (SharePoint and OneDrive for Business). You can also specify the app ID as an argument when calling `get_personal_onedrive()`, `get_business_onedrive()` et al.
 

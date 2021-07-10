@@ -8,6 +8,9 @@
 #' @name add_methods
 #' @section Usage:
 #' ```
+#' ## R6 method for class 'az_user'
+#' get_chat(chat_id)
+#'
 #' ## R6 method for class 'ms_graph'
 #' get_drive(drive_id)
 #'
@@ -31,6 +34,9 @@
 #'
 #' ## R6 method for class 'az_group'
 #' get_team()
+#'
+#' ## R6 method for class 'az_user'
+#' list_chats(filter = NULL, n = Inf)
 #'
 #' ## R6 method for class 'az_user'
 #' list_drives(filter = NULL, n = Inf)
@@ -62,6 +68,8 @@
 #'
 #' `get_team` retrieves a team. The method for the Graph client class requires the team ID. The method for the `az_user` class requires either the team name or ID. The method for the `az_group` class retrieves the team associated with the group, if it exists.
 #'
+#' `get_chat` retrieves a one-on-one, group or meeting chat, by ID. `list_chats` retrieves all chats that the user is part of.
+#'
 #' Note that Teams, SharePoint and OneDrive for Business require a Microsoft 365 Business license, and are available for organisational tenants only. Similarly, only Microsoft 365 groups can have associated sites/teams/plans/drives, not any other kind of group.
 #'
 #' @section List methods:
@@ -76,8 +84,10 @@
 #' For `get_plan`, an object of class `ms_plan`. For `list_plans`, a list of `ms_plan` objects.
 #'
 #' For `get_team`, an object of class `ms_team`. For `list_teams`, a list of `ms_team` objects.
+#'
+#' For `get_chat`, an object of class `ms_chat`. For `list_chats`, a list of `ms_chat` objects.
 #' @seealso
-#' [`ms_site`], [`ms_drive`], [`ms_plan`], [`ms_team`], [`az_user`], [`az_group`]
+#' [`ms_site`], [`ms_drive`], [`ms_plan`], [`ms_team`], [`ms_chat`], [`az_user`], [`az_group`]
 #' @examples
 #' \dontrun{
 #'
@@ -174,6 +184,19 @@ add_user_methods <- function()
     function()
     {
         ms_outlook$new(self$token, self$tenant, self$properties)
+    })
+
+    az_user$set("public", "list_chats", overwrite=TRUE,
+    function(filter=NULL, n=Inf)
+    {
+        make_basic_list(self, "chats", filter, n)
+    })
+
+    az_user$set("public", "get_chat", overwrite=TRUE,
+    function(chat_id)
+    {
+        op <- file.path("chats", chat_id)
+        ms_chat$new(self$token, self$tenant, self$do_operation(op))
     })
 }
 

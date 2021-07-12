@@ -97,7 +97,7 @@ get_sharepoint_site <- function(site_name=NULL, site_url=NULL, site_id=NULL,
                                 tenant=Sys.getenv("CLIMICROSOFT365_TENANT", "common"),
                                 app=Sys.getenv("CLIMICROSOFT365_AADAPPID"),
                                 scopes=c("Group.ReadWrite.All", "Directory.Read.All",
-                                         "Sites.ReadWrite", "Sites.Manage.All"),
+                                         "Sites.ReadWrite.All", "Sites.Manage.All"),
                                 ...)
 {
     assert_one_arg(site_name, site_url, site_id, msg="Supply exactly one of site name, URL or ID")
@@ -123,7 +123,7 @@ get_sharepoint_site <- function(site_name=NULL, site_url=NULL, site_id=NULL,
 list_sharepoint_sites <- function(tenant=Sys.getenv("CLIMICROSOFT365_TENANT", "common"),
                                   app=Sys.getenv("CLIMICROSOFT365_AADAPPID"),
                                   scopes=c("Group.ReadWrite.All", "Directory.Read.All",
-                                           "Sites.ReadWrite", "Sites.Manage.All"),
+                                           "Sites.ReadWrite.All", "Sites.Manage.All"),
                                   ...)
 {
     app <- choose_app(app)

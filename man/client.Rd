@@ -32,7 +32,7 @@ get_sharepoint_site(
   site_id = NULL,
   tenant = Sys.getenv("CLIMICROSOFT365_TENANT", "common"),
   app = Sys.getenv("CLIMICROSOFT365_AADAPPID"),
-  scopes = c("Group.ReadWrite.All", "Directory.Read.All", "Sites.ReadWrite",
+  scopes = c("Group.ReadWrite.All", "Directory.Read.All", "Sites.ReadWrite.All",
     "Sites.Manage.All"),
   ...
 )
@@ -40,7 +40,7 @@ get_sharepoint_site(
 list_sharepoint_sites(
   tenant = Sys.getenv("CLIMICROSOFT365_TENANT", "common"),
   app = Sys.getenv("CLIMICROSOFT365_AADAPPID"),
-  scopes = c("Group.ReadWrite.All", "Directory.Read.All", "Sites.ReadWrite",
+  scopes = c("Group.ReadWrite.All", "Directory.Read.All", "Sites.ReadWrite.All",
     "Sites.Manage.All"),
   ...
 )

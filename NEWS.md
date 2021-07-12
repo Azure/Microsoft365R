@@ -1,6 +1,10 @@
 # Microsoft365R 2.2.1.9000
 
 - Fix a bug where the presence of calendar invites in an email folder caused `list_emails()` to fail (#60).
+- Add support for shared mailboxes to `get_business_outlook()` (#39). To access a shared mailbox, supply one of the arguments `shared_mbox_id`, `shared_mbox_name` or `shared_mbox_email` specifying the ID, displayname or email address of the mailbox respectively.
+- Add support for Teams chats (including one-on-one, group and meeting chats).
+  - Use the `list_chats()` function to list the chats you're participating in, and the `get_chat()` function to retrieve a specific chat.
+  - A chat object has class `ms_chat`, which has similar methods to a channel: you can send, list and retrieve messages, and list and retrieve members/attendees. One difference is that chats don't have an associated file folder, unlike channels.
 
 # Microsoft365R 2.2.1
 

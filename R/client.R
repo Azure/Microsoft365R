@@ -83,10 +83,11 @@ get_personal_onedrive <- function(app=.microsoft365r_app_id,
 #' @export
 get_business_onedrive <- function(tenant=Sys.getenv("CLIMICROSOFT365_TENANT", "common"),
                                   app=Sys.getenv("CLIMICROSOFT365_AADAPPID"),
-                                  scopes=".default",
+                                  scopes=NULL,
                                   ...)
 {
     app <- choose_app(app)
+    scopes <- set_default_scopes(scopes, app)
     do_login(tenant, app, scopes, ...)$get_user()$get_drive()
 }
 
@@ -95,11 +96,12 @@ get_business_onedrive <- function(tenant=Sys.getenv("CLIMICROSOFT365_TENANT", "c
 get_sharepoint_site <- function(site_name=NULL, site_url=NULL, site_id=NULL,
                                 tenant=Sys.getenv("CLIMICROSOFT365_TENANT", "common"),
                                 app=Sys.getenv("CLIMICROSOFT365_AADAPPID"),
-                                scopes=".default",
+                                scopes=NULL,
                                 ...)
 {
     assert_one_arg(site_name, site_url, site_id, msg="Supply exactly one of site name, URL or ID")
     app <- choose_app(app)
+    scopes <- set_default_scopes(scopes, app)
     login <- do_login(tenant, app, scopes, ...)
 
     if(!is.null(site_name))
@@ -119,10 +121,11 @@ get_sharepoint_site <- function(site_name=NULL, site_url=NULL, site_id=NULL,
 #' @export
 list_sharepoint_sites <- function(tenant=Sys.getenv("CLIMICROSOFT365_TENANT", "common"),
                                   app=Sys.getenv("CLIMICROSOFT365_AADAPPID"),
-                                  scopes=".default",
+                                  scopes=NULL,
                                   ...)
 {
     app <- choose_app(app)
+    scopes <- set_default_scopes(scopes, app)
     login <- do_login(tenant, app, scopes, ...)
 
     login$get_user()$list_sharepoint_sites()
@@ -133,11 +136,12 @@ list_sharepoint_sites <- function(tenant=Sys.getenv("CLIMICROSOFT365_TENANT", "c
 get_team <- function(team_name=NULL, team_id=NULL,
                      tenant=Sys.getenv("CLIMICROSOFT365_TENANT", "common"),
                      app=Sys.getenv("CLIMICROSOFT365_AADAPPID"),
-                     scopes=".default",
+                     scopes=NULL,
                      ...)
 {
     assert_one_arg(team_name, team_id, msg="Supply exactly one of team name or ID")
     app <- choose_app(app)
+    scopes <- set_default_scopes(scopes, app)
     login <- do_login(tenant, app, scopes, ...)
 
     if(!is.null(team_name))
@@ -159,10 +163,11 @@ get_team <- function(team_name=NULL, team_id=NULL,
 #' @export
 list_teams <- function(tenant=Sys.getenv("CLIMICROSOFT365_TENANT", "common"),
                        app=Sys.getenv("CLIMICROSOFT365_AADAPPID"),
-                       scopes=".default",
+                       scopes=NULL,
                        ...)
 {
     app <- choose_app(app)
+    scopes <- set_default_scopes(scopes, app)
     login <- do_login(tenant, app, scopes, ...)
 
     login$get_user()$list_teams()
@@ -256,4 +261,16 @@ assert_one_arg <- function(..., msg=NULL)
     nulls <- sapply(arglst, is.null)
     if(sum(!nulls) != 1)
         stop(msg, call.=FALSE)
+}
+
+
+set_default_scopes <- function(scopes, app)
+{
+    if(is.null(scopes))
+    {
+        scopes <- if(app %in% c(.cli_microsoft365_app_id, get(".az_cli_app_id", getNamespace("AzureGraph"))))
+            ".default"
+        else c("User.Read", "Group.ReadWrite.All", "Directory.Read.All", "Sites.Manage.All")
+    }
+    scopes
 }

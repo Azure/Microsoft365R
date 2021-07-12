@@ -22,7 +22,7 @@ get_personal_onedrive(
 get_business_onedrive(
   tenant = Sys.getenv("CLIMICROSOFT365_TENANT", "common"),
   app = Sys.getenv("CLIMICROSOFT365_AADAPPID"),
-  scopes = NULL,
+  scopes = c("Files.ReadWrite.All", "User.Read"),
   ...
 )
 
@@ -32,14 +32,16 @@ get_sharepoint_site(
   site_id = NULL,
   tenant = Sys.getenv("CLIMICROSOFT365_TENANT", "common"),
   app = Sys.getenv("CLIMICROSOFT365_AADAPPID"),
-  scopes = NULL,
+  scopes = c("Group.ReadWrite.All", "Directory.Read.All", "Sites.ReadWrite",
+    "Sites.Manage.All"),
   ...
 )
 
 list_sharepoint_sites(
   tenant = Sys.getenv("CLIMICROSOFT365_TENANT", "common"),
   app = Sys.getenv("CLIMICROSOFT365_AADAPPID"),
-  scopes = NULL,
+  scopes = c("Group.ReadWrite.All", "Directory.Read.All", "Sites.ReadWrite",
+    "Sites.Manage.All"),
   ...
 )
 
@@ -48,14 +50,14 @@ get_team(
   team_id = NULL,
   tenant = Sys.getenv("CLIMICROSOFT365_TENANT", "common"),
   app = Sys.getenv("CLIMICROSOFT365_AADAPPID"),
-  scopes = NULL,
+  scopes = c("Group.ReadWrite.All", "Directory.Read.All"),
   ...
 )
 
 list_teams(
   tenant = Sys.getenv("CLIMICROSOFT365_TENANT", "common"),
   app = Sys.getenv("CLIMICROSOFT365_AADAPPID"),
-  scopes = NULL,
+  scopes = c("Group.ReadWrite.All", "Directory.Read.All"),
   ...
 )
 

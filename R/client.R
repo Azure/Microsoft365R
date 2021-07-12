@@ -83,7 +83,7 @@ get_personal_onedrive <- function(app=.microsoft365r_app_id,
 #' @export
 get_business_onedrive <- function(tenant=Sys.getenv("CLIMICROSOFT365_TENANT", "common"),
                                   app=Sys.getenv("CLIMICROSOFT365_AADAPPID"),
-                                  scopes=NULL,
+                                  scopes=c("Files.ReadWrite.All", "User.Read"),
                                   ...)
 {
     app <- choose_app(app)
@@ -96,7 +96,8 @@ get_business_onedrive <- function(tenant=Sys.getenv("CLIMICROSOFT365_TENANT", "c
 get_sharepoint_site <- function(site_name=NULL, site_url=NULL, site_id=NULL,
                                 tenant=Sys.getenv("CLIMICROSOFT365_TENANT", "common"),
                                 app=Sys.getenv("CLIMICROSOFT365_AADAPPID"),
-                                scopes=NULL,
+                                scopes=c("Group.ReadWrite.All", "Directory.Read.All",
+                                         "Sites.ReadWrite", "Sites.Manage.All"),
                                 ...)
 {
     assert_one_arg(site_name, site_url, site_id, msg="Supply exactly one of site name, URL or ID")
@@ -121,7 +122,8 @@ get_sharepoint_site <- function(site_name=NULL, site_url=NULL, site_id=NULL,
 #' @export
 list_sharepoint_sites <- function(tenant=Sys.getenv("CLIMICROSOFT365_TENANT", "common"),
                                   app=Sys.getenv("CLIMICROSOFT365_AADAPPID"),
-                                  scopes=NULL,
+                                  scopes=c("Group.ReadWrite.All", "Directory.Read.All",
+                                           "Sites.ReadWrite", "Sites.Manage.All"),
                                   ...)
 {
     app <- choose_app(app)
@@ -136,7 +138,7 @@ list_sharepoint_sites <- function(tenant=Sys.getenv("CLIMICROSOFT365_TENANT", "c
 get_team <- function(team_name=NULL, team_id=NULL,
                      tenant=Sys.getenv("CLIMICROSOFT365_TENANT", "common"),
                      app=Sys.getenv("CLIMICROSOFT365_AADAPPID"),
-                     scopes=NULL,
+                     scopes=c("Group.ReadWrite.All", "Directory.Read.All"),
                      ...)
 {
     assert_one_arg(team_name, team_id, msg="Supply exactly one of team name or ID")
@@ -163,7 +165,7 @@ get_team <- function(team_name=NULL, team_id=NULL,
 #' @export
 list_teams <- function(tenant=Sys.getenv("CLIMICROSOFT365_TENANT", "common"),
                        app=Sys.getenv("CLIMICROSOFT365_AADAPPID"),
-                       scopes=NULL,
+                       scopes=c("Group.ReadWrite.All", "Directory.Read.All"),
                        ...)
 {
     app <- choose_app(app)
@@ -266,11 +268,7 @@ assert_one_arg <- function(..., msg=NULL)
 
 set_default_scopes <- function(scopes, app)
 {
-    if(is.null(scopes))
-    {
-        scopes <- if(app %in% c(.cli_microsoft365_app_id, get(".az_cli_app_id", getNamespace("AzureGraph"))))
-            ".default"
-        else c("User.Read", "Group.ReadWrite.All", "Directory.Read.All", "Sites.Manage.All")
-    }
+    if(app %in% c(.cli_microsoft365_app_id, get(".az_cli_app_id", getNamespace("AzureGraph"))))
+        scopes <- ".default"
     scopes
 }

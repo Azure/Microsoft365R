@@ -1,6 +1,6 @@
 Package: Microsoft365R
 Title: Interface to the 'Microsoft 365' Suite of Cloud Services
-Version: 2.2.1.9000
+Version: 2.3.0
 Authors@R: c(
     person("Hong", "Ooi", , "hongooi73@gmail.com", role = c("aut", "cre")),
     person("Roman", "Zenka", role="ctb"),

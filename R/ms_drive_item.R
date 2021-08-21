@@ -232,6 +232,13 @@ public=list(
         ms_drive_item$new(self$token, self$tenant, call_graph_endpoint(self$token, op))
     },
 
+    get_parent=function()
+    {
+        op <- private$make_absolute_path("..")
+        print(op)
+        ms_drive_item$new(self$token, self$tenant, call_graph_endpoint(self$token, op))
+    },
+
     create_folder=function(path)
     {
         private$assert_is_folder()
@@ -313,7 +320,10 @@ public=list(
 
 private=list(
 
-    make_absolute_path=function(dest)
+    # dest = . or '' --> this item
+    # dest = .. --> parent folder
+    # dest = (childname) --> path to named child
+    make_absolute_path=function(dest=".")
     {
         if(dest == ".")
             dest <- ""
@@ -327,9 +337,13 @@ private=list(
             # in this case, assume the parent is the root folder
             if(is.null(parent$path))
                 parent$path <- sprintf("/drives/%s/root:", parent$driveId)
-            file.path(parent$path, name)
+            if(dest != "..")
+                file.path(parent$path, name)
+            else parent$path
         }
-        utils::URLencode(enc2utf8(sub("/$", "", file.path(op, dest))))
+        if(dest != "..")
+            op <- file.path(op, dest)
+        utils::URLencode(enc2utf8(sub(":?/?$", "", op)))
     },
 
     assert_is_folder=function()

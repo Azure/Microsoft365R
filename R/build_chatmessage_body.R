@@ -1,16 +1,24 @@
 build_chatmessage_body <- function(channel, body, content_type, attachments, inline, mentions)
 {
+    get_upload_location <- function(item)
+    {
+        path <- item$get_parent()$properties$webUrl
+        name <- item$properties$name
+        file.path(path, name)
+    }
+
     call_body <- list(body=list(content=paste(body, collapse="\n"), contentType=content_type))
     if(!is_empty(attachments))
     {
         call_body$attachments <- lapply(attachments, function(f)
         {
             att <- channel$upload_file(f, dest=basename(f))
+            attx <<- att
             et <- att$properties$eTag
             list(
                 id=regmatches(et, regexpr("[A-Za-z0-9\\-]{10,}", et)),
                 name=att$properties$name,
-                contentUrl=att$properties$webUrl,
+                contentUrl=get_upload_location(att),
                 contentType="reference"
             )
         })
@@ -58,6 +66,7 @@ build_chatmessage_body <- function(channel, body, content_type, attachments, inl
             function(m) sprintf('<at id="%d">%s</at>', m$id, m$mentionText))
         call_body$body$content <- paste(call_body$body$content, paste(mention_tags, collapse=" "))
     }
+    xx <<- call_body
     call_body
 }
 

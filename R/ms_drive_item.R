@@ -195,7 +195,7 @@ public=list(
         if(!is.null(filter))
             opts$`filter` <- filter
 
-        op <- sub("::", "", paste0(private$make_absolute_path(path), ":/children"))
+        op <- sub("root:/children", "root/children", paste0(private$make_absolute_path(path), ":/children"))
         children <- call_graph_endpoint(self$token, op, options=opts, simplify=TRUE)
 
         # get file list as a data frame, or return the iterator immediately if n is NULL

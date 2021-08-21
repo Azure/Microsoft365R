@@ -232,10 +232,9 @@ public=list(
         ms_drive_item$new(self$token, self$tenant, call_graph_endpoint(self$token, op))
     },
 
-    get_parent=function()
+    get_parent_folder=function()
     {
         op <- private$make_absolute_path("..")
-        print(op)
         ms_drive_item$new(self$token, self$tenant, call_graph_endpoint(self$token, op))
     },
 

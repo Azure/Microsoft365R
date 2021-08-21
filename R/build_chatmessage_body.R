@@ -2,7 +2,7 @@ build_chatmessage_body <- function(channel, body, content_type, attachments, inl
 {
     get_upload_location <- function(item)
     {
-        path <- item$get_parent()$properties$webUrl
+        path <- item$get_parent_folder()$properties$webUrl
         name <- item$properties$name
         file.path(path, name)
     }
@@ -13,7 +13,6 @@ build_chatmessage_body <- function(channel, body, content_type, attachments, inl
         call_body$attachments <- lapply(attachments, function(f)
         {
             att <- channel$upload_file(f, dest=basename(f))
-            attx <<- att
             et <- att$properties$eTag
             list(
                 id=regmatches(et, regexpr("[A-Za-z0-9\\-]{10,}", et)),

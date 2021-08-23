@@ -21,6 +21,7 @@
 #' - `upload(src, dest, blocksize)`: Upload a file. Only applicable for a folder item.
 #' - `create_folder(path)`: Create a folder. Only applicable for a folder item.
 #' - `get_item(path)`: Get a child item (file or folder) under this folder.
+#' - `get_parent_folder()`: Get the parent folder for this item. Returns the root folder for the root.
 #' - `is_folder()`: Information function, returns TRUE if this item is a folder.
 #'
 #' @section Initialization:

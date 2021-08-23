@@ -1,3 +1,13 @@
+# Microsoft365R 2.3.0.9000
+
+## OneDrive/SharePoint
+
+- Add a `get_parent_folder()` method for drive items, which returns the parent folder as another drive item. The parent of the root is itself.
+
+## Teams
+
+- Fix a bug where attaching a file to a Teams chat/channel message would fail if the file was a type recognised by Microsoft 365 (#73).
+
 # Microsoft365R 2.3.0
 
 ## Outlook

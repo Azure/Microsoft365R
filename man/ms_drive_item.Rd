@@ -35,6 +35,7 @@ Class representing an item (file or folder) in a OneDrive or SharePoint document
 \item \code{upload(src, dest, blocksize)}: Upload a file. Only applicable for a folder item.
 \item \code{create_folder(path)}: Create a folder. Only applicable for a folder item.
 \item \code{get_item(path)}: Get a child item (file or folder) under this folder.
+\item \code{get_parent_folder()}: Get the parent folder for this item. Returns the root folder for the root.
 \item \code{is_folder()}: Information function, returns TRUE if this item is a folder.
 }
 }

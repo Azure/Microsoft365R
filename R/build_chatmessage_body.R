@@ -65,7 +65,6 @@ build_chatmessage_body <- function(channel, body, content_type, attachments, inl
             function(m) sprintf('<at id="%d">%s</at>', m$id, m$mentionText))
         call_body$body$content <- paste(call_body$body$content, paste(mention_tags, collapse=" "))
     }
-    xx <<- call_body
     call_body
 }
 

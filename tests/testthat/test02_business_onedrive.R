@@ -72,21 +72,34 @@ test_that("Drive item methods work",
     root <- od$get_item("/")
     expect_is(root, "ms_drive_item")
 
+    rootp <- root$get_parent_folder()
+    expect_is(rootp, "ms_drive_item")
+    expect_equal(rootp$properties$name, "root")
+
     tmpname1 <- make_name(10)
     folder1 <- root$create_folder(tmpname1)
     expect_is(folder1, "ms_drive_item")
     expect_true(folder1$is_folder())
+
+    folder1p <- folder1$get_parent_folder()
+    expect_equal(rootp$properties$name, "root")
 
     tmpname2 <- make_name(10)
     folder2 <- folder1$create_folder(tmpname2)
     expect_is(folder2, "ms_drive_item")
     expect_true(folder2$is_folder())
 
+    folder2p <- folder2$get_parent_folder()
+    expect_equal(folder2p$properties$name, folder1$properties$name)
+
     src <- write_file()
     expect_silent(file1 <- root$upload(src))
     expect_is(file1, "ms_drive_item")
     expect_false(file1$is_folder())
     expect_error(file1$create_folder("bad"))
+
+    file1p <- file1$get_parent_folder()
+    expect_equal(file1p$properties$name, "root")
 
     file1_0 <- root$get_item(basename(src))
     expect_is(file1_0, "ms_drive_item")
@@ -99,6 +112,9 @@ test_that("Drive item methods work",
 
     expect_silent(file2 <- folder1$upload(src))
     expect_is(file2, "ms_drive_item")
+
+    file2p <- file2$get_parent_folder()
+    expect_equal(file2p$properties$name, folder1$properties$name)
 
     dest2 <- tempfile()
     expect_silent(file2$download(dest2))

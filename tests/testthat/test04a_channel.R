@@ -56,7 +56,7 @@ test_that("Channel methods work",
     expect_is(msg2, "ms_chat_message")
 
     msg3_body <- sprintf("Test message with attachment: %s", make_name(5))
-    f0 <- write_file()
+    f0 <- write_file(fname=tempfile(tmpdir=tempdir(), fileext=".xlsx"))
     msg3 <- chan$send_message(msg3_body, attachments=f0)
     expect_is(msg3, "ms_chat_message")
     expect_true(nzchar(msg3$properties$attachments[[1]]$contentUrl))

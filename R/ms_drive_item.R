@@ -21,6 +21,7 @@
 #' - `upload(src, dest, blocksize)`: Upload a file. Only applicable for a folder item.
 #' - `create_folder(path)`: Create a folder. Only applicable for a folder item.
 #' - `get_item(path)`: Get a child item (file or folder) under this folder.
+#' - `get_parent_folder()`: Get the parent folder for this item. Returns the root folder for the root.
 #' - `is_folder()`: Information function, returns TRUE if this item is a folder.
 #'
 #' @section Initialization:
@@ -195,7 +196,7 @@ public=list(
         if(!is.null(filter))
             opts$`filter` <- filter
 
-        op <- sub("::", "", paste0(private$make_absolute_path(path), ":/children"))
+        op <- sub("root:/children", "root/children", paste0(private$make_absolute_path(path), ":/children"))
         children <- call_graph_endpoint(self$token, op, options=opts, simplify=TRUE)
 
         # get file list as a data frame, or return the iterator immediately if n is NULL
@@ -229,6 +230,12 @@ public=list(
     {
         private$assert_is_folder()
         op <- private$make_absolute_path(path)
+        ms_drive_item$new(self$token, self$tenant, call_graph_endpoint(self$token, op))
+    },
+
+    get_parent_folder=function()
+    {
+        op <- private$make_absolute_path("..")
         ms_drive_item$new(self$token, self$tenant, call_graph_endpoint(self$token, op))
     },
 
@@ -313,7 +320,10 @@ public=list(
 
 private=list(
 
-    make_absolute_path=function(dest)
+    # dest = . or '' --> this item
+    # dest = .. --> parent folder
+    # dest = (childname) --> path to named child
+    make_absolute_path=function(dest=".")
     {
         if(dest == ".")
             dest <- ""
@@ -327,9 +337,13 @@ private=list(
             # in this case, assume the parent is the root folder
             if(is.null(parent$path))
                 parent$path <- sprintf("/drives/%s/root:", parent$driveId)
-            file.path(parent$path, name)
+            if(dest != "..")
+                file.path(parent$path, name)
+            else parent$path
         }
-        utils::URLencode(enc2utf8(sub("/$", "", file.path(op, dest))))
+        if(dest != "..")
+            op <- file.path(op, dest)
+        utils::URLencode(enc2utf8(sub(":?/?$", "", op)))
     },
 
     assert_is_folder=function()

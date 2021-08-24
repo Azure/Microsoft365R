@@ -1,5 +1,12 @@
 build_chatmessage_body <- function(channel, body, content_type, attachments, inline, mentions)
 {
+    get_upload_location <- function(item)
+    {
+        path <- item$get_parent_folder()$properties$webUrl
+        name <- item$properties$name
+        file.path(path, name)
+    }
+
     call_body <- list(body=list(content=paste(body, collapse="\n"), contentType=content_type))
     if(!is_empty(attachments))
     {
@@ -10,7 +17,7 @@ build_chatmessage_body <- function(channel, body, content_type, attachments, inl
             list(
                 id=regmatches(et, regexpr("[A-Za-z0-9\\-]{10,}", et)),
                 name=att$properties$name,
-                contentUrl=att$properties$webUrl,
+                contentUrl=get_upload_location(att),
                 contentType="reference"
             )
         })

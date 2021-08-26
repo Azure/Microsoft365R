@@ -4,7 +4,7 @@
 \alias{add_methods}
 \title{Microsoft 365 object accessor methods}
 \description{
-Methods for the \code{\link[AzureGraph:ms_graph]{AzureGraph::ms_graph}}, \code{\link[AzureGraph:az_user]{AzureGraph::az_user}} and \code{\link[AzureGraph:az_group]{AzureGraph::az_group}} classes.
+Methods for the \code{\link[AzureGraph:ms_graph]{AzureGraph::ms_graph}}, \code{\link[AzureGraph:az_user]{AzureGraph::az_user}}, \code{\link[AzureGraph:az_group]{AzureGraph::az_group}} and \code{\link[AzureGraph:ms_object]{AzureGraph::ms_object}} classes.
 }
 \section{Usage}{
 \preformatted{## R6 method for class 'az_user'
@@ -51,6 +51,9 @@ list_sharepoint_sites(filter = NULL, n = Inf)
 
 ## R6 method for class 'az_user'
 list_teams(filter = NULL, n = Inf)
+
+## R6 method for class 'ms_object'
+make_basic_list(op, filter, n, ...)
 }
 }
 
@@ -62,6 +65,8 @@ list_teams(filter = NULL, n = Inf)
 \item \code{team_name},\code{team_id}: For \code{az_user$get_team()}, the name and ID of the site. Provide one or the other, but not both. For \code{ms_graph$get_team}, you must provide the team ID.
 \item \code{plan_title},\code{plan_id}: For \code{az_group$get_plan()}, the title and ID of the site. Provide one or the other, but not both.
 \item \verb{filter, n}: See 'List methods' below.
+\item \code{op} A string, the REST operation.
+\item \code{...} Arguments passed to lower-level functions, and ultimately to \code{AzureGraph::call_graph_endpoint}.
 }
 }
 
@@ -77,12 +82,14 @@ list_teams(filter = NULL, n = Inf)
 
 \code{get_chat} retrieves a one-on-one, group or meeting chat, by ID. \code{list_chats} retrieves all chats that the user is part of.
 
+\code{make_basic_list} creates a list of Graph objects. A basic utility called by various Microsoft365R class methods. It is exported to work around issues in how R6 handles classes that extend across package boundaries. It should not be called by the user. If \code{n} is NULL, returns an iterator object, of class \code{AzureGraph::ms_graph_pager}. Otherwise, returns a list of individual Graph objects.
+
 Note that Teams, SharePoint and OneDrive for Business require a Microsoft 365 Business license, and are available for organisational tenants only. Similarly, only Microsoft 365 groups can have associated sites/teams/plans/drives, not any other kind of group.
 }
 
 \section{List methods}{
 
-All \verb{list_*} methods have \code{filter} and \code{n} arguments to limit the number of results. The former should be an \href{https://docs.microsoft.com/en-us/graph/query-parameters#filter-parameter}{OData expression} as a string to filter the result set on. The latter should be a number setting the maximum number of (filtered) results to return. The default values are \code{filter=NULL} and \code{n=Inf}. If \code{n=NULL}, the \code{ms_graph_pager} iterator object is returned instead to allow manual iteration over the results.
+All \verb{list_*} methods and \code{make_basic_list} have \code{filter} and \code{n} arguments to limit the number of results. The former should be an \href{https://docs.microsoft.com/en-us/graph/query-parameters#filter-parameter}{OData expression} as a string to filter the result set on. The latter should be a number setting the maximum number of (filtered) results to return. The default values are \code{filter=NULL} and \code{n=Inf}. If \code{n=NULL}, the \code{ms_graph_pager} iterator object is returned instead to allow manual iteration over the results.
 
 Support in the underlying Graph API for OData queries is patchy. Not all endpoints that return lists of objects support filtering, and if they do, they may not allow all of the defined operators. If your filtering expression results in an error, you can carry out the operation without filtering and then filter the results on the client side.
 }
@@ -98,6 +105,8 @@ For \code{get_plan}, an object of class \code{ms_plan}. For \code{list_plans}, a
 For \code{get_team}, an object of class \code{ms_team}. For \code{list_teams}, a list of \code{ms_team} objects.
 
 For \code{get_chat}, an object of class \code{ms_chat}. For \code{list_chats}, a list of \code{ms_chat} objects.
+
+For \code{make_basic_list} if \code{n} is NULL, an iterator object of class \code{AzureGraph::ms_graph_pager}. Otherwise, a list of individual Graph objects.
 }
 
 \examples{
@@ -126,5 +135,5 @@ grp$get_drive()
 }
 }
 \seealso{
-\code{\link{ms_site}}, \code{\link{ms_drive}}, \code{\link{ms_plan}}, \code{\link{ms_team}}, \code{\link{ms_chat}}, \code{\link{az_user}}, \code{\link{az_group}}
+\code{\link{ms_site}}, \code{\link{ms_drive}}, \code{\link{ms_plan}}, \code{\link{ms_team}}, \code{\link{ms_chat}}, \code{\link{az_user}}, \code{\link{az_group}}, \code{\link{az_object}}
 }

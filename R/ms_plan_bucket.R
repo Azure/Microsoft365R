@@ -44,7 +44,7 @@ public=list(
 
     list_tasks=function(filter=NULL, n=Inf)
     {
-        make_basic_list(self, "tasks", filter, n)
+        private$make_basic_list("tasks", filter, n)
     },
 
     print=function(...)

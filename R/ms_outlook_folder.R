@@ -200,7 +200,7 @@ public=list(
 
     list_folders=function(filter=NULL, n=Inf)
     {
-        make_basic_list(self, "childFolders", filter, n, user_id=self$user_id)
+        private$make_basic_list("childFolders", filter, n, user_id=self$user_id)
     },
 
     get_folder=function(folder_name=NULL, folder_id=NULL)

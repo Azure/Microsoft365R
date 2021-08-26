@@ -98,7 +98,7 @@ public=list(
 
     list_messages=function(filter=NULL, n=50)
     {
-        make_basic_list(self, "messages", filter, n)
+        private$make_basic_list("messages", filter, n)
     },
 
     get_message=function(message_id)
@@ -114,7 +114,7 @@ public=list(
 
     list_members=function(filter=NULL, n=Inf)
     {
-        make_basic_list(self, "members", filter, n, parent_id=self$properties$id, parent_type="chat")
+        private$make_basic_list("members", filter, n, parent_id=self$properties$id, parent_type="chat")
     },
 
     get_member=function(name=NULL, email=NULL, id=NULL)

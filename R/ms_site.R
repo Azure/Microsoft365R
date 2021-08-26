@@ -57,7 +57,7 @@ public=list(
 
     list_drives=function(filter=NULL, n=Inf)
     {
-        make_basic_list(self, "drives", filter, n)
+        private$make_basic_list("drives", filter, n)
     },
 
     get_drive=function(drive_name=NULL, drive_id=NULL)
@@ -81,12 +81,12 @@ public=list(
 
     list_subsites=function(filter=NULL, n=Inf)
     {
-        make_basic_list(self, "sites", filter, n)
+        private$make_basic_list("sites", filter, n)
     },
 
     get_lists=function(filter=NULL, n=Inf)
     {
-        make_basic_list(self, "lists", filter, n)
+        private$make_basic_list("lists", filter, n)
     },
 
     get_list=function(list_name=NULL, list_id=NULL)

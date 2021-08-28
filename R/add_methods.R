@@ -199,7 +199,7 @@ add_user_methods <- function()
     az_user$set("public", "get_outlook", overwrite=TRUE,
     function()
     {
-      Microsoft365R::ms_outlook$new(self$token, self$tenant, self$properties)
+        Microsoft365R::ms_outlook$new(self$token, self$tenant, self$properties)
     })
 
     az_user$set("public", "list_chats", overwrite=TRUE,

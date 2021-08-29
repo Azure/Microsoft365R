@@ -70,7 +70,7 @@ public=list(
 
     list_channels=function(filter=NULL, n=Inf)
     {
-        make_basic_list(self, "channels", filter, n, team_id=self$properties$id)
+        private$make_basic_list("channels", filter, n, team_id=self$properties$id)
     },
 
     get_channel=function(channel_name=NULL, channel_id=NULL)
@@ -111,7 +111,7 @@ public=list(
 
     list_drives=function(filter=NULL, n=Inf)
     {
-        make_basic_list(self$get_group(), "drives", filter, n)
+        self$get_group()$list_drives(filter, n)
     },
 
     get_drive=function(drive_name=NULL, drive_id=NULL)
@@ -146,7 +146,7 @@ public=list(
 
     list_members=function(filter=NULL, n=Inf)
     {
-        make_basic_list(self, "members", filter, n, parent_id=self$properties$id, parent_type="team")
+        private$make_basic_list("members", filter, n, parent_id=self$properties$id, parent_type="team")
     },
 
     get_member=function(name=NULL, email=NULL, id=NULL)

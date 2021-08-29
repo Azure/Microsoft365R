@@ -91,7 +91,7 @@ public=list(
     list_replies=function(filter=NULL, n=50)
     {
         private$assert_not_nested_reply()
-        make_basic_list(self, "replies", filter, n)
+        private$make_basic_list("replies", filter, n)
     },
 
     get_reply=function(message_id)

@@ -114,6 +114,18 @@
 #' }
 NULL
 
+add_object_methods <- function()
+{
+    AzureGraph::ms_object$set("private", "make_basic_list", overwrite=TRUE,
+    function(op, filter, n, ...)
+    {
+        opts <- list(`$filter`=filter)
+        hdrs <- if(!is.null(filter)) httr::add_headers(consistencyLevel="eventual")
+        pager <- self$get_list_pager(self$do_operation(op, options=opts, hdrs), ...)
+        extract_list_values(pager, n)
+    })
+}
+
 add_graph_methods <- function()
 {
     ms_graph$set("public", "get_sharepoint_site", overwrite=TRUE,
@@ -127,21 +139,24 @@ add_graph_methods <- function()
             file.path("sites", paste0(site_url$hostname, ":"), site_url$path)
         }
         else file.path("sites", site_id)
-        ms_site$new(self$token, self$tenant, self$call_graph_endpoint(op))
+        Microsoft365R::ms_site$new(self$token, self$tenant,
+                                   self$call_graph_endpoint(op))
     })
 
     ms_graph$set("public", "get_drive", overwrite=TRUE,
     function(drive_id)
     {
         op <- file.path("drives", drive_id)
-        ms_drive$new(self$token, self$tenant, self$call_graph_endpoint(op))
+        Microsoft365R::ms_drive$new(self$token, self$tenant,
+                                    self$call_graph_endpoint(op))
     })
 
     ms_graph$set("public", "get_team", overwrite=TRUE,
     function(team_id)
     {
         op <- file.path("teams", team_id)
-        ms_team$new(self$token, self$tenant, self$call_graph_endpoint(op))
+        Microsoft365R::ms_team$new(self$token, self$tenant,
+                                   self$call_graph_endpoint(op))
     })
 }
 
@@ -150,7 +165,7 @@ add_user_methods <- function()
     az_user$set("public", "list_drives", overwrite=TRUE,
     function(filter=NULL, n=Inf)
     {
-        make_basic_list(self, "drives", filter, n)
+        private$make_basic_list(self, "drives", filter, n)
     })
 
     az_user$set("public", "get_drive", overwrite=TRUE,
@@ -159,13 +174,14 @@ add_user_methods <- function()
         op <- if(is.null(drive_id))
             "drive"
         else file.path("drives", drive_id)
-        ms_drive$new(self$token, self$tenant, self$do_operation(op))
+        Microsoft365R::ms_drive$new(self$token, self$tenant,
+                                    self$do_operation(op))
     })
 
     az_user$set("public", "list_sharepoint_sites", overwrite=TRUE,
     function(filter=NULL, n=Inf)
     {
-        lst <- make_basic_list(self, "followedSites", filter, n)
+        lst <- private$make_basic_list(self, "followedSites", filter, n)
         if(!is.null(n))
             lapply(lst, function(site) site$sync_fields())  # result from endpoint is incomplete
         else lst
@@ -174,7 +190,7 @@ add_user_methods <- function()
     az_user$set("public", "list_teams", overwrite=TRUE,
     function(filter=NULL, n=Inf)
     {
-        lst <- make_basic_list(self, "joinedTeams", filter, n)
+        lst <- private$make_basic_list(self, "joinedTeams", filter, n)
         if(!is.null(n))
             lapply(lst, function(team) team$sync_fields())  # result from endpoint only contains ID and displayname
         else lst
@@ -183,20 +199,20 @@ add_user_methods <- function()
     az_user$set("public", "get_outlook", overwrite=TRUE,
     function()
     {
-        ms_outlook$new(self$token, self$tenant, self$properties)
+        Microsoft365R::ms_outlook$new(self$token, self$tenant, self$properties)
     })
 
     az_user$set("public", "list_chats", overwrite=TRUE,
     function(filter=NULL, n=Inf)
     {
-        make_basic_list(self, "chats", filter, n)
+        private$make_basic_list(self, "chats", filter, n)
     })
 
     az_user$set("public", "get_chat", overwrite=TRUE,
     function(chat_id)
     {
         op <- file.path("chats", chat_id)
-        ms_chat$new(self$token, self$tenant, self$do_operation(op))
+        Microsoft365R::ms_chat$new(self$token, self$tenant, self$do_operation(op))
     })
 }
 
@@ -206,13 +222,13 @@ add_group_methods <- function()
     function()
     {
         res <- self$do_operation("sites/root")
-        ms_site$new(self$token, self$tenant, res)
+        Microsoft365R::ms_site$new(self$token, self$tenant, res)
     })
 
     az_group$set("public", "list_drives", overwrite=TRUE,
     function(filter=NULL, n=Inf)
     {
-        make_basic_list(self, "drives", filter, n)
+        private$make_basic_list(self, "drives", filter, n)
     })
 
     az_group$set("public", "get_drive", overwrite=TRUE,
@@ -232,20 +248,22 @@ add_group_methods <- function()
         op <- if(is.null(drive_id))
             "drive"
         else file.path("drives", drive_id)
-        ms_drive$new(self$token, self$tenant, self$do_operation(op))
+        Microsoft365R::ms_drive$new(self$token, self$tenant,
+                                    self$do_operation(op))
     })
 
     az_group$set("public", "get_team", overwrite=TRUE,
     function()
     {
         op <- file.path("teams", self$properties$id)
-        ms_team$new(self$token, self$tenant, call_graph_endpoint(self$token, op))
+        Microsoft365R::ms_team$new(self$token, self$tenant,
+                                   call_graph_endpoint(self$token, op))
     })
 
     az_group$set("public", "list_plans", overwrite=TRUE,
     function(filter=NULL, n=Inf)
     {
-        make_basic_list(self, "planner/plans", filter, n)
+        private$make_basic_list(self, "planner/plans", filter, n)
     })
 
     az_group$set("public", "get_plan", overwrite=TRUE,
@@ -255,7 +273,7 @@ add_group_methods <- function()
         if(!is.null(plan_id))
         {
             res <- call_graph_endpoint(self$token, file.path("planner/plans", plan_id))
-            ms_plan$new(self$token, self$tenant, res)
+            Microsoft365R::ms_plan$new(self$token, self$tenant, res)
         }
         else
         {

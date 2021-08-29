@@ -57,7 +57,7 @@ public=list(
 
     list_tasks=function(filter=NULL, n=Inf)
     {
-        make_basic_list(self, "tasks", filter, n)
+        private$make_basic_list("tasks", filter, n)
     },
 
     get_task=function(task_title=NULL, task_id=NULL)
@@ -79,7 +79,7 @@ public=list(
 
     list_buckets=function(filter=NULL, n=Inf)
     {
-        make_basic_list(self, "buckets", filter, n)
+        private$make_basic_list("buckets", filter, n)
     },
 
     get_bucket=function(bucket_name=NULL, bucket_id=NULL)

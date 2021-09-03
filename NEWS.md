@@ -10,7 +10,7 @@
 
 ## Other
 
-- Changes to allow Microsoft365R to be usable without being on the search list (#72). Among other things, `make_basic_list()` is now a private method, rather than being exported. Thanks to @rob for the PR.
+- Changes to allow Microsoft365R to be usable without being on the search list (#72). Among other things, `make_basic_list()` is now a private method, rather than being exported. Thanks to Robert Ashton (@r-ash) for the PR.
 
 # Microsoft365R 2.3.0
 

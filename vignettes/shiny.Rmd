@@ -28,3 +28,69 @@ The main things to set in your app registration are:
 
 Registering an app can be done either in the [Azure portal](https://portal.azure.com/) or using the [Azure CLI](https://docs.microsoft.com/en-us/cli/azure/create-an-azure-service-principal-azure-cli). In general, the Portal is easier for interactive use, while the CLI is intended to be called in scripts.
 
+
+## Shiny code skeleton
+
+```r
+library(AzureAuth)
+library(AzureGraph)
+library(Microsoft365R)
+library(shiny)
+library(shinyjs)
+
+tenant <- "your-tenant-here"
+
+# the ID of the app registration you created
+app <- "your-app-id-here"
+
+# if your app reg has a 'webapp' redirect, it requires a client secret (password)
+# you should NEVER put secrets in code: here we get it from an environment variable
+# leave the environment variable unset if you have a 'desktop & mobile' redirect
+pwd <- Sys.getenv("SHINY_APP_SECRET", NULL)
+
+# set this to the site URL of your app once it is deployed
+redirect <- "https://example.com/mysite"
+port <- httr::parse_url(redirect)$port
+options(shiny.port=if(is.null(port)) 80 else as.numeric(port))
+
+# get the Graph permissions listed for the app
+# also retrieve an ID token
+resource <- c("https://graph.microsoft.com/.default", "openid")
+
+# a simple UI: display the user's OneDrive
+ui <- fluidPage(
+    verbatimTextOutput("drv")
+)
+
+ui_func <- function(req)
+{
+    opts <- parseQueryString(req$QUERY_STRING)
+    if(is.null(opts$code))
+    {
+        auth_uri <- build_authorization_uri(resource, tenant, app, redirect_uri=redirect, version=2)
+        redir_js <- sprintf("location.replace(\"%s\");", auth_uri)
+        tags$script(HTML(redir_js))
+    }
+    else ui
+}
+
+server <- function(input, output, session)
+{
+    opts <- parseQueryString(isolate(session$clientData$url_search))
+    if(is.null(opts$code))
+        return()
+
+    token <- get_azure_token(resource, tenant, app, password=pwd, auth_type="authorization_code",
+                             authorize_args=list(redirect_uri=redirect), version=2,
+                             use_cache=FALSE, auth_code=opts$code)
+
+    # display the contents of the user's OneDrive root folder
+    drv <- ms_graph$
+        new(token=token)$
+        get_user()$
+        get_drive()
+    output$drv <- renderPrint(drv$list_files())
+}
+
+shinyApp(ui_func, server)
+```

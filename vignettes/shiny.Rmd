@@ -1,0 +1,30 @@
+---
+title: "Using Microsoft365R in a Shiny app"
+author: Hong Ooi
+output: rmarkdown::html_vignette
+vignette: >
+    %\VignetteIndexEntry{Shiny}
+    %\VignetteEngine{knitr::rmarkdown}
+    %\VignetteEncoding{utf8}
+---
+
+This vignette describes how to incorporate Microsoft365R and interactive authentication with Azure Active Directory (AAD) into a Shiny web app. There are a few steps involved:
+
+- Register your app with AAD
+- Use the app ID to authenticate and get an OAuth token
+- Pass the token to the Microsoft365R functions
+
+## App registration
+
+The default Microsoft365R app registration only works when the package is used on a local machine; it does not support running in a remote server. Because of this, when you use Microsoft365R inside a Shiny app, you (or your friendly local sysadmin) must register that app in AAD.
+
+The main things to set in your app registration are:
+
+- The **redirect URI** of your app, ie, your user-facing site address. For example if your app is hosted in shinyapps.io, this would be a URL of the form `https://youraccount.shinyapps.io/appname`. If your app uses a special port number rather than the default port 80, don't forget to include that as well. It's possible to set more than one redirect, so you can reuse a single app registration for multiple Shiny apps. You can also include the standard `http://localhost:1410` redirect if you want to support authentication on a local machine.
+
+- The **type of redirect**, either native (mobile & desktop) or webapp. The difference between these is that you must supply a client secret when authenticating with a webapp redirect, which is not required for a mobile & desktop redirect. It's recommended that you should use a webapp redirect when registering a Shiny app, as the client secret helps prevent third parties from hijacking your app registration.
+
+- The **intended audience** of your app, ie, who is allowed to use it. This can be only members of your AAD tenant; members of any AAD tenant; or anyone with a Microsoft account (including personal accounts).
+
+Registering an app can be done either in the [Azure portal](https://portal.azure.com/) or using the [Azure CLI](https://docs.microsoft.com/en-us/cli/azure/create-an-azure-service-principal-azure-cli). In general, the Portal is easier for interactive use, while the CLI is intended to be called in scripts.
+

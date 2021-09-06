@@ -20,41 +20,51 @@ The default Microsoft365R app registration only works when the package is used o
 
 The main things to set in your app registration are:
 
-- The **redirect URI** of your app, ie, your user-facing site address. For example if your app is hosted in shinyapps.io, this would be a URL of the form `https://youraccount.shinyapps.io/appname`. If your app uses a special port number rather than the default port 80, don't forget to include that as well. It's possible to set more than one redirect, so you can reuse a single app registration for multiple Shiny apps. You can also include the standard `http://localhost:1410` redirect if you want to support authentication on a local machine.
+- The **redirect URI** of your app, ie, your user-facing site address. For example if your app is hosted in shinyapps.io, this would be a URL of the form `https://youraccount.shinyapps.io/appname`. If your app uses a special port number rather than the default port 80, don't forget to include that as well. It's possible to set more than one redirect, so you can reuse a single app registration for multiple Shiny apps.
 
-- The **type of redirect**, either native (mobile & desktop) or webapp. The difference between these is that you must supply a client secret when authenticating with a webapp redirect, which is not required for a mobile & desktop redirect. It's recommended that you should use a webapp redirect when registering a Shiny app, as the client secret helps prevent third parties from hijacking your app registration.
+- The **type of redirect**, either native (mobile & desktop) or webapp. There are also other types of redirects, but these are the only ones relevant to R. The difference between a mobile & desktop and a webapp redirect is that you supply a client secret when authenticating with the latter, but not the former. It's recommended to use a webapp redirect for a Shiny app, as the client secret helps prevent third parties from hijacking your app registration. The client secret is also set as part of the app registration.
 
 - The **intended audience** of your app, ie, who is allowed to use it. This can be only members of your AAD tenant; members of any AAD tenant; or anyone with a Microsoft account (including personal accounts).
 
-Registering an app can be done either in the [Azure portal](https://portal.azure.com/) or using the [Azure CLI](https://docs.microsoft.com/en-us/cli/azure/create-an-azure-service-principal-azure-cli). In general, the Portal is easier for interactive use, while the CLI is intended to be called in scripts.
+- The **permissions required** by your app. Refer to the [`app_registration.md'](https://github.com/Azure/Microsoft365R/blob/master/inst/app_registration.md) file for the list of permissions Microsoft365R uses. You can omit any permissions that you don't need if your app doesn't use all of Microsoft365R's functionality, eg if you don't handle emails you can omit Mail.Send and Mail.ReadWrite.
 
+The following pages at the AAD documentation will be helpful:
+
+- [A step-by-step guide](https://docs.microsoft.com/en-us/azure/active-directory/develop/quickstart-register-app) to registering an app in the Azure portal.
+
+- [How to set permissions for an app](https://docs.microsoft.com/en-us/azure/active-directory/develop/quickstart-configure-app-access-web-apis). For a Shiny app, note that you want _delegated_ permissions from the Microsoft Graph API, not application permissions.
 
 ## Shiny code skeleton
+
+Below is a basic app that logs the user in, retrieves their OneDrive, and lists the contents of the root folder.
+
+One thing to note is that the regular Microsoft365R client functions like `get_sharepoint_site`, `get_team` etc are intended for use on a local machine. While they will still work when called in a web app, it's a better idea to call the underlying R6 methods directly: Microsoft365R extends AzureGraph with several R6 classes and methods, which do the actual work of interacting with the Microsoft 365 REST API.
+
+Here, we call the `get_drive()` method for the `AzureGraph::az_user` class, which retrieves the OneDrive for a user. For more information, see the online help page in R for the Microsoft365R "add_methods" topic: `?add_methods`.
 
 ```r
 library(AzureAuth)
 library(AzureGraph)
 library(Microsoft365R)
 library(shiny)
-library(shinyjs)
 
 tenant <- "your-tenant-here"
 
-# the ID of the app registration you created
+# the application/client ID of the app registration you created
+# - not to be confused with the 'object ID' or 'service principal ID'
 app <- "your-app-id-here"
 
-# if your app reg has a 'webapp' redirect, it requires a client secret (password)
-# you should NEVER put secrets in code: here we get it from an environment variable
-# leave the environment variable unset if you have a 'desktop & mobile' redirect
-pwd <- Sys.getenv("SHINY_APP_SECRET", NULL)
-
-# set this to the site URL of your app once it is deployed
+# the address of your app: also the redirect URI of your app registration in AAD
 redirect <- "https://example.com/mysite"
 port <- httr::parse_url(redirect)$port
 options(shiny.port=if(is.null(port)) 80 else as.numeric(port))
 
-# get the Graph permissions listed for the app
-# also retrieve an ID token
+# if your app reg has a 'webapp' redirect, it requires a client secret (password)
+# - you should NEVER put secrets in code: here we get it from an environment variable
+# - leave the environment variable unset if you have a 'desktop & mobile' redirect
+pwd <- Sys.getenv("EXAMPLE_SHINY_CLIENT_SECRET", NULL)
+
+# get the Graph permissions listed for the app, plus an ID token
 resource <- c("https://graph.microsoft.com/.default", "openid")
 
 # a simple UI: display the user's OneDrive

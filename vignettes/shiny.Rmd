@@ -26,7 +26,7 @@ The main things to set in your app registration are:
 
 - The **intended audience** of your app, ie, who is allowed to use it. This can be only members of your AAD tenant; members of any AAD tenant; or anyone with a Microsoft account (including personal accounts).
 
-- The **permissions required** by your app. Refer to the [`app_registration.md'](https://github.com/Azure/Microsoft365R/blob/master/inst/app_registration.md) file for the list of permissions Microsoft365R uses. You can omit any permissions that you don't need if your app doesn't use all of Microsoft365R's functionality, eg if you don't handle emails you can omit Mail.Send and Mail.ReadWrite.
+- The **permissions required** by your app. Refer to the [app_registration.md](https://github.com/Azure/Microsoft365R/blob/master/inst/app_registration.md) file for the list of permissions Microsoft365R uses. You can omit any permissions that you don't need if your app doesn't use all of Microsoft365R's functionality, eg if you don't handle emails you can omit Mail.Send and Mail.ReadWrite.
 
 The following pages at the AAD documentation will be helpful:
 

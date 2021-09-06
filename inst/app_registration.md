@@ -22,5 +22,5 @@ These are Microsoft Graph permissions (`https://graph.microsoft.com/`). They are
 
 > For delegated permissions, the effective permissions of your app are the intersection of the delegated permissions the app has been granted (via consent) and the privileges of the currently signed-in user. Your app can never have more privileges than the signed-in user. Within organizations, the privileges of the signed-in user are determined by policy or by membership in one or more administrator roles.
 
-Note that the default app registration is only for a local machine: if you are running Microsoft365R inside a Shiny app on a remote server, it will not work. To enable interactive authentication, you must register your app with Azure and supply details such as the target audience and site address (redirect URI).
+Note that the default app registration is only for a local machine: if you are running Microsoft365R inside a Shiny app on a remote server, it will not work. To enable interactive authentication, you must register your app with Azure and supply details such as the target audience and site address (redirect URI): see the Shiny vignette for more information.
 

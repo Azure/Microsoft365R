@@ -20,7 +20,7 @@ The default Microsoft365R app registration only works when the package is used o
 
 The main things to set in your app registration are:
 
-- The **redirect URI** of your app, ie, your user-facing site address. For example if your app is hosted in shinyapps.io, this would be a URL of the form `https://youraccount.shinyapps.io/appname`. If your app uses a special port number rather than the default port 80, don't forget to include that as well. It's possible to set more than one redirect, so you can reuse a single app registration for multiple Shiny apps.
+- The **redirect URI** of your app, ie, your user-facing site address. For example if your app is hosted in shinyapps.io, this would be a URL of the form `https://youraccount.shinyapps.io/appname`. If your app uses a special port number rather than the default port 443 for HTTPS, don't forget to include that as well. It's possible to set more than one redirect, so you can reuse a single app registration for multiple Shiny apps.
 
 - The **type of redirect**, either native (mobile & desktop) or webapp. There are also other types of redirects, but these are the only ones relevant to R. The difference between a mobile & desktop and a webapp redirect is that you supply a client secret when authenticating with the latter, but not the former. It's recommended to use a webapp redirect for a Shiny app, as the client secret helps prevent third parties from hijacking your app registration. The client secret is also set as part of the app registration.
 
@@ -57,7 +57,7 @@ app <- "your-app-id-here"
 # the address of your app: also the redirect URI of your app registration in AAD
 redirect <- "https://example.com/mysite"
 port <- httr::parse_url(redirect)$port
-options(shiny.port=if(is.null(port)) 80 else as.numeric(port))
+options(shiny.port=if(is.null(port)) 443 else as.numeric(port))
 
 # if your app reg has a 'webapp' redirect, it requires a client secret (password)
 # - you should NEVER put secrets in code: here we get it from an environment variable

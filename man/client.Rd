@@ -16,6 +16,7 @@
 get_personal_onedrive(
   app = .microsoft365r_app_id,
   scopes = c("Files.ReadWrite.All", "User.Read"),
+  token = NULL,
   ...
 )
 
@@ -23,6 +24,7 @@ get_business_onedrive(
   tenant = Sys.getenv("CLIMICROSOFT365_TENANT", "common"),
   app = Sys.getenv("CLIMICROSOFT365_AADAPPID"),
   scopes = c("Files.ReadWrite.All", "User.Read"),
+  token = NULL,
   ...
 )
 
@@ -34,6 +36,7 @@ get_sharepoint_site(
   app = Sys.getenv("CLIMICROSOFT365_AADAPPID"),
   scopes = c("Group.ReadWrite.All", "Directory.Read.All", "Sites.ReadWrite.All",
     "Sites.Manage.All"),
+  token = NULL,
   ...
 )
 
@@ -42,6 +45,7 @@ list_sharepoint_sites(
   app = Sys.getenv("CLIMICROSOFT365_AADAPPID"),
   scopes = c("Group.ReadWrite.All", "Directory.Read.All", "Sites.ReadWrite.All",
     "Sites.Manage.All"),
+  token = NULL,
   ...
 )
 
@@ -51,6 +55,7 @@ get_team(
   tenant = Sys.getenv("CLIMICROSOFT365_TENANT", "common"),
   app = Sys.getenv("CLIMICROSOFT365_AADAPPID"),
   scopes = c("Group.ReadWrite.All", "Directory.Read.All"),
+  token = NULL,
   ...
 )
 
@@ -58,12 +63,14 @@ list_teams(
   tenant = Sys.getenv("CLIMICROSOFT365_TENANT", "common"),
   app = Sys.getenv("CLIMICROSOFT365_AADAPPID"),
   scopes = c("Group.ReadWrite.All", "Directory.Read.All"),
+  token = NULL,
   ...
 )
 
 get_personal_outlook(
   app = .microsoft365r_app_id,
   scopes = c("Mail.Send", "Mail.ReadWrite", "User.Read"),
+  token = NULL,
   ...
 )
 
@@ -74,6 +81,7 @@ get_business_outlook(
   shared_mbox_name = NULL,
   shared_mbox_email = NULL,
   scopes = c("User.Read", "Mail.Send", "Mail.ReadWrite"),
+  token = NULL,
   ...
 )
 
@@ -82,6 +90,7 @@ get_chat(
   tenant = Sys.getenv("CLIMICROSOFT365_TENANT", "common"),
   app = .microsoft365r_app_id,
   scopes = c("User.Read", "Directory.Read.All", "Chat.ReadWrite"),
+  token = NULL,
   ...
 )
 
@@ -89,6 +98,7 @@ list_chats(
   tenant = Sys.getenv("CLIMICROSOFT365_TENANT", "common"),
   app = .microsoft365r_app_id,
   scopes = c("User.Read", "Directory.Read.All", "Chat.ReadWrite"),
+  token = NULL,
   ...
 )
 }
@@ -96,6 +106,8 @@ list_chats(
 \item{app}{A custom app registration ID to use for authentication. See below.}
 
 \item{scopes}{The Microsoft Graph scopes (permissions) to obtain. It should never be necessary to change these.}
+
+\item{token}{An AAD OAuth token object, of class \code{AzureAuth::AzureToken}. If supplied, this will override any other arguments. Mostly intended for use in Shiny apps, where authentication must be handled specially.}
 
 \item{...}{Optional arguments that will ultimately be passed to \code{\link[AzureAuth:get_azure_token]{AzureAuth::get_azure_token}}.}
 

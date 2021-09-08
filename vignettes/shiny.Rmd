@@ -50,11 +50,12 @@ library(shiny)
 
 tenant <- "your-tenant-here"
 
-# the application/client ID of the app registration you created
+# the application/client ID of the app registration you created in AAD
 # - not to be confused with the 'object ID' or 'service principal ID'
 app <- "your-app-id-here"
 
-# the address of your app: also the redirect URI of your app registration in AAD
+# the address of your app: also the redirect URI of your app registration
+# - AAD allows only HTTPS for non-localhost redirects, not HTTP
 redirect <- "https://example.com/mysite"
 port <- httr::parse_url(redirect)$port
 options(shiny.port=if(is.null(port)) 443 else as.numeric(port))

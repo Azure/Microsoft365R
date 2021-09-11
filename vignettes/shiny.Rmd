@@ -63,7 +63,8 @@ options(shiny.port=if(is.null(port)) 443 else as.numeric(port))
 # if your app reg has a 'webapp' redirect, it requires a client secret (password)
 # - you should NEVER put secrets in code: here we get it from an environment variable
 # - leave the environment variable unset if you have a 'desktop & mobile' redirect
-pwd <- Sys.getenv("EXAMPLE_SHINY_CLIENT_SECRET", NULL)
+pwd <- Sys.getenv("EXAMPLE_SHINY_CLIENT_SECRET", "")
+if(pwd == "") pwd <- NULL
 
 # get the Graph permissions listed for the app, plus an ID token
 resource <- c("https://graph.microsoft.com/.default", "openid")

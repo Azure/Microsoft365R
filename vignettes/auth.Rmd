@@ -3,9 +3,9 @@ title: "Authenticating to Microsoft 365"
 author: Hong Ooi
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Authentication}
-  %\VignetteEngine{knitr::rmarkdown}
-  %\VignetteEncoding{utf8}
+    %\VignetteIndexEntry{Authentication}
+    %\VignetteEngine{knitr::rmarkdown}
+    %\VignetteEncoding{utf8}
 ---
 
 ## Authentication
@@ -50,7 +50,9 @@ For authentication purposes, the package is registered as an app in the 'aicatr'
 
 ### Using your own app registration
 
-Rather than getting the Microsoft365R app approved, you can also use your own app registration for authentication. If you want to use the default authorization code flow, the app registration should have a mobile & desktop redirect URI of `https://localhost:1410` (not a web or SPA redirect). If you want to use the device code flow, the "Allow native client" setting should be enabled. Your app should also have the same default permissions as the Microsoft365R app (see above).
+Rather than getting the Microsoft365R app approved, you can also use your own app registration for authentication. One specific scenario where this is **required** if you want to use Microsoft365R with Shiny---see the vignette "Using Microsoft365R in a Shiny app" for more on this topic, including how to configure the app registration in Azure Active Directory.
+
+For use in a local R session, if you want to use the default authorization code flow, the app registration should have a mobile & desktop redirect URI of `https://localhost:1410` (not a web or SPA redirect). If you want to use the device code flow, the "Allow native client" setting should be enabled. Your app should also have the same default permissions as the Microsoft365R app (see above).
 
 Once the app has been registered, you can pass the app ID to Microsoft365R in a couple of ways.
 
@@ -80,6 +82,26 @@ The above methods are the **recommended solutions** to dealing with access restr
   ```
 
 Be warned that these workarounds may draw the attention of your admin!
+
+
+## Authenticating with a token
+
+In some circumstances, it may be desirable to carry out authentication/authorization as a separate step prior to  making requests to the Microsoft 365 REST API. This holds in a Shiny app, for example, since only the UI part can talk to the browser while the server part does the rest of the work. Another scenario is if the refresh token lifetime set by your org is too short, so that the token expires in between R sessions. In this case, you can authenticate by obtaining a new token with `AzureAuth::get_azure_token`, and passing the token object to the client function.
+
+When calling `get_azure_token`, the scopes you should use are those given in the `scopes` argument for each client function, and the API host is `https://graph.microsoft.com/`. The Microsoft365R internal app ID is `d44a05d5-c6a5-4bbb-82d2-443123722380`, while that for the CLI for Microsoft 365 is `31359c7f-bd7e-475c-86db-fdb8c937548e`. As noted above, however, these app IDs **only** work for a local R session; you must create your own app registration if you want to use the package inside a Shiny app.
+
+```r
+# authenticating separately to working with the MS365 API
+scopes <- c(
+    "https://graph.microsoft.com/Files.ReadWrite.All",
+    "https://graph.microsoft.com/User.Read",
+    "openid", "offline_access"
+)
+app <- "d44a05d5-c6a5-4bbb-82d2-443123722380" # for local use only
+token <- AzureAuth::get_azure_token(scopes, "mytenant", app, version=2)
+od <- get_business_onedrive(token=token)
+```
+
 
 ## Other issues
 

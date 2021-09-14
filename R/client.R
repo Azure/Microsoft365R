@@ -9,7 +9,7 @@
 #' @param team_name,team_id For `get_team`, either the name or ID of the team to retrieve. Supply exactly one of these.
 #' @param shared_mbox_id,shared_mbox_name,shared_mbox_email For `get_business_outlook`, an ID/principal name/email address. Supply exactly one of these to retrieve a shared mailbox. If all are NULL (the default), retrieve your own mailbox.
 #' @param chat_id For `get_chat`, the ID of a group, one-on-one or meeting chat in Teams.
-#' @param token An AAD OAuth token object, of class `AzureAuth::AzureToken`. If supplied, this will override any other arguments. Mostly intended for use in Shiny apps, where authentication must be handled specially.
+#' @param token An AAD OAuth token object, of class `AzureAuth::AzureToken`. If supplied, this will override any other arguments. See "AUthenticating with a token" below.
 #' @param ... Optional arguments that will ultimately be passed to [`AzureAuth::get_azure_token`].
 #' @details
 #' These functions provide easy access to the various collaboration services that are part of Microsoft 365. On first use, they will call your web browser to authenticate with Azure Active Directory, in a similar manner to other web apps. You will get a dialog box asking for permission to access your information. You only have to authenticate once; your credentials will be saved and reloaded in subsequent sessions.
@@ -17,11 +17,18 @@
 #' When authenticating, you can pass optional arguments in `...` which will ultimately be received by `AzureAuth::get_azure_token`. In particular, if your machine doesn't have a web browser available to authenticate with (for example if you are in a remote RStudio Server session), pass `auth_type="device_code"` which is intended for such scenarios.
 #'
 #' @section Authenticating to Microsoft 365 Business services:
-#' Authenticating to Microsoft 365 Business services (Teams, SharePoint and OneDrive for Business) has some specific complexities.
+#' Authenticating to Microsoft 365 Business services (Teams, SharePoint and business OneDrive/Outlook) has some specific complexities.
 #'
 #' The default "common" tenant for `get_team`, `get_business_onedrive` and `get_sharepoint_site` attempts to detect your actual tenant from your saved credentials in your browser. This may not always succeed, for example if you have a personal account that is also a guest account in a tenant. In this case, supply the actual tenant name, either in the `tenant` argument or in the `CLIMICROSOFT365_TENANT` environment variable. The latter allows sharing authentication details with the [CLI for Microsoft 365](https://pnp.github.io/cli-microsoft365/).
 #'
-#' The default when authenticating to these services is for Microsoft365R to use its own internal app ID. As an alternative, you (or your admin) can create your own app registration in Azure: it should have a native redirect URI of `http://localhost:1410`, and the "public client" option should be enabled if you want to use the device code authentication flow. You can supply your app ID either via the `app` argument, or in the environment variable `CLIMICROSOFT365_AADAPPID`.
+#' The default when authenticating to these services is for Microsoft365R to use its own internal app ID. As an alternative, you (or your admin) can create your own app registration in Azure: for use in a local session, it should have a native redirect URI of `http://localhost:1410`, and the "public client" option should be enabled if you want to use the device code authentication flow. You can supply your app ID either via the `app` argument, or in the environment variable `CLIMICROSOFT365_AADAPPID`.
+#'
+#' @section Authenticating with a token:
+#' In some circumstances, it may be desirable to carry out authentication/authorization as a separate step prior to  making requests to the Microsoft 365 REST API. This holds in a Shiny app, for example, since only the UI part can talk to the browser while the server part does the rest of the work. Another scenario is if the refresh token lifetime set by your org is too short, so that the token expires in between R sessions. In this case, you can authenticate by obtaining a new token with `AzureAuth::get_azure_token`, and passing the token object to the client function.
+#'
+#' When calling `get_azure_token`, the scopes you should use are those given in the `scopes` argument for each client function, and the API host is `https://graph.microsoft.com/`. The Microsoft365R internal app ID is `d44a05d5-c6a5-4bbb-82d2-443123722380`, while that for the CLI for Microsoft 365 is `31359c7f-bd7e-475c-86db-fdb8c937548e`. However, these app IDs **only** work for a local R session; you must create your own app registration if you want to use the package inside a Shiny app.
+#'
+#' See the examples below, and also the vignette "Using Microsoft365R in a Shiny app" for a more detailed rundown on combining Microsoft365R and Shiny.
 #'
 #' @return
 #' For `get_personal_onedrive` and `get_business_onedrive`, an R6 object of class `ms_drive`.
@@ -34,7 +41,7 @@
 #'
 #' [`add_methods`] for the associated methods that this package adds to the base AzureGraph classes.
 #'
-#' The "Authentication" vignette has more details on the authentication process, including troubleshooting and fixes for common problems.
+#' The "Authentication" vignette has more details on the authentication process, including troubleshooting and fixes for common problems. The "Using Microsoft365R in a Shiny app" vignette has further Shiny-specific information, including how to configure the necessary app registration in Azure Active Directory.
 #'
 #' [CLI for Microsoft 365](https://pnp.github.io/cli-microsoft365/) -- a commandline tool for managing Microsoft 365
 #' @examples
@@ -69,6 +76,16 @@
 #' get_business_onedrive()
 #' get_sharepoint_site("My site")
 #' get_team("My team")
+#'
+#' # authenticating separately to working with the MS365 API
+#' scopes <- c(
+#'     "https://graph.microsoft.com/Files.ReadWrite.All",
+#'     "https://graph.microsoft.com/User.Read",
+#'     "openid", "offline_access"
+#' )
+#' app <- "d44a05d5-c6a5-4bbb-82d2-443123722380" # for local use only
+#' token <- AzureAuth::get_azure_token(scopes, "mytenant", app, version=2)
+#' od <- get_business_onedrive(token=token)
 #'
 #' }
 #' @rdname client

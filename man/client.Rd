@@ -198,8 +198,8 @@ scopes <- c(
     "openid", "offline_access"
 )
 app <- "d44a05d5-c6a5-4bbb-82d2-443123722380" # for local use only
-token <- AzureAuth::get_azure_token(scopes, "mytenant", app, version=2)
-od <- get_business_onedrive(token=token)
+token <- AzureAuth::get_azure_token(scopes, "mycompany", app, version=2)
+get_business_onedrive(token=token)
 
 }
 }

@@ -135,8 +135,7 @@ Microsoft365R provides functions for logging into each Microsoft 365 service.
 These functions provide easy access to the various collaboration services that are part of Microsoft 365. On first use, they will call your web browser to authenticate with Azure Active Directory, in a similar manner to other web apps. You will get a dialog box asking for permission to access your information. You only have to authenticate once; your credentials will be saved and reloaded in subsequent sessions.
 
 When authenticating, you can pass optional arguments in \code{...} which will ultimately be received by \code{AzureAuth::get_azure_token}. In particular, if your machine doesn't have a web browser available to authenticate with (for example if you are in a remote RStudio Server session), pass \code{auth_type="device_code"} which is intended for such scenarios.
-}
-\section{Authenticating to Microsoft 365 Business services}{
+\subsection{Authenticating to Microsoft 365 Business services}{
 
 Authenticating to Microsoft 365 Business services (Teams, SharePoint and business OneDrive/Outlook) has some specific complexities.
 
@@ -145,7 +144,7 @@ The default "common" tenant for \code{get_team}, \code{get_business_onedrive} an
 The default when authenticating to these services is for Microsoft365R to use its own internal app ID. As an alternative, you (or your admin) can create your own app registration in Azure: for use in a local session, it should have a native redirect URI of \verb{http://localhost:1410}, and the "public client" option should be enabled if you want to use the device code authentication flow. You can supply your app ID either via the \code{app} argument, or in the environment variable \code{CLIMICROSOFT365_AADAPPID}.
 }
 
-\section{Authenticating with a token}{
+\subsection{Authenticating with a token}{
 
 In some circumstances, it may be desirable to carry out authentication/authorization as a separate step prior to  making requests to the Microsoft 365 REST API. This holds in a Shiny app, for example, since only the UI part can talk to the browser while the server part does the rest of the work. Another scenario is if the refresh token lifetime set by your org is too short, so that the token expires in between R sessions. In this case, you can authenticate by obtaining a new token with \code{AzureAuth::get_azure_token}, and passing the token object to the client function.
 
@@ -154,6 +153,11 @@ When calling \code{get_azure_token}, the scopes you should use are those given i
 See the examples below, and also the vignette "Using Microsoft365R in a Shiny app" for a more detailed rundown on combining Microsoft365R and Shiny.
 }
 
+\subsection{Clearing the cache}{
+
+Deleting your cached credentials is a way of rebooting the authentication process, if you are repeatedly encountering errors. To do this, call \code{\link[AzureAuth:get_azure_token]{AzureAuth::clean_token_directory}}, then try logging in again. You may also need to clear your browser's cookies, if you are authenticating interactively.
+}
+}
 \examples{
 \dontrun{
 

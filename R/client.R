@@ -251,29 +251,15 @@ list_chats <- function(tenant=Sys.getenv("CLIMICROSOFT365_TENANT", "common"),
 }
 
 
-.ms365_login_env <- new.env()
-
 do_login <- function(tenant, app, scopes, token, ...)
 {
-    hash <- function(...)
-    {
-        as.character(openssl::md5(serialize(list(...), NULL)))
-    }
+    # bypass AzureGraph login caching if token provided
+    if(!is.null(token))
+        return(msgraph$new(token=token))
 
-    login_id <- hash(tenant, app, scopes, token, ...)
-    login <- .ms365_login_env[[login_id]]
-    if(is.null(login) || !inherits(login, "ms_graph"))
-    {
-        if(!is.null(token))
-            login <- token
-        else
-        {
-            login <- try(get_graph_login(tenant, app=app, scopes=scopes, refresh=FALSE), silent=TRUE)
-            if(inherits(login, "try-error"))
-                login <- create_graph_login(tenant, app=app, scopes=scopes, ...)
-        }
-        .ms365_login_env[[login_id]] <- login
-    }
+    login <- try(get_graph_login(tenant, app=app, scopes=scopes, refresh=FALSE), silent=TRUE)
+    if(inherits(login, "try-error"))
+        login <- create_graph_login(tenant, app=app, scopes=scopes, ...)
     login
 }
 

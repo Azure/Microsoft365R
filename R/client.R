@@ -9,7 +9,7 @@
 #' @param team_name,team_id For `get_team`, either the name or ID of the team to retrieve. Supply exactly one of these.
 #' @param shared_mbox_id,shared_mbox_name,shared_mbox_email For `get_business_outlook`, an ID/principal name/email address. Supply exactly one of these to retrieve a shared mailbox. If all are NULL (the default), retrieve your own mailbox.
 #' @param chat_id For `get_chat`, the ID of a group, one-on-one or meeting chat in Teams.
-#' @param token An AAD OAuth token object, of class `AzureAuth::AzureToken`. If supplied, this will override any other arguments. See "AUthenticating with a token" below.
+#' @param token An AAD OAuth token object, of class `AzureAuth::AzureToken`. If supplied, the `tenant`, `app`, `scopes` and `...` arguments will be ignored. See "Authenticating with a token" below.
 #' @param ... Optional arguments that will ultimately be passed to [`AzureAuth::get_azure_token`].
 #' @details
 #' These functions provide easy access to the various collaboration services that are part of Microsoft 365. On first use, they will call your web browser to authenticate with Azure Active Directory, in a similar manner to other web apps. You will get a dialog box asking for permission to access your information. You only have to authenticate once; your credentials will be saved and reloaded in subsequent sessions.
@@ -258,7 +258,7 @@ do_login <- function(tenant, app, scopes, token, ...)
 {
     # bypass AzureGraph login caching if token provided
     if(!is.null(token))
-        return(msgraph$new(token=token))
+        return(ms_graph$new(token=token))
 
     login <- try(get_graph_login(tenant, app=app, scopes=scopes, refresh=FALSE), silent=TRUE)
     if(inherits(login, "try-error"))

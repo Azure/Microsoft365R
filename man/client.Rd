@@ -107,7 +107,7 @@ list_chats(
 
 \item{scopes}{The Microsoft Graph scopes (permissions) to obtain. It should never be necessary to change these.}
 
-\item{token}{An AAD OAuth token object, of class \code{AzureAuth::AzureToken}. If supplied, this will override any other arguments. See "AUthenticating with a token" below.}
+\item{token}{An AAD OAuth token object, of class \code{AzureAuth::AzureToken}. If supplied, the \code{tenant}, \code{app}, \code{scopes} and \code{...} arguments will be ignored. See "Authenticating with a token" below.}
 
 \item{...}{Optional arguments that will ultimately be passed to \code{\link[AzureAuth:get_azure_token]{AzureAuth::get_azure_token}}.}
 

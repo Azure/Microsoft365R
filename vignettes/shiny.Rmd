@@ -3,7 +3,7 @@ title: "Using Microsoft365R in a Shiny app"
 author: Hong Ooi
 output: rmarkdown::html_vignette
 vignette: >
-    %\VignetteIndexEntry{Shiny}
+    %\VignetteIndexEntry{Microsoft365R and Shiny}
     %\VignetteEngine{knitr::rmarkdown}
     %\VignetteEncoding{utf8}
 ---

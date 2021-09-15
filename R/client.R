@@ -24,7 +24,9 @@
 #' The default when authenticating to these services is for Microsoft365R to use its own internal app ID. As an alternative, you (or your admin) can create your own app registration in Azure: for use in a local session, it should have a native redirect URI of `http://localhost:1410`, and the "public client" option should be enabled if you want to use the device code authentication flow. You can supply your app ID either via the `app` argument, or in the environment variable `CLIMICROSOFT365_AADAPPID`.
 #'
 #' ## Authenticating with a token
-#' In some circumstances, it may be desirable to carry out authentication/authorization as a separate step prior to  making requests to the Microsoft 365 REST API. This holds in a Shiny app, for example, since only the UI part can talk to the browser while the server part does the rest of the work. Another scenario is if the refresh token lifetime set by your org is too short, so that the token expires in between R sessions. In this case, you can authenticate by obtaining a new token with `AzureAuth::get_azure_token`, and passing the token object to the client function.
+#' In some circumstances, it may be desirable to carry out authentication/authorization as a separate step prior to  making requests to the Microsoft 365 REST API. This holds in a Shiny app, for example, since only the UI part can talk to the browser while the server part does the rest of the work. Another scenario is if the refresh token lifetime set by your org is too short, so that the token expires in between R sessions.
+#'
+#' In this case, you can authenticate by obtaining a new token with `AzureAuth::get_azure_token`, and passing the token object to the client function. Note that the token is accepted as-is; no checks are performed that it has the correct permissions for the service you're using.
 #'
 #' When calling `get_azure_token`, the scopes you should use are those given in the `scopes` argument for each client function, and the API host is `https://graph.microsoft.com/`. The Microsoft365R internal app ID is `d44a05d5-c6a5-4bbb-82d2-443123722380`, while that for the CLI for Microsoft 365 is `31359c7f-bd7e-475c-86db-fdb8c937548e`. However, these app IDs **only** work for a local R session; you must create your own app registration if you want to use the package inside a Shiny app.
 #'
@@ -258,7 +260,11 @@ do_login <- function(tenant, app, scopes, token, ...)
 {
     # bypass AzureGraph login caching if token provided
     if(!is.null(token))
+    {
+        if(!AzureAuth::is_azure_token(token))
+            stop("Invalid token object supplied")
         return(ms_graph$new(token=token))
+    }
 
     login <- try(get_graph_login(tenant, app=app, scopes=scopes, refresh=FALSE), silent=TRUE)
     if(inherits(login, "try-error"))

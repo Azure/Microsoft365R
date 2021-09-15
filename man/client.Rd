@@ -146,7 +146,9 @@ The default when authenticating to these services is for Microsoft365R to use it
 
 \subsection{Authenticating with a token}{
 
-In some circumstances, it may be desirable to carry out authentication/authorization as a separate step prior to  making requests to the Microsoft 365 REST API. This holds in a Shiny app, for example, since only the UI part can talk to the browser while the server part does the rest of the work. Another scenario is if the refresh token lifetime set by your org is too short, so that the token expires in between R sessions. In this case, you can authenticate by obtaining a new token with \code{AzureAuth::get_azure_token}, and passing the token object to the client function.
+In some circumstances, it may be desirable to carry out authentication/authorization as a separate step prior to  making requests to the Microsoft 365 REST API. This holds in a Shiny app, for example, since only the UI part can talk to the browser while the server part does the rest of the work. Another scenario is if the refresh token lifetime set by your org is too short, so that the token expires in between R sessions.
+
+In this case, you can authenticate by obtaining a new token with \code{AzureAuth::get_azure_token}, and passing the token object to the client function. Note that the token is accepted as-is; no checks are performed that it has the correct permissions for the service you're using.
 
 When calling \code{get_azure_token}, the scopes you should use are those given in the \code{scopes} argument for each client function, and the API host is \verb{https://graph.microsoft.com/}. The Microsoft365R internal app ID is \verb{d44a05d5-c6a5-4bbb-82d2-443123722380}, while that for the CLI for Microsoft 365 is \verb{31359c7f-bd7e-475c-86db-fdb8c937548e}. However, these app IDs \strong{only} work for a local R session; you must create your own app registration if you want to use the package inside a Shiny app.
 

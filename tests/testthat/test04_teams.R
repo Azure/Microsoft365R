@@ -11,39 +11,35 @@ if(tenant == "" || app == "" || team_name == "" || team_id == "" || channel_name
 if(!interactive())
     skip("Teams tests skipped: must be in interactive session")
 
-tok <- try(AzureAuth::get_azure_token(
-    c("https://graph.microsoft.com/.default",
-      "openid",
-      "offline_access"),
-    tenant=tenant, app=app, version=2),
-    silent=TRUE)
-if(inherits(tok, "try-error"))
+tok <- get_test_token(tenant, app, c("Group.ReadWrite.All", "Directory.Read.All"))
+if(is.null(tok))
     skip("Teams tests skipped: no access to tenant")
 
 team <- try(call_graph_endpoint(tok, file.path("teams", team_id)), silent=TRUE)
 if(inherits(team, "try-error"))
     skip("Teams tests skipped: service not available")
 
+team <- ms_team$new(tok, tenant, team)
+
 test_that("Teams client works",
 {
-    expect_error(get_team(team_name=team_name, team_id=team_id, tenant=tenant, app=app))
+    expect_error(get_team(team_name=team_name, team_id=team_id, token=tok))
 
-    team1 <- get_team(team_name=team_name, tenant=tenant, app=app)
+    team1 <- get_team(team_name=team_name, token=tok)
     expect_is(team1, "ms_team")
     expect_identical(team1$properties$displayName, team_name)
 
-    team2 <- get_team(team_id=team_id, tenant=tenant, app=app)
+    team2 <- get_team(team_id=team_id, token=tok)
     expect_is(team2, "ms_team")
     expect_identical(team1$properties$id, team_id)
 
-    teams <- list_teams()
+    teams <- list_teams(token=tok)
     expect_is(teams, "list")
     expect_true(all(sapply(teams, inherits, "ms_team")))
 })
 
 test_that("Teams methods work",
 {
-    team <- get_team(team_id=team_id, tenant=tenant, app=app)
     expect_is(team, "ms_team")
 
     # drive -- functionality tested in test02
@@ -101,8 +97,6 @@ test_that("Teams methods work",
 
 test_that("Team member methods work",
 {
-    team <- get_team(team_id=team_id, tenant=tenant, app=app)
-
     mlst <- team$list_members()
     expect_is(mlst, "list")
     expect_true(all(sapply(mlst, inherits, "ms_team_member")))

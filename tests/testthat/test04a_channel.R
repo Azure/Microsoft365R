@@ -13,24 +13,20 @@ if(Sys.getenv("AZ_TEST_CHANNEL_FLAG") == "")
 if(!interactive())
     skip("Channel tests skipped: must be in interactive session")
 
-tok <- try(AzureAuth::get_azure_token(
-    c("https://graph.microsoft.com/.default",
-      "openid",
-      "offline_access"),
-    tenant=tenant, app=app, version=2),
-    silent=TRUE)
-if(inherits(tok, "try-error"))
+tok <- get_test_token(tenant, app, c("Group.ReadWrite.All", "Directory.Read.All"))
+if(is.null(tok))
     skip("Channel tests skipped: no access to tenant")
 
 team <- try(call_graph_endpoint(tok, file.path("teams", team_id)), silent=TRUE)
 if(inherits(team, "try-error"))
     skip("Channel tests skipped: service not available")
 
+team <- ms_team$new(tok, tenant, team)
+
 channel_name <- sprintf("Test channel %s", make_name(10))
 
 test_that("Channel methods work",
 {
-    team <- get_team(team_id=team_id, tenant=tenant, app=app)
     expect_is(team, "ms_team")
 
     expect_error(team$get_channel(channel_name=channel_name))

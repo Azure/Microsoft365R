@@ -1,3 +1,4 @@
+tenant <- "consumers"
 app <- Sys.getenv("AZ_TEST_NATIVE_APP_ID")
 
 if(app == "")
@@ -6,23 +7,19 @@ if(app == "")
 if(!interactive())
     skip("Outlook tests skipped: must be in interactive session")
 
-tok <- try(AzureAuth::get_azure_token(c("https://graph.microsoft.com/Mail.Read", "openid", "offline_access"),
-    tenant="9188040d-6c67-4c5b-b112-36a304b66dad", app=.microsoft365r_app_id, version=2),
-    silent=TRUE)
-if(inherits(tok, "try-error"))
+tok <- get_test_token(tenant, app, c("Mail.Send", "Mail.ReadWrite", "User.Read"))
+if(is.null(tok))
     skip("Outlook tests skipped: unable to login to consumers tenant")
 
 inbox <- try(call_graph_endpoint(tok, "me/mailFolders/inbox"), silent=TRUE)
 if(inherits(inbox, "try-error"))
     skip("Outlook tests skipped: service not available")
 
+outl <- get_personal_outlook(token=tok)
+
 test_that("Outlook client works",
 {
-    outl <- get_personal_outlook()
     expect_is(outl, c("ms_outlook", "ms_outlook_object"))
-
-    outl2 <- get_personal_outlook(app=app)
-    expect_is(outl2, c("ms_outlook", "ms_outlook_object"))
 
     folders <- outl$list_folders()
     expect_is(folders, "list")

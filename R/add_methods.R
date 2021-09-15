@@ -165,7 +165,7 @@ add_user_methods <- function()
     az_user$set("public", "list_drives", overwrite=TRUE,
     function(filter=NULL, n=Inf)
     {
-        private$make_basic_list(self, "drives", filter, n)
+        private$make_basic_list("drives", filter, n)
     })
 
     az_user$set("public", "get_drive", overwrite=TRUE,
@@ -181,7 +181,7 @@ add_user_methods <- function()
     az_user$set("public", "list_sharepoint_sites", overwrite=TRUE,
     function(filter=NULL, n=Inf)
     {
-        lst <- private$make_basic_list(self, "followedSites", filter, n)
+        lst <- private$make_basic_list("followedSites", filter, n)
         if(!is.null(n))
             lapply(lst, function(site) site$sync_fields())  # result from endpoint is incomplete
         else lst
@@ -190,7 +190,7 @@ add_user_methods <- function()
     az_user$set("public", "list_teams", overwrite=TRUE,
     function(filter=NULL, n=Inf)
     {
-        lst <- private$make_basic_list(self, "joinedTeams", filter, n)
+        lst <- private$make_basic_list("joinedTeams", filter, n)
         if(!is.null(n))
             lapply(lst, function(team) team$sync_fields())  # result from endpoint only contains ID and displayname
         else lst
@@ -205,7 +205,7 @@ add_user_methods <- function()
     az_user$set("public", "list_chats", overwrite=TRUE,
     function(filter=NULL, n=Inf)
     {
-        private$make_basic_list(self, "chats", filter, n)
+        private$make_basic_list("chats", filter, n)
     })
 
     az_user$set("public", "get_chat", overwrite=TRUE,
@@ -228,7 +228,7 @@ add_group_methods <- function()
     az_group$set("public", "list_drives", overwrite=TRUE,
     function(filter=NULL, n=Inf)
     {
-        private$make_basic_list(self, "drives", filter, n)
+        private$make_basic_list("drives", filter, n)
     })
 
     az_group$set("public", "get_drive", overwrite=TRUE,
@@ -263,7 +263,7 @@ add_group_methods <- function()
     az_group$set("public", "list_plans", overwrite=TRUE,
     function(filter=NULL, n=Inf)
     {
-        private$make_basic_list(self, "planner/plans", filter, n)
+        private$make_basic_list("planner/plans", filter, n)
     })
 
     az_group$set("public", "get_plan", overwrite=TRUE,

@@ -52,6 +52,10 @@ test_that("Authenticating works with org tenant",
     expect_type(drv, "list")
     expect_true("id" %in% names(drv) && is.character(drv$id) && nchar(drv$id) > 0)
 
+    # munging of app/scopes may be required for org tenants
+    app <- choose_app(app)
+    scopes <- set_default_scopes(scopes, app)
+
     gr <- do_login(tenant, app, scopes, NULL)
     expect_is(gr, "ms_graph")
 

@@ -1,3 +1,4 @@
+tenant <- "consumers"
 app <- Sys.getenv("AZ_TEST_NATIVE_APP_ID")
 from_addr <- Sys.getenv("AZ_TEST_OUTLOOK_FROM_ADDR")
 to_addr <- Sys.getenv("AZ_TEST_OUTLOOK_TO_ADDR")
@@ -10,10 +11,8 @@ if(app == "" || from_addr == "" || to_addr == "" || cc_addr == "" || bcc_addr ==
 if(!interactive())
     skip("Outlook email send tests skipped: must be in interactive session")
 
-tok <- try(AzureAuth::get_azure_token(c("https://graph.microsoft.com/Mail.Read", "openid", "offline_access"),
-    tenant="9188040d-6c67-4c5b-b112-36a304b66dad", app=.microsoft365r_app_id, version=2),
-    silent=TRUE)
-if(inherits(tok, "try-error"))
+tok <- get_test_token(tenant, app, c("Mail.Send", "Mail.ReadWrite", "User.Read"))
+if(is.null(tok))
     skip("Outlook tests send skipped: unable to login to consumers tenant")
 
 get_to_addr <- function(x, n=1) x$properties$toRecipients[[n]]$emailAddress$address
@@ -21,7 +20,7 @@ get_cc_addr <- function(x, n=1) x$properties$ccRecipients[[n]]$emailAddress$addr
 get_bcc_addr <- function(x, n=1) x$properties$bccRecipients[[n]]$emailAddress$address
 get_replyto_addr <- function(x, n=1) x$properties$replyTo[[n]]$emailAddress$address
 
-outl <- get_personal_outlook()
+outl <- get_personal_outlook(token=tok)
 srcname <- make_name()
 destname <- make_name()
 src <- outl$create_folder(srcname)

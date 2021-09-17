@@ -16,6 +16,7 @@
 get_personal_onedrive(
   app = .microsoft365r_app_id,
   scopes = c("Files.ReadWrite.All", "User.Read"),
+  token = NULL,
   ...
 )
 
@@ -23,6 +24,7 @@ get_business_onedrive(
   tenant = Sys.getenv("CLIMICROSOFT365_TENANT", "common"),
   app = Sys.getenv("CLIMICROSOFT365_AADAPPID"),
   scopes = c("Files.ReadWrite.All", "User.Read"),
+  token = NULL,
   ...
 )
 
@@ -34,6 +36,7 @@ get_sharepoint_site(
   app = Sys.getenv("CLIMICROSOFT365_AADAPPID"),
   scopes = c("Group.ReadWrite.All", "Directory.Read.All", "Sites.ReadWrite.All",
     "Sites.Manage.All"),
+  token = NULL,
   ...
 )
 
@@ -42,6 +45,7 @@ list_sharepoint_sites(
   app = Sys.getenv("CLIMICROSOFT365_AADAPPID"),
   scopes = c("Group.ReadWrite.All", "Directory.Read.All", "Sites.ReadWrite.All",
     "Sites.Manage.All"),
+  token = NULL,
   ...
 )
 
@@ -51,6 +55,7 @@ get_team(
   tenant = Sys.getenv("CLIMICROSOFT365_TENANT", "common"),
   app = Sys.getenv("CLIMICROSOFT365_AADAPPID"),
   scopes = c("Group.ReadWrite.All", "Directory.Read.All"),
+  token = NULL,
   ...
 )
 
@@ -58,12 +63,14 @@ list_teams(
   tenant = Sys.getenv("CLIMICROSOFT365_TENANT", "common"),
   app = Sys.getenv("CLIMICROSOFT365_AADAPPID"),
   scopes = c("Group.ReadWrite.All", "Directory.Read.All"),
+  token = NULL,
   ...
 )
 
 get_personal_outlook(
   app = .microsoft365r_app_id,
   scopes = c("Mail.Send", "Mail.ReadWrite", "User.Read"),
+  token = NULL,
   ...
 )
 
@@ -74,6 +81,7 @@ get_business_outlook(
   shared_mbox_name = NULL,
   shared_mbox_email = NULL,
   scopes = c("User.Read", "Mail.Send", "Mail.ReadWrite"),
+  token = NULL,
   ...
 )
 
@@ -82,6 +90,7 @@ get_chat(
   tenant = Sys.getenv("CLIMICROSOFT365_TENANT", "common"),
   app = .microsoft365r_app_id,
   scopes = c("User.Read", "Directory.Read.All", "Chat.ReadWrite"),
+  token = NULL,
   ...
 )
 
@@ -89,6 +98,7 @@ list_chats(
   tenant = Sys.getenv("CLIMICROSOFT365_TENANT", "common"),
   app = .microsoft365r_app_id,
   scopes = c("User.Read", "Directory.Read.All", "Chat.ReadWrite"),
+  token = NULL,
   ...
 )
 }
@@ -96,6 +106,8 @@ list_chats(
 \item{app}{A custom app registration ID to use for authentication. See below.}
 
 \item{scopes}{The Microsoft Graph scopes (permissions) to obtain. It should never be necessary to change these.}
+
+\item{token}{An AAD OAuth token object, of class \code{AzureAuth::AzureToken}. If supplied, the \code{tenant}, \code{app}, \code{scopes} and \code{...} arguments will be ignored. See "Authenticating with a token" below.}
 
 \item{...}{Optional arguments that will ultimately be passed to \code{\link[AzureAuth:get_azure_token]{AzureAuth::get_azure_token}}.}
 
@@ -123,16 +135,31 @@ Microsoft365R provides functions for logging into each Microsoft 365 service.
 These functions provide easy access to the various collaboration services that are part of Microsoft 365. On first use, they will call your web browser to authenticate with Azure Active Directory, in a similar manner to other web apps. You will get a dialog box asking for permission to access your information. You only have to authenticate once; your credentials will be saved and reloaded in subsequent sessions.
 
 When authenticating, you can pass optional arguments in \code{...} which will ultimately be received by \code{AzureAuth::get_azure_token}. In particular, if your machine doesn't have a web browser available to authenticate with (for example if you are in a remote RStudio Server session), pass \code{auth_type="device_code"} which is intended for such scenarios.
-}
-\section{Authenticating to Microsoft 365 Business services}{
+\subsection{Authenticating to Microsoft 365 Business services}{
 
-Authenticating to Microsoft 365 Business services (Teams, SharePoint and OneDrive for Business) has some specific complexities.
+Authenticating to Microsoft 365 Business services (Teams, SharePoint and business OneDrive/Outlook) has some specific complexities.
 
 The default "common" tenant for \code{get_team}, \code{get_business_onedrive} and \code{get_sharepoint_site} attempts to detect your actual tenant from your saved credentials in your browser. This may not always succeed, for example if you have a personal account that is also a guest account in a tenant. In this case, supply the actual tenant name, either in the \code{tenant} argument or in the \code{CLIMICROSOFT365_TENANT} environment variable. The latter allows sharing authentication details with the \href{https://pnp.github.io/cli-microsoft365/}{CLI for Microsoft 365}.
 
-The default when authenticating to these services is for Microsoft365R to use its own internal app ID. As an alternative, you (or your admin) can create your own app registration in Azure: it should have a native redirect URI of \verb{http://localhost:1410}, and the "public client" option should be enabled if you want to use the device code authentication flow. You can supply your app ID either via the \code{app} argument, or in the environment variable \code{CLIMICROSOFT365_AADAPPID}.
+The default when authenticating to these services is for Microsoft365R to use its own internal app ID. As an alternative, you (or your admin) can create your own app registration in Azure: for use in a local session, it should have a native redirect URI of \verb{http://localhost:1410}, and the "public client" option should be enabled if you want to use the device code authentication flow. You can supply your app ID either via the \code{app} argument, or in the environment variable \code{CLIMICROSOFT365_AADAPPID}.
 }
 
+\subsection{Authenticating with a token}{
+
+In some circumstances, it may be desirable to carry out authentication/authorization as a separate step prior to  making requests to the Microsoft 365 REST API. This holds in a Shiny app, for example, since only the UI part can talk to the browser while the server part does the rest of the work. Another scenario is if the refresh token lifetime set by your org is too short, so that the token expires in between R sessions.
+
+In this case, you can authenticate by obtaining a new token with \code{AzureAuth::get_azure_token}, and passing the token object to the client function. Note that the token is accepted as-is; no checks are performed that it has the correct permissions for the service you're using.
+
+When calling \code{get_azure_token}, the scopes you should use are those given in the \code{scopes} argument for each client function, and the API host is \verb{https://graph.microsoft.com/}. The Microsoft365R internal app ID is \verb{d44a05d5-c6a5-4bbb-82d2-443123722380}, while that for the CLI for Microsoft 365 is \verb{31359c7f-bd7e-475c-86db-fdb8c937548e}. However, these app IDs \strong{only} work for a local R session; you must create your own app registration if you want to use the package inside a Shiny app.
+
+See the examples below, and also the vignette "Using Microsoft365R in a Shiny app" for a more detailed rundown on combining Microsoft365R and Shiny.
+}
+
+\subsection{Clearing the cache}{
+
+Deleting your cached credentials is a way of rebooting the authentication process, if you are repeatedly encountering errors. To do this, call \code{\link[AzureAuth:get_azure_token]{AzureAuth::clean_token_directory}}, then try logging in again. You may also need to clear your browser's cookies, if you are authenticating interactively.
+}
+}
 \examples{
 \dontrun{
 
@@ -166,6 +193,16 @@ get_business_onedrive()
 get_sharepoint_site("My site")
 get_team("My team")
 
+# authenticating separately to working with the MS365 API
+scopes <- c(
+    "https://graph.microsoft.com/Files.ReadWrite.All",
+    "https://graph.microsoft.com/User.Read",
+    "openid", "offline_access"
+)
+app <- "d44a05d5-c6a5-4bbb-82d2-443123722380" # for local use only
+token <- AzureAuth::get_azure_token(scopes, "mycompany", app, version=2)
+get_business_onedrive(token=token)
+
 }
 }
 \seealso{
@@ -173,7 +210,7 @@ get_team("My team")
 
 \code{\link{add_methods}} for the associated methods that this package adds to the base AzureGraph classes.
 
-The "Authentication" vignette has more details on the authentication process, including troubleshooting and fixes for common problems.
+The "Authentication" vignette has more details on the authentication process, including troubleshooting and fixes for common problems. The "Using Microsoft365R in a Shiny app" vignette has further Shiny-specific information, including how to configure the necessary app registration in Azure Active Directory.
 
 \href{https://pnp.github.io/cli-microsoft365/}{CLI for Microsoft 365} -- a commandline tool for managing Microsoft 365
 }

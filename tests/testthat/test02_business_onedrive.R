@@ -7,27 +7,19 @@ if(tenant == "" || app == "")
 if(!interactive())
     skip("OneDrive for Business tests skipped: must be in interactive session")
 
-tok <- try(AzureAuth::get_azure_token(
-    c("https://graph.microsoft.com/.default",
-      "openid",
-      "offline_access"),
-    tenant=tenant, app=app, version=2),
-    silent=TRUE)
-if(inherits(tok, "try-error"))
+tok <- get_test_token(tenant, app, c("Files.ReadWrite.All", "User.Read"))
+if(is.null(tok))
     skip("OneDrive for Business tests skipped: no access to tenant")
 
-gr <- AzureGraph::ms_graph$new(token=tok)
 drv <- try(call_graph_endpoint(tok, "me/drive"), silent=TRUE)
 if(inherits(drv, "try-error"))
     skip("OneDrive for Business tests skipped: service not available")
 
+od <- ms_drive$new(tok, tenant, drv)
+
 test_that("OneDrive for Business works",
 {
-    od <- get_business_onedrive(tenant=tenant)
     expect_is(od, "ms_drive")
-
-    od2 <- get_business_onedrive(tenant=tenant, app=app)
-    expect_is(od2, "ms_drive")
 
     lst <- od$list_items()
     expect_is(lst, "data.frame")
@@ -67,8 +59,6 @@ test_that("OneDrive for Business works",
 
 test_that("Drive item methods work",
 {
-    od <- get_business_onedrive(tenant=tenant, app=app)
-
     root <- od$get_item("/")
     expect_is(root, "ms_drive_item")
 
@@ -155,8 +145,6 @@ test_that("Drive item methods work",
 
 test_that("Methods work with filenames with special characters",
 {
-    od <- get_business_onedrive(tenant=tenant)
-
     test_name <- paste(make_name(5), "plus spaces and áccénts")
     src <- write_file(fname=file.path(tempdir(), test_name))
 
@@ -169,8 +157,6 @@ test_that("Methods work with filenames with special characters",
 
 test_that("Nested folder creation/deletion works",
 {
-    od <- get_business_onedrive()
-
     f1 <- make_name(10)
     f2 <- make_name(10)
     f3 <- make_name(10)

@@ -1,3 +1,4 @@
+tenant <- "consumers"
 app <- Sys.getenv("AZ_TEST_NATIVE_APP_ID")
 to_addr <- Sys.getenv("AZ_TEST_OUTLOOK_TO_ADDR")
 cc_addr <- Sys.getenv("AZ_TEST_OUTLOOK_CC_ADDR")
@@ -9,22 +10,16 @@ if(app == "" || to_addr == "" || cc_addr == "" || bcc_addr == "")
 if(!interactive())
     skip("Outlook email attachment tests skipped: must be in interactive session")
 
-tok <- try(AzureAuth::get_azure_token(c("https://graph.microsoft.com/Mail.Read", "openid", "offline_access"),
-    tenant="9188040d-6c67-4c5b-b112-36a304b66dad", app=.microsoft365r_app_id, version=2),
-    silent=TRUE)
-if(inherits(tok, "try-error"))
+tok <- get_test_token(tenant, app, c("Mail.Send", "Mail.ReadWrite", "User.Read"))
+if(is.null(tok))
     skip("Outlook email attachment tests skipped: unable to login to consumers tenant")
 
 inbox <- try(call_graph_endpoint(tok, "me/mailFolders/inbox"), silent=TRUE)
 if(inherits(inbox, "try-error"))
     skip("Outlook email attachment tests skipped: service not available")
 
-inbox <- try(call_graph_endpoint(tok, "me/mailFolders/inbox"), silent=TRUE)
-if(inherits(inbox, "try-error"))
-    skip("Outlook email attachment tests skipped: service not available")
-
 fname <- make_name()
-folder <- get_personal_outlook()$create_folder(fname)
+folder <- get_personal_outlook(token=tok)$create_folder(fname)
 
 test_that("Outlook email attachment methods work",
 {

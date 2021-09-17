@@ -9,22 +9,19 @@ if(tenant == "" || app == "" || site_url == "" || site_id == "")
 if(!interactive())
     skip("Planner tests skipped: must be in interactive session")
 
-tok <- try(AzureAuth::get_azure_token(
-    c("https://graph.microsoft.com/.default",
-      "openid",
-      "offline_access"),
-    tenant=tenant, app=app, version=2),
-    silent=TRUE)
-if(inherits(tok, "try-error"))
+tok <- get_test_token(tenant, app, c("Group.ReadWrite.All", "Directory.Read.All",
+                                     "Sites.ReadWrite.All", "Sites.Manage.All"))
+if(is.null(tok))
     skip("Planner tests skipped: no access to tenant")
 
 site <- try(call_graph_endpoint(tok, file.path("sites", site_id)), silent=TRUE)
 if(inherits(site, "try-error"))
     skip("Planner tests skipped: service not available")
 
+site <- ms_site$new(tok, tenant, site)
+
 test_that("Planner methods work",
 {
-    site <- get_sharepoint_site(site_url=site_url, tenant=tenant, app=app)
     expect_is(site, "ms_site")
 
     grp <- site$get_group()

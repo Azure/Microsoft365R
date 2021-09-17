@@ -12,47 +12,44 @@ if(tenant == "" || app == "" || site_name == "" || site_url == "" || site_id == 
 if(!interactive())
     skip("SharePoint tests skipped: must be in interactive session")
 
-tok <- try(AzureAuth::get_azure_token(
-    c("https://graph.microsoft.com/.default",
-      "openid",
-      "offline_access"),
-    tenant=tenant, app=app, version=2),
-    silent=TRUE)
-if(inherits(tok, "try-error"))
+tok <- get_test_token(tenant, app, c("Group.ReadWrite.All", "Directory.Read.All",
+                                     "Sites.ReadWrite.All", "Sites.Manage.All"))
+if(is.null(tok))
     skip("SharePoint tests skipped: no access to tenant")
 
 site <- try(call_graph_endpoint(tok, file.path("sites", site_id)), silent=TRUE)
 if(inherits(site, "try-error"))
     skip("SharePoint tests skipped: service not available")
 
+site <- ms_site$new(tok, tenant, site)
+
 test_that("SharePoint client works",
 {
     expect_error(get_sharepoint_site(site_name=site_name, site_url=site_url, site_id=site_id,
                                      tenant=tenant, app=app))
 
-    site1 <- get_sharepoint_site(site_name=site_name, tenant=tenant, app=app)
+    site1 <- get_sharepoint_site(site_name=site_name, token=tok)
     expect_is(site1, "ms_site")
     expect_identical(site1$properties$displayName, site_name)
 
-    site2 <- get_sharepoint_site(site_url=site_url, tenant=tenant, app=app)
+    site2 <- get_sharepoint_site(site_url=site_url, token=tok)
     expect_is(site2, "ms_site")
     expect_identical(site1$properties$webUrl, site_url)
 
-    site3 <- get_sharepoint_site(site_id=site_id, tenant=tenant, app=app)
+    site3 <- get_sharepoint_site(site_id=site_id, token=tok)
     expect_is(site3, "ms_site")
     expect_identical(site1$properties$id, site_id)
 
     expect_identical(site1$properties, site2$properties)
     expect_identical(site2$properties, site3$properties)
 
-    sites <- list_sharepoint_sites()
+    sites <- list_sharepoint_sites(token=tok)
     expect_is(sites, "list")
     expect_true(all(sapply(sites, inherits, "ms_site")))
 })
 
 test_that("SharePoint methods work",
 {
-    site <- get_sharepoint_site(site_name, tenant=tenant, app=app)
     expect_is(site, "ms_site")
 
     # drive functionality tested in test02

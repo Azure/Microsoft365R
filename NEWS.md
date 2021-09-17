@@ -10,6 +10,8 @@
 
 ## Other
 
+- Add a vignette "Using Microsoft365R in a Shiny app" for this common use case.
+- Make `token` an explicit argument to the client functions, for supplying an OAuth token object directly. Note that this was always possible, but is now better documented and supported. This is mostly to support the Shiny use case, as well as other situations where authentication is more complicated than usual.
 - Changes to allow Microsoft365R to be usable without being on the search list (#72). Among other things, `make_basic_list()` is now a private method, rather than being exported. Thanks to Robert Ashton (@r-ash) for the PR.
 
 # Microsoft365R 2.3.0

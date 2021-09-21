@@ -159,7 +159,7 @@ private=list(
 
     folder=NULL,
 
-    # these methods is private because "chat folder" is not a publicly documented concept, unlike a channel folder
+    # these methods are private because "chat folder" is not a publicly documented concept, unlike a channel folder
     # - possible that chat file handling may change in the future
     upload_file_private=function(src, dest=basename(src), ...)
     {
@@ -172,7 +172,7 @@ private=list(
         {
             drv <- ms_drive$new(self$token, self$tenant, call_graph_endpoint(self$token, "me/drive"))
 
-            # all chats put their file in 1 location (!)
+            # all chats put their files in 1 location (!)
             folder <- try(drv$get_item("Microsoft Teams Chat Files"), silent=TRUE)
             if(inherits(folder, "try-error"))
                 folder <- drv$create_folder("Microsoft Teams Chat Files")

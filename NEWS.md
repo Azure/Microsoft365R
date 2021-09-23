@@ -1,3 +1,7 @@
+# Microsoft365R 2.3.1.9000
+
+- Fix a bug in sending file attachments in Teams chats (#87).
+
 # Microsoft365R 2.3.1
 
 ## OneDrive/SharePoint

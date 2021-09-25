@@ -7,6 +7,10 @@ build_chatmessage_body <- function(channel, body, content_type, attachments, inl
         file.path(path, name)
     }
 
+    # if a chat (not a channel), thunk to helper class to expose upload_file() method
+    if(channel$type == "chat")
+        channel <- chat_uploader$new(channel$token, channel$tenant, channel$properties)
+
     call_body <- list(body=list(content=paste(body, collapse="\n"), contentType=content_type))
     if(!is_empty(attachments))
     {
@@ -132,3 +136,15 @@ make_mention.ms_team_member <- function(object, i)
 {
     make_mention(object$get_aaduser(), i)
 }
+
+
+# helper class that exposes an upload_file() method
+# - used by build_chatmessage_body() to handle file attachments for private chat messages
+chat_uploader <- R6::R6Class("chat_uploader", inherit=ms_chat,
+
+public=list(
+    upload_file=function(...)
+    {
+        private$get_folder()$upload(...)
+    }
+))

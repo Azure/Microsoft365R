@@ -31,6 +31,8 @@
 #' - `inline`: Optional vector of image filenames that will be inserted into the body of the message. The images must be PNG or JPEG, and the `content_type` argument must be "html" to include inline content.
 #' - `mentions`: Optional vector of @mentions that will be inserted into the body of the message. This should be either an object of one of the following classes, or a list of the same: [`az_user`], [`ms_team`], [`ms_channel`], [`ms_team_member`]. The `content_type` argument must be "html" to include mentions.
 #'
+#' Message attachments are uploaded to your OneDrive for Business, in the folder "Microsoft Teams Chat Files". This is the same method as used by the regular Teams app. Unlike the Teams app, no localisation is performed, so the folder is always the same regardless of your language settings. As with channels, support for attachments is still somewhat experimental so please report any bugs found.
+#'
 #' @section List methods:
 #' All `list_*` methods have `filter` and `n` arguments to limit the number of results. The former should be an [OData expression](https://docs.microsoft.com/en-us/graph/query-parameters#filter-parameter) as a string to filter the result set on. The latter should be a number setting the maximum number of (filtered) results to return. The default values are `filter=NULL` and `n=Inf`. If `n=NULL`, the `ms_graph_pager` iterator object is returned instead to allow manual iteration over the results.
 #'
@@ -152,5 +154,29 @@ public=list(
         cat("---\n")
         cat(format_public_methods(self))
         invisible(self)
+    }
+),
+
+private=list(
+
+    folder=NULL,
+
+    # this is private because "chat folder" is not a publicly documented concept, unlike a channel folder
+    # - similarly there is no public upload_file() method
+    # - possible that chat file handling may change in the future
+    get_folder=function()
+    {
+        if(is.null(private$folder))
+        {
+            drv <- ms_drive$new(self$token, self$tenant, call_graph_endpoint(self$token, "me/drive"))
+
+            # all chats put their files in 1 location (!)
+            folder <- try(drv$get_item("Microsoft Teams Chat Files"), silent=TRUE)
+            if(inherits(folder, "try-error"))
+                folder <- drv$create_folder("Microsoft Teams Chat Files")
+
+            private$folder <- folder
+        }
+        private$folder
     }
 ))

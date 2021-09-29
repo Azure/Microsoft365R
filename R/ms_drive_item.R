@@ -108,9 +108,10 @@ ms_drive_item <- R6::R6Class("ms_drive_item", inherit=ms_object,
 
 public=list(
 
-    initialize=function(token, tenant=NULL, properties=NULL)
+    initialize=function(token, tenant=NULL, properties=NULL, remote=FALSE)
     {
         self$type <- "drive item"
+        private$remote <- remote
         private$api_type <- file.path("drives", properties$parentReference$driveId, "items")
         super$initialize(token, tenant, properties)
     },
@@ -320,6 +321,8 @@ public=list(
 
 private=list(
 
+    remote=NULL,
+
     # dest = . or '' --> this item
     # dest = .. --> parent folder
     # dest = (childname) --> path to named child
@@ -327,14 +330,23 @@ private=list(
     {
         if(dest == ".")
             dest <- ""
+
+        # find correct parent path if this folder is a shared folder
+        if(private$remote && is.null(self$properties$parentReference$path))
+        {
+            parent <- self$properties$parentReference
+            op <- file.path("drives", parent$driveId, "items", self$properties$id)
+            props <- call_graph_endpoint(self$token, op)
+            self$properties$parentReference$path <- props$parentReference$path
+        }
+
         parent <- self$properties$parentReference
         name <- self$properties$name
         op <- if(name == "root")
             file.path("drives", parent$driveId, "root:")
         else
         {
-            # have to infer the parent path if we got this item as a Teams channel folder
-            # in this case, assume the parent is the root folder
+            # null path means parent is the root folder
             if(is.null(parent$path))
                 parent$path <- sprintf("/drives/%s/root:", parent$driveId)
             if(dest != "..")

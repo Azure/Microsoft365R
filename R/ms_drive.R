@@ -207,7 +207,7 @@ public=list(
         }
 
         df$remoteItem <- lapply(seq_len(nrow(df)),
-            function(i) ms_drive_item$new(self$token, self$tenant, df$remoteItem[i, ]))
+            function(i) ms_drive_item$new(self$token, self$tenant, df$remoteItem[i, ], remote=TRUE))
 
         switch(info,
             partial=df[c("name", "size", "isdir", "remoteItem")],

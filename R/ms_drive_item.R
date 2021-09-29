@@ -321,6 +321,7 @@ public=list(
 
 private=list(
 
+    # flag: whether this object is a shared file/folder on another drive
     remote=NULL,
 
     # dest = . or '' --> this item

@@ -1,5 +1,6 @@
 # Microsoft365R 2.3.1.9000
 
+- Fix broken methods for accessing items in shared OneDrive/SharePoint folders (#89).
 - Fix a bug in sending file attachments in Teams chats (#87).
 
 # Microsoft365R 2.3.1

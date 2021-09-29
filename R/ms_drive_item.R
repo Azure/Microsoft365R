@@ -332,14 +332,9 @@ private=list(
         if(dest == ".")
             dest <- ""
 
-        # find correct parent path if this folder is a shared folder
-        if(private$remote && is.null(self$properties$parentReference$path))
-        {
-            parent <- self$properties$parentReference
-            op <- file.path("drives", parent$driveId, "items", self$properties$id)
-            props <- call_graph_endpoint(self$token, op)
-            self$properties$parentReference$path <- props$parentReference$path
-        }
+        # this is needed to find the correct parent folder for a shared item
+        if(private$remote)
+            private$normalise_remote_item()
 
         parent <- self$properties$parentReference
         name <- self$properties$name
@@ -369,6 +364,17 @@ private=list(
     {
         if(self$is_folder())
             stop("This method is only applicable for a file item", call.=FALSE)
+    },
+
+    normalise_remote_item=function()
+    {
+        # if this was a shared item, replace properties with those obtained from original drive
+        if(!private$remote)
+            return(NULL)
+        parent <- self$properties$parentReference
+        op <- file.path("drives", parent$driveId, "items", self$properties$id)
+        self$properties <- call_graph_endpoint(self$token, op)
+        private$remote <- FALSE
     }
 ))
 

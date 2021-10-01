@@ -1,5 +1,6 @@
 # Microsoft365R 2.3.1.9000
 
+- Add a `get_path()` method for drive items, which returns the path to the item starting from the root. Needed as Graph doesn't seem to store the path in an unmangled form anywhere.
 - Fix broken methods for accessing items in shared OneDrive/SharePoint folders (#89).
 - Fix a bug in sending file attachments in Teams chats (#87).
 

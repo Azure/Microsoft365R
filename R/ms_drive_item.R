@@ -21,7 +21,8 @@
 #' - `upload(src, dest, blocksize)`: Upload a file. Only applicable for a folder item.
 #' - `create_folder(path)`: Create a folder. Only applicable for a folder item.
 #' - `get_item(path)`: Get a child item (file or folder) under this folder.
-#' - `get_parent_folder()`: Get the parent folder for this item. Returns the root folder for the root.
+#' - `get_parent_folder()`: Get the parent folder for this item, as a drive item object. Returns the root folder for the root.
+#' - `get_path()`: Get the absolute path for this item, as a character string.
 #' - `is_folder()`: Information function, returns TRUE if this item is a folder.
 #'
 #' @section Initialization:
@@ -304,6 +305,12 @@ public=list(
                 sub("\\.$", "", error_message(httr::content(res)))))
         }
         invisible(NULL)
+    },
+
+    get_path=function()
+    {
+        path <- private$make_absolute_path()
+        sub("^.+root:?/?", "/", path)
     },
 
     print=function(...)

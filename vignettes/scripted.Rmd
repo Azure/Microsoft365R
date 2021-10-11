@@ -8,8 +8,71 @@ vignette: >
     %\VignetteEncoding{utf8}
 ---
 
-This vignette describes how to incorporate Microsoft365R into an automated (unattended) script, such as for a GitHub Actions workflow or other CI/CD process. There are a few steps involved:
+This vignette describes how to incorporate Microsoft365R into an automated (unattended) script, such as for a GitHub Actions workflow or other CI/CD process. This involves creating a new app registration that has application permissions, and using it to work with the Microsoft Graph API.
 
-- Create a new app registration and give it application permissions
-- Use the app ID to authenticate and get an OAuth token
-- Pass the token to the Microsoft365R functions
+## App registration
+
+The default Microsoft365R app registration only has _delegated_ permissions. This means that it requires you to authenticate with Azure Active Directory (AAD) to obtain an OAuth token, after which it will use your credentials to perform tasks. This doesn't work if you want to use the package in an automated script, ie one that is meant to run without user intervention.
+
+In this situation, you must create a new app registration that has _application_ permissions. This means that, rather than using the credentials of a logged-in user, Microsoft365R has its own, custom set of permissions that determine what it can do.
+
+The app registration for an unattended script looks slightly different to that for a user-facing application.
+
+- There is no redirect URI, since we don't need a user to authenticate in a browser.
+
+- You must set the **client secret**, which is like a password that serves to verify to AAD the identity of the workflow calling the script. Alternatively, you can use a certificate instead of a secret; this is more secure but also more complicated to setup and use.
+
+- In nearly all cases, the **intended audience** of your app registration should be only members of your AAD tenant.
+
+- Ensure that you give your app **application permissions** instead of delegated permissions. Refer to the complete [list of permissions](https://docs.microsoft.com/en-us/graph/permissions-reference?context=graph%2Fapi%2Fbeta&view=graph-rest-beta) to determine which ones you need.
+
+The following pages at the AAD documentation will be helpful:
+
+- [A step-by-step guide](https://docs.microsoft.com/en-us/azure/active-directory/develop/quickstart-register-app) to registering an app in the Azure portal.
+
+- [How to set permissions for an app](https://docs.microsoft.com/en-us/azure/active-directory/develop/quickstart-configure-app-access-web-apis).
+
+- [Authentication and authorization basics for Microsoft Graph](https://docs.microsoft.com/en-us/graph/auth/auth-concepts#microsoft-graph-permissions).
+
+### Application permissions and security
+
+It's important to note that application permissions are _much more powerful_ than delegated permissions. From the "Authentication and authorization basics" link above:
+
+> For application permissions, the effective permissions of your app will be the full level of privileges implied by the permission. For example, an app that has the User.ReadWrite.All application permission can update the profile of every user in the organization.
+
+For this reason, you should only give your app registration the minimum permissions it needs to get the job done. In particular, avoid giving your app read/write permissions if it only needs to read data.
+
+## Sample code skeleton
+
+Here is a simple script that retrieves a given user's OneDrive and lists the contents of the root directory. Note that we cannot use `get_personal/business_onedrive`, because these client functions assume that there is an authenticated user. Instead, we call the underlying R6 methods directly.
+
+For this script, the application permissions needed are as follows:
+- Get a user's details: User.Read
+- Read from OneDrive: Files.Read
+
+```r
+library(AzureGraph)
+library(Microsoft365R)
+
+tenant <- "your-tenant-here"
+
+# the application/client ID of the app registration you created in AAD
+# - not to be confused with the 'object ID' or 'service principal ID'
+app <- "your-app-id-here"
+
+# retrieve the client secret (password) from an environment variable
+pwd <- Sys.getenv("EXAMPLE_MS365R_CLIENT_SECRET")
+
+# retrieve the user whose OneDrive we want to access
+# - this should be their 'userPrincipalName', which is of the form 'name@tenant.com'
+# - note this may be different to their regular email address
+user <- Sys.getenv("EXAMPLE_MS365R_TARGET_USER")
+
+# create a Microsoft Graph login
+gr <- create_graph_login(tenant, app, password=pwd, auth_type="client_credentials")
+
+drv <- gr$get_user(user)$get_drive()
+
+drv$list_files()
+```
+

@@ -14,7 +14,7 @@ This vignette describes how to incorporate Microsoft365R into an automated (unat
 
 The default Microsoft365R app registration only has _delegated_ permissions. This means that it requires you to authenticate with Azure Active Directory (AAD) to obtain an OAuth token, after which it will use your credentials to perform tasks. This doesn't work if you want to use the package in an automated script, ie one that is meant to run without user intervention.
 
-In this situation, you must create a new app registration that has _application_ permissions. This means that, rather than using the credentials of a logged-in user, Microsoft365R has its own, custom set of permissions that determine what it can do.
+In this situation, you must create a new app registration in AAD that has _application_ permissions. This means that, rather than using the credentials of a logged-in user, Microsoft365R has its own, custom set of permissions that determine what it can do.
 
 The app registration for an unattended script looks slightly different to that for a user-facing application.
 
@@ -24,7 +24,7 @@ The app registration for an unattended script looks slightly different to that f
 
 - In nearly all cases, the **intended audience** of your app registration should be only members of your AAD tenant.
 
-- Ensure that you give your app **application permissions** instead of delegated permissions. Refer to the complete [list of permissions](https://docs.microsoft.com/en-us/graph/permissions-reference?context=graph%2Fapi%2Fbeta&view=graph-rest-beta) to determine which ones you need.
+- Ensure that you give your app **application permissions** instead of delegated permissions. Refer to the complete [list of Graph permissions](https://docs.microsoft.com/en-us/graph/permissions-reference?context=graph%2Fapi%2Fbeta&view=graph-rest-beta) to determine which ones you need.
 
 The following pages at the AAD documentation will be helpful:
 
@@ -44,9 +44,10 @@ For this reason, you should only give your app registration the minimum permissi
 
 ## Sample code skeleton
 
-Here is a simple script that retrieves a given user's OneDrive and lists the contents of the root directory. Note that we cannot use `get_personal/business_onedrive`, because these client functions assume that there is an authenticated user. Instead, we call the underlying R6 methods directly.
+Here is a simple script that retrieves a given user's OneDrive and lists the contents of the root directory. We cannot use `get_personal/business_onedrive`, because these client functions assume that a user is logged in. Instead, we call the underlying R6 methods directly.
 
-For this script, the application permissions needed are as follows:
+For this script, the application permissions needed are:
+
 - Get a user's details: User.Read
 - Read from OneDrive: Files.Read
 

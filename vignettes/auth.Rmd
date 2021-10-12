@@ -46,13 +46,11 @@ get_team("My team", tenant="mytenant")
 
 ## App registration and approvals
 
-For authentication purposes, the package is registered as an app in the 'aicatr' AAD tenant; depending on your organisation's security policy, you may have to get an admin to grant it access to your tenant. See [app_registration.md](https://github.com/Azure/Microsoft365R/blob/master/inst/app_registration.md) for details on the app, including the permissions it requires.
+Microsoft365R comes with a default app registration for authenticating with AAD; depending on your organisation's security policy, you may have to get an admin to grant it access to your tenant. See [app_registration.md](https://github.com/Azure/Microsoft365R/blob/master/inst/app_registration.md) for details on the permissions that Microsoft365R requires.
 
 ### Using your own app registration
 
-Rather than getting the Microsoft365R app approved, you can also use your own app registration for authentication. One specific scenario where this is **required** if you want to use Microsoft365R with Shiny---see the vignette "Using Microsoft365R in a Shiny app" for more on this topic, including how to configure the app registration in Azure Active Directory.
-
-For use in a local R session, if you want to use the default authorization code flow, the app registration should have a mobile & desktop redirect URI of `https://localhost:1410` (not a web or SPA redirect). If you want to use the device code flow, the "Allow native client" setting should be enabled. Your app should also have the same default permissions as the Microsoft365R app (see above).
+Rather than getting the default app registration approved, you can also create your own registration for authentication. If this is for use in a local R session, it should have a mobile & desktop redirect URI of `https://localhost:1410` (not a web or SPA redirect), and the "Allow native client" setting should be enabled. You can use the same permissions as the default app, or set your own: for example, if you know you don't need to interact with Outlook, you can omit the Mail.Send and Mail.ReadWrite permissions.
 
 Once the app has been registered, you can pass the app ID to Microsoft365R in a couple of ways.
 
@@ -63,6 +61,13 @@ Once the app has been registered, you can pass the app ID to Microsoft365R in a 
   ```
 
 - Alternatively, if the environment variable `CLIMICROSOFT365_AADAPPID` is set, Microsoft365R will use its value as the app ID for authenticating to the Microsoft 365 Business services (Teams, SharePoint and OneDrive for Business). This environment variable is defined by the [CLI for Microsoft365](https://pnp.github.io/cli-microsoft365/), an open source tool for managing Microsoft 365 accounts; you thus can reuse the same app ID for both the CLI and Microsoft365R.
+
+If you want to use Microsoft365R outside a local R session, creating a custom app registration is **required**. In particular, this includes the following common scenarios:
+
+- Using Microsoft365R inside a Shiny webapp
+- Using it in an unattended (automated) script, eg in a GitHub Actions workflow or other CI/CD pipeline
+
+See the vignettes "Using Microsoft365R in a Shiny app" and "Using Microsoft365R in an unattended script" for more on these use cases, including how to configure the app registration in Azure Active Directory.
 
 ### Using other app registrations: last-resort workarounds
 

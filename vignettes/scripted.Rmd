@@ -10,6 +10,8 @@ vignette: >
 
 This vignette describes how to incorporate Microsoft365R into an automated (unattended) script, such as for a GitHub Actions workflow or other CI/CD process. This involves creating a new app registration that has application permissions, and using it to work with the Microsoft Graph API.
 
+Note that the workflow demonstrated here is potentially very powerful and requires admin consent to run. For this reason, you may not be able to run it on your own.
+
 ## App registration
 
 The default Microsoft365R app registration only has _delegated_ permissions. This means that it requires you to authenticate with Azure Active Directory (AAD) to obtain an OAuth token, after which it will use your credentials to perform tasks. This doesn't work if you want to use the package in an automated script, ie one that is meant to run without user intervention.
@@ -36,11 +38,11 @@ The following pages at the AAD documentation will be helpful:
 
 ### Application permissions and security
 
-It's important to note that application permissions are _much more powerful_ than delegated permissions. From the "Authentication and authorization basics" link above:
+Application permissions are _much more powerful_ than delegated permissions. From the "Authentication and authorization basics" link above:
 
 > For application permissions, the effective permissions of your app will be the full level of privileges implied by the permission. For example, an app that has the User.ReadWrite.All application permission can update the profile of every user in the organization.
 
-For this reason, you should only give your app registration the minimum permissions it needs to get the job done. In particular, avoid giving your app read/write permissions if it only needs to read data.
+This is why granting application permissions always requires admin consent. Similarly, you should only give your app registration the minimum permissions it needs to get the job done. In particular, avoid giving your app read/write permissions if it only needs to read data.
 
 ## Sample code skeleton
 
@@ -50,6 +52,8 @@ For this script, the application permissions needed are:
 
 - Get a user's details: User.Read
 - Read from OneDrive: Files.Read
+
+Observe that this script can potentially read _every user's OneDrive_ in your organisation, given their username. This shows why client secrets and application permissions are not to be handed out lightly!
 
 ```r
 library(AzureGraph)

@@ -154,15 +154,15 @@ target_dir <- dirname(target_path)
 target_name <- basename(target_path)
 item <- NULL
 
-for(i in seq_along(shared))
+for(shared_item in shared)
 {
-    remote_drive <- shared[[i]]$properties$parentReference$driveId
-    path <- shared[[i]]$get_parent_path()
-    name <- shared[[i]]$properties$name
+    remote_drive <- shared_item$properties$parentReference$driveId
+    path <- shared_item$get_parent_path()
+    name <- shared_item$properties$name
 
     if(remote_drive == target_drive && path == target_dir && name == target_name)
     {
-        item <- shared[[i]]
+        item <- shared_item
         break
     }
 }

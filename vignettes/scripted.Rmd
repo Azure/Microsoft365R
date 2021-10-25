@@ -8,11 +8,13 @@ vignette: >
     %\VignetteEncoding{utf8}
 ---
 
-This vignette describes how to incorporate Microsoft365R into an automated (unattended) script, such as for a GitHub Actions workflow or other CI/CD process. This involves creating a new app registration that has application permissions, and using it to work with the Microsoft Graph API.
+This vignette describes how to incorporate Microsoft365R into an automated (unattended) script, such as for a GitHub Actions workflow or other CI/CD process. There are two ways of achieving this: with a service principal, and with a  service account.
 
-Note that the workflow demonstrated here is potentially very powerful and requires admin consent to run. For this reason, you may not be able to run it on your own.
+## Service principal
 
-## App registration
+This approach involves creating a new app registration that has application permissions, and using it to work with the Microsoft Graph API. Note that working with application permissions requires admin consent, so you won't be able to run this workflow on your own unless you're an admin.
+
+### App registration
 
 The default Microsoft365R app registration only has _delegated_ permissions. This means that it requires you to authenticate with Azure Active Directory (AAD) to obtain an OAuth token, after which it will use your credentials to perform tasks. This doesn't work if you want to use the package in an automated script, ie one that is meant to run without user intervention.
 
@@ -44,7 +46,7 @@ Application permissions are _much more powerful_ than delegated permissions. Fro
 
 This is why granting application permissions always requires admin consent. Similarly, you should only give your app registration the minimum permissions it needs to get the job done. In particular, avoid giving your app read/write permissions if it only needs to read data.
 
-## Sample code skeleton
+### Sample code skeleton
 
 Here is a simple script that retrieves a given user's OneDrive and lists the contents of the root directory. We cannot use `get_personal/business_onedrive`, because these client functions assume that a user is logged in. Instead, we call the underlying R6 methods directly.
 
@@ -81,3 +83,88 @@ drv <- gr$get_user(user)$get_drive()
 drv$list_files()
 ```
 
+## Service account
+
+Using a service principal is the Microsoft-recommended approach, but as noted above, is potentially very powerful. For this reason, you may want to consider using a service account instead. This is a normal user account that is not intended for interactive use, but instead authenticates via a script. The advantage is that the account only needs delegated permissions and so won't have access to all of your tenant's resources.
+
+To authenticate a service account with AAD non-interactively, you use the [resource owner password grant](https://docs.microsoft.com/en-au/azure/active-directory/develop/v2-oauth-ropc) flow. You can use any app registration that has access to your tenant and has the correct delegated permissions to work with Microsoft Graph; see the "Authenticating to Microsoft 365" vignette for more information on creating an app registration. Note that you (or an admin) must grant consent for the permissions beforehand.
+
+### Creating a service account
+
+While any user account can in principle be employed as a service account, you (or an admin) should create a new account specifically for this purpose. This is for the following reasons:
+
+- There are restrictions on how the ROPC authentication flow works with AAD. In particular a service account can't make use of multifactor authentication, and it also can't be a personal account that is a guest in a tenant.
+- Creating a new account allows you to assign it a strong random password, which means it can't be easily guessed, phished or brute-forced. For example, you can use the `openssl::rand_bytes()` function to generate the password.
+- You can limit the account to only the roles and group memberships it needs for its specific task.
+
+### Sample code
+
+Here is a simple example of a script that logs in and accesses a folder in SharePoint. We assume that the service account has been granted access to the SharePoint site beforehand.
+
+```r
+library(Microsoft365R)
+
+tenant <- "your-tenant-here"
+
+# the application/client ID of the app registration to use
+app <- "your-app-id-here"
+
+# get the service account username and password
+user <- Sys.getenv("EXAMPLE_MS365R_SERVICE_USER")
+pwd <- Sys.getenv("EXAMPLE_MS365R_SERVICE_PASSWORD")
+
+# SharePoint site and path to folder
+sitename <- Sys.getenv("EXAMPLE_MS365R_SPO_SITENAME")
+folderpath <- Sys.getenv("EXAMPLE_MS365R_SPO_FOLDERPATH")
+
+# use the 'resource_owner' auth type for a non-interactive login
+site <- get_sharepoint_site(sitename, tenant=tenant, app=app, username=user, password=pwd,
+    auth_type="resource_owner")
+
+folder <- site$get_drive()$get_item(folderpath)
+folder$list_files()
+```
+
+Here is a slightly more complex example: a script that downloads a shared file in OneDrive. The file must have been shared with the service account beforehand, but could be sourced from either another user's OneDrive or from a SharePoint document library.
+
+```r
+library(Microsoft365R)
+
+tenant <- "your-tenant-here"
+
+# the application/client ID of the app registration to use
+app <- "your-app-id-here"
+
+# get the service account username and password
+user <- Sys.getenv("EXAMPLE_MS365R_SERVICE_USER")
+pwd <- Sys.getenv("EXAMPLE_MS365R_SERVICE_PASSWORD")
+
+# the drive ID and file we want to access
+target_drive <- Sys.getenv("EXAMPLE_MS365R_TARGET_DRIVE")
+target_path <- Sys.getenv("EXAMPLE_MS365R_TARGET_PATH")
+
+drv <- get_business_onedrive(tenant=tenant, app=app, username=user, password=pwd,
+    auth_type="resource_owner")
+
+# search for the desired item in the list of shared items
+shared <- drv$list_shared_files(info="items")
+target_dir <- dirname(target_path)
+target_name <- basename(target_path)
+item <- NULL
+
+for(shared_item in shared)
+{
+    remote_drive <- shared_item$properties$parentReference$driveId
+    path <- shared_item$get_parent_path()
+    name <- shared_item$properties$name
+
+    if(remote_drive == target_drive && path == target_dir && name == target_name)
+    {
+        item <- shared_item
+        break
+    }
+}
+if(is.null(item)) stop("Item not found!")
+
+item$download(overwrite=TRUE)
+```

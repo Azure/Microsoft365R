@@ -87,7 +87,7 @@ drv$list_files()
 
 Using a service principal is the Microsoft-recommended approach, but as noted above, is potentially very powerful. For this reason, you may want to consider using a service account instead. This is a normal user account that is not intended for interactive use, but instead authenticates via a script. The advantage is that the account only needs delegated permissions and so won't have access to all of your tenant's resources.
 
-To authenticate a service account with AAD non-interactively, you use the [resource owner password grant](https://docs.microsoft.com/en-au/azure/active-directory/develop/v2-oauth-ropc) flow. You can use any app registration that has access to your tenant and has the correct delegated permissions to work with Microsoft Graph. Note that you (or an admin) must grant consent for the permissions beforehand.
+To authenticate a service account with AAD non-interactively, you use the [resource owner password grant](https://docs.microsoft.com/en-au/azure/active-directory/develop/v2-oauth-ropc) flow. You can use any app registration that has access to your tenant and has the correct delegated permissions to work with Microsoft Graph; see the "Authenticating to Microsoft 365" vignette for more information on creating an app registration. Note that you (or an admin) must grant consent for the permissions beforehand.
 
 ### Creating a service account
 
@@ -95,14 +95,13 @@ While any user account can in principle be employed as a service account, you (o
 
 - There are restrictions on how the ROPC authentication flow works with AAD. In particular a service account can't make use of multifactor authentication, and it also can't be a personal account that is a guest in a tenant.
 - Creating a new account allows you to assign it a strong random password, which means it can't be easily guessed, phished or brute-forced. For example, you can use the `openssl::rand_bytes()` function to generate the password.
-- You can limit the account to only the roles and permissions it needs for its specific task.
+- You can limit the account to only the roles and group memberships it needs for its specific task.
 
 ### Sample code
 
 Here is a simple example of a script that logs in and accesses a folder in SharePoint. We assume that the service account has been granted access to the SharePoint site beforehand.
 
 ```r
-library(AzureGraph)
 library(Microsoft365R)
 
 tenant <- "your-tenant-here"
@@ -129,7 +128,6 @@ folder$list_files()
 Here is a slightly more complex example: a script that downloads a shared file in OneDrive. The file must have been shared with the service account beforehand, but could be sourced from either another user's OneDrive or from a SharePoint document library.
 
 ```r
-library(AzureGraph)
 library(Microsoft365R)
 
 tenant <- "your-tenant-here"

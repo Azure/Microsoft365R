@@ -30,6 +30,7 @@ add_external_attachments.blastula_message <- function(object, email)
 
 add_external_attachments.envelope <- function(object, email)
 {
+    require_emayili_0.6()
     parts <- object$parts
 
     # parts is either a single body object (itself a named list), or a list of body objects

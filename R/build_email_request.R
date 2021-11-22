@@ -40,6 +40,7 @@ build_email_request.blastula_message <- function(body, content_type,
 
 build_email_request.envelope <- function(body, token=NULL, user_id=NULL, ...)
 {
+    require_emayili_0.6()
     parts <- body$parts
 
     # parts is either a single body object (itself a named list), or a list of body objects
@@ -113,4 +114,11 @@ build_email_recipients <- function(to, cc, bcc, reply_to)
         replyTo=make_recipients(reply_to)
     )
     out[sapply(out, function(x) is_empty(x) || !is.na(x))]
+}
+
+
+require_emayili_0.6 <- function()
+{
+    if(packageVersion("emayili") < package_version("0.6"))
+        stop("Need emayili version 0.6 or later", call.=FALSE)
 }

@@ -79,7 +79,7 @@ test_that("Attachments from emayili work",
 
     ey_em <- emayili::envelope(
         subject="test emayili email",
-        html="test emayili email"
+        html="<p>test emayili email</p>"
     )
     ey_em <- emayili::attachment(ey_em, "../resources/logo_small.jpg")
 

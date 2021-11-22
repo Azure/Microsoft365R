@@ -98,7 +98,7 @@ test_that("Creating email with emayili works",
     ey_em <- emayili::envelope(
         to=to_addr,
         subject="test emayili email",
-        html="test emayili email"
+        html="<p>test emayili email</p>"
     )
     em <- folder$create_email(ey_em)
 

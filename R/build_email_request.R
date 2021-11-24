@@ -62,14 +62,14 @@ build_email_request.envelope <- function(body, token=NULL, user_id=NULL, ...)
     }
     else list(body=list(contentType="text", content=""))
 
-    if(!is_empty(body$header$Subject))
-        req$subject <- body$header$Subject$values
+    if(!is_empty(emayili::subject(body)))
+        req$subject <- as.character(emayili::subject(body))
 
     recipients <- build_email_recipients(
-        unclass(body$headers$To$values)$email,
-        unclass(body$headers$Cc$values)$email,
-        unclass(body$headers$Bcc$values)$email,
-        unclass(body$headers$`Reply-To`$values)$email
+        as.character(emayili::to(body)),
+        as.character(emayili::cc(body)),
+        as.character(emayili::bcc(body)),
+        as.character(emayili::reply(body))
     )
 
     utils::modifyList(req, recipients)

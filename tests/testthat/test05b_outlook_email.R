@@ -96,7 +96,7 @@ test_that("Creating email with emayili works",
         skip("Emayili tests skipped: package not installed")
 
     ey_em <- emayili::envelope(
-        to=to_addr,
+        to=c(to_addr, cc_addr),
         subject="test emayili email",
         html="<p>test emayili email</p>"
     )

@@ -66,10 +66,10 @@ build_email_request.envelope <- function(body, token=NULL, user_id=NULL, ...)
         req$subject <- body$header$Subject$values
 
     recipients <- build_email_recipients(
-        body$headers$To$values,
-        body$headers$Cc$values,
-        body$headers$Bcc$values,
-        body$headers$`Reply-To`$values
+        unclass(body$headers$To$values)$email,
+        unclass(body$headers$Cc$values)$email,
+        unclass(body$headers$Bcc$values)$email,
+        unclass(body$headers$`Reply-To`$values)$email
     )
 
     utils::modifyList(req, recipients)
@@ -101,8 +101,8 @@ build_email_recipients <- function(to, cc, bcc, reply_to)
                 name <- props$displayName
             }
             else name <- x <- as.character(x)
-            if(!grepl(".+@.+", x))  # basic check for a valid address
-                stop("Invalid email address '", x, "'", call.=FALSE)
+            if(!all(grepl(".+@.+", x)))  # basic check for a valid address
+                stop("Invalid email address supplied", call.=FALSE)
             list(emailAddress=list(name=name, address=x))
         })
     }

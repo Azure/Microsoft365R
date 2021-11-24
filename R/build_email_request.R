@@ -40,9 +40,14 @@ build_email_request.blastula_message <- function(body, content_type,
 
 build_email_request.envelope <- function(body, token=NULL, user_id=NULL, ...)
 {
+    require_emayili_0.6()
     parts <- body$parts
 
-    inline <- which(sapply(parts, function(p) p$header$content_disposition == "inline"))
+    # parts is either a single body object (itself a named list), or a list of body objects
+    if(!is.null(names(parts)))
+        parts <- list(parts)
+
+    inline <- which(sapply(parts, function(p) p$disposition == "inline"))
     if(length(inline) > 1)
         warning("Multiple inline sections found, only the first will be used", call.=FALSE)
     req <- if(!is_empty(inline))
@@ -50,18 +55,24 @@ build_email_request.envelope <- function(body, token=NULL, user_id=NULL, ...)
         inline <- parts[[inline[1]]]
         list(
             body=list(
-                contentType=if(inline$header$content_type == "text/html") "html" else "text",
-                content=inline$body
+                contentType=if(inherits(inline, "text_html")) "html" else "text",
+                content=inline$content
             )
         )
     }
     else list(body=list(contentType="text", content=""))
 
-    if(!is_empty(body$header$Subject))
-        req$subject <- body$header$Subject
+    if(!is_empty(emayili::subject(body)))
+        req$subject <- as.character(emayili::subject(body))
 
-    utils::modifyList(req,
-        build_email_recipients(body$header$To, body$header$Cc, body$header$Bcc, body$header$Reply_To))
+    recipients <- build_email_recipients(
+        as.character(emayili::to(body)),
+        as.character(emayili::cc(body)),
+        as.character(emayili::bcc(body)),
+        as.character(emayili::reply(body))
+    )
+
+    utils::modifyList(req, recipients)
 }
 
 
@@ -90,8 +101,8 @@ build_email_recipients <- function(to, cc, bcc, reply_to)
                 name <- props$displayName
             }
             else name <- x <- as.character(x)
-            if(!grepl(".+@.+", x))  # basic check for a valid address
-                stop("Invalid email address '", x, "'", call.=FALSE)
+            if(!all(grepl(".+@.+", x)))  # basic check for a valid address
+                stop("Invalid email address supplied", call.=FALSE)
             list(emailAddress=list(name=name, address=x))
         })
     }
@@ -103,4 +114,11 @@ build_email_recipients <- function(to, cc, bcc, reply_to)
         replyTo=make_recipients(reply_to)
     )
     out[sapply(out, function(x) is_empty(x) || !is.na(x))]
+}
+
+
+require_emayili_0.6 <- function()
+{
+    if(packageVersion("emayili") < package_version("0.6"))
+        stop("Need emayili version 0.6 or later", call.=FALSE)
 }

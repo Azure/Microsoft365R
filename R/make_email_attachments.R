@@ -30,10 +30,17 @@ add_external_attachments.blastula_message <- function(object, email)
 
 add_external_attachments.envelope <- function(object, email)
 {
-    atts <-  which(sapply(object$parts, function(p) p$header$content_disposition == "attachment"))
-    for(a in object$parts[atts])
+    require_emayili_0.6()
+    parts <- object$parts
+
+    # parts is either a single body object (itself a named list), or a list of body objects
+    if(!is.null(names(parts)))
+        parts <- list(parts)
+
+    atts <-  which(sapply(parts, inherits, "attachment"))
+    for(a in parts[atts])
     {
-        if(!is_small_attachment(nchar(a$body)/0.74))  # allow for base64 bloat
+        if(!is_small_attachment(length(a$content)))
         {
             warning("File attachments from emayili > 3MB not currently supported; will be skipped", call.=FALSE)
             next
@@ -41,10 +48,11 @@ add_external_attachments.envelope <- function(object, email)
         att <- list(
             `@odata.type`="#microsoft.graph.fileAttachment",
             isInline=FALSE,
-            contentBytes=a$body,
-            name=a$header$filename,
-            contentType=a$header$content_type
+            contentBytes=openssl::base64_encode(a$content),
+            name=unclass(gsub('"', "", sub("^.+filename=", "", a$disposition))),
+            contentType=unclass(sub(";.+$", "", a$type))
         )
+        # print(att)
         email$do_operation("attachments", body=att, http_verb="POST")
     }
 }

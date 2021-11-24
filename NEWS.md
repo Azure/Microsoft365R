@@ -1,3 +1,7 @@
+# Microsoft365R 2.3.2.9000
+
+- Compatibility update for emayili version 0.6+. Note that this _breaks_ compatibility with emayili versions 0.5 and earlier.
+
 # Microsoft365R 2.3.2
 
 ## OneDrive/SharePoint

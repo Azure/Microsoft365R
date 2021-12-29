@@ -14,17 +14,19 @@ public=list(
         private$make_basic_list("events", filter, n)
     },
 
-    get_event=function()
+    get_event=function(event_id)
+    {
+        op <- file.path("events", event_id)
+        ms_event$new(self$token, self$tenant, self$do_operation(op))
+    },
+
+    create_event=function(subject, start, end, required_attendees, optional_attendees, location)
     {},
 
-    create_event=function(...)
-    {},
-
-    update_event=function(...)
-    {},
-
-    delete_event=function(id, confirm=TRUE)
-    {},
+    delete_event=function(event_id, confirm=TRUE)
+    {
+        self$get_event(event_id)$delete(confirm=confirm)
+    },
 
     print=function(...)
     {

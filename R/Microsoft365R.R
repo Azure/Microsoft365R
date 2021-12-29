@@ -65,6 +65,12 @@ utils::globalVariables(c("self", "private"))
     register_graph_class("chat", ms_chat,
         function(props) "chatType" %in% names(props))
 
+    register_graph_class("calendar", ms_calendar,
+        function(props) "isDefaultCalendar" %in% names(props))
+
+    register_graph_class("event", ms_event,
+        function(props) "organizer" %in% names(props))
+
     add_object_methods()
     add_graph_methods()
     add_user_methods()

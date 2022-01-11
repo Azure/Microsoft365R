@@ -548,7 +548,7 @@ make_reply_comment.blastula_message <- function(comment)
 make_reply_comment.envelope <- function(comment)
 {
     parts <- comment$parts
-    inline <- which(sapply(parts, function(p) p$header$content_disposition == "inline"))
+    inline <- which(sapply(parts, function(p) p$disposition == "inline"))
     if(length(inline) > 1)
         warning("Multiple inline sections found, only the first will be used", call.=FALSE)
     req <- if(!is_empty(inline))

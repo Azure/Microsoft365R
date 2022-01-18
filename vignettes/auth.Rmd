@@ -3,7 +3,7 @@ title: "Authenticating to Microsoft 365"
 author: Hong Ooi
 output: rmarkdown::html_vignette
 vignette: >
-    %\VignetteIndexEntry{Authentication}
+    %\VignetteIndexEntry{Authenticating to Microsoft 365}
     %\VignetteEngine{knitr::rmarkdown}
     %\VignetteEncoding{utf8}
 ---

@@ -119,6 +119,6 @@ build_email_recipients <- function(to, cc, bcc, reply_to)
 
 require_emayili_0.6 <- function()
 {
-    if(packageVersion("emayili") < package_version("0.6"))
+    if(utils::packageVersion("emayili") < package_version("0.6"))
         stop("Need emayili version 0.6 or later", call.=FALSE)
 }

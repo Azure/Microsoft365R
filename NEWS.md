@@ -1,3 +1,8 @@
+# Microsoft365R 2.3.3.9000
+
+- Fix a bug in retrieving a drive by name (#104).
+
+
 # Microsoft365R 2.3.3
 
 - Compatibility update for emayili version 0.6+. Note that this _breaks_ compatibility with emayili versions 0.5 and earlier.

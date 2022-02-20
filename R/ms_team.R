@@ -125,7 +125,7 @@ public=list(
             wch <- which(sapply(drives, function(drv) drv$properties$name == drive_name))
             if(length(wch) != 1)
                 stop("Invalid drive name", call.=FALSE)
-            return(drives[[1]])
+            return(drives[[wch]])
         }
         op <- if(is.null(drive_id))
             "drive"

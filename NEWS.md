@@ -1,7 +1,6 @@
-# Microsoft365R 2.3.3.9000
+# Microsoft365R 2.3.4
 
 - Fix a bug in retrieving a drive by name (#104).
-
 
 # Microsoft365R 2.3.3
 

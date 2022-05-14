@@ -19,7 +19,7 @@ add_external_attachments.blastula_message <- function(object, email)
         body <- list(
             `@odata.type`="#microsoft.graph.fileAttachment",
             contentBytes=object$images[[i]],
-            name=names(object$images)[1],
+            name=names(object$images)[i],
             contentType=attr(object$images[[i]], "content_type"),
             isInline=TRUE
         )

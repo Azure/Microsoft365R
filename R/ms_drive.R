@@ -204,6 +204,8 @@ public=list(
             df$isdir <- if(!is.null(df$folder))
                 !is.na(df$folder$childCount)
             else rep(FALSE, nrow(df))
+            if(is.null(df$size))
+                df$size <- rep(NA, nrow(df))
         }
 
         df$remoteItem <- lapply(seq_len(nrow(df)),

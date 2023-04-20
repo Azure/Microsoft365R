@@ -348,10 +348,8 @@ private=list(
     # dest = . or '' --> this item
     # dest = .. --> parent folder
     # dest = (childname) --> path to named child
-    make_absolute_path=function(dest=".", use_itemid=NULL)
+    make_absolute_path=function(dest=".", use_itemid=getOption("microsoft365r_use_itemid_in_path"))
     {
-        if(is.null(use_itemid))
-            use_itemid <- getOption("microsoft365r_use_itemid_in_path")
         if(use_itemid == "remote")
             use_itemid <- private$remote
 

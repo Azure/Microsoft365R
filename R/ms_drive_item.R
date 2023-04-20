@@ -387,23 +387,18 @@ private=list(
     # ".." not supported
     make_absolute_path_with_itemid=function(dest=".")
     {
-        cat("Getting path using item ID: ")
         driveid <- self$properties$parentReference$driveId
         id <- self$properties$id
         base <- sprintf("drives/%s/items/%s", driveid, id)
 
         if(dest == "." || dest == "")
-        {
-            cat(base, "\n")
             return(base)
-        }
         else if(dest == "..")
             stop("Path with item ID to parent folder not supported", call.=FALSE)
         else if(substr(dest, 1, 1) == "/")
             stop("Absolute path incompatible with path starting from item ID", call.=FALSE)
 
         op <- sprintf("%s:/%s", base, dest)
-        cat(op, "\n")
         utils::URLencode(enc2utf8(op))
     },
 

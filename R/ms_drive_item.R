@@ -198,7 +198,13 @@ public=list(
         if(!is.null(filter))
             opts$`filter` <- filter
 
-        op <- sub("root:/children", "root/children", paste0(private$make_absolute_path(path), ":/children"))
+        fullpath <- private$make_absolute_path(path)
+        # possible fullpath formats -> string to append:
+        # drives/xxx/root -> /children
+        # drives/xxx/root:/foo/bar -> :/children
+        # drives/xxx/items/yyy -> /children
+        # drives/xxx/items/yyy:/foo/bar -> :/children
+        op <- if(grepl(":/", fullpath)) paste0(fullpath, ":/children") else paste0(fullpath, "/children")
         children <- call_graph_endpoint(self$token, op, options=opts, simplify=TRUE)
 
         # get file list as a data frame, or return the iterator immediately if n is NULL
@@ -261,7 +267,15 @@ public=list(
         con <- file(src, open="rb")
         on.exit(close(con))
 
-        op <- paste0(private$make_absolute_path(dest), ":/createUploadSession")
+        fullpath <- private$make_absolute_path(dest)
+        # possible fullpath formats -> string to append:
+        # drives/xxx/root -> /createUploadSession
+        # drives/xxx/root:/foo/bar -> :/createUploadSession
+        # drives/xxx/items/yyy -> /createUploadSession
+        # drives/xxx/items/yyy:/foo/bar -> :/createUploadSession
+        op <- if(grepl(":/", fullpath))
+            paste0(fullpath, ":/createUploadSession")
+        else paste0(fullpath, "/createUploadSession")
         upload_dest <- call_graph_endpoint(self$token, op, http_verb="POST")$uploadUrl
 
         size <- file.size(src)
@@ -334,14 +348,22 @@ private=list(
     # dest = . or '' --> this item
     # dest = .. --> parent folder
     # dest = (childname) --> path to named child
-    make_absolute_path=function(dest=".")
+    make_absolute_path=function(dest=".", use_itemid=NULL)
+    {
+        if(is.null(use_itemid))
+            use_itemid <- getOption("microsoft365r_use_itemid_in_path")
+        if(use_itemid == "remote")
+            use_itemid <- private$remote
+
+        if(use_itemid)
+            private$make_absolute_path_with_itemid(dest)
+        else private$make_absolute_path_from_root(dest)
+    },
+
+    make_absolute_path_from_root=function(dest=".")
     {
         if(dest == ".")
             dest <- ""
-
-        # this is needed to find the correct parent folder for a shared item
-        if(private$remote)
-            self$sync_fields()
 
         parent <- self$properties$parentReference
         name <- self$properties$name
@@ -359,6 +381,30 @@ private=list(
         if(dest != "..")
             op <- file.path(op, dest)
         utils::URLencode(enc2utf8(sub(":?/?$", "", op)))
+    },
+
+    # construct path using this item's ID
+    # ".." not supported
+    make_absolute_path_with_itemid=function(dest=".")
+    {
+        cat("Getting path using item ID: ")
+        driveid <- self$properties$parentReference$driveId
+        id <- self$properties$id
+        base <- sprintf("drives/%s/items/%s", driveid, id)
+
+        if(dest == "." || dest == "")
+        {
+            cat(base, "\n")
+            return(base)
+        }
+        else if(dest == "..")
+            stop("Path with item ID to parent folder not supported", call.=FALSE)
+        else if(substr(dest, 1, 1) == "/")
+            stop("Absolute path incompatible with path starting from item ID", call.=FALSE)
+
+        op <- sprintf("%s:/%s", base, dest)
+        cat(op, "\n")
+        utils::URLencode(enc2utf8(op))
     },
 
     assert_is_folder=function()

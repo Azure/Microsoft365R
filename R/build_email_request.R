@@ -81,7 +81,7 @@ build_email_recipients <- function(to, cc, bcc, reply_to)
     make_recipients <- function(addr_list)
     {
         # NA means don't update current value
-        if(!is_empty(addr_list) && is.na(addr_list))
+        if(!is_empty(addr_list) && any(is.na(addr_list)))
             return(NA)
 
         # handle case of a single az_user object

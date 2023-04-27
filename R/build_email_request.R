@@ -113,7 +113,7 @@ build_email_recipients <- function(to, cc, bcc, reply_to)
         bccRecipients=make_recipients(bcc),
         replyTo=make_recipients(reply_to)
     )
-    out[sapply(out, function(x) is_empty(x) || !is.na(x))]
+    out[sapply(out, function(x) is_empty(x) || !any(is.na(x)))]
 }
 
 

@@ -181,7 +181,7 @@ public=list(
         self$get_item(path)$update(...)
     },
 
-    list_shared_items=function(info=c("partial", "items", "all"), allow_external=FALSE,
+    list_shared_items=function(info=c("partial", "items", "all"), allow_external=TRUE,
                                filter=NULL, n=Inf, pagesize=1000)
     {
         info <- match.arg(info)
@@ -204,6 +204,8 @@ public=list(
             df$isdir <- if(!is.null(df$folder))
                 !is.na(df$folder$childCount)
             else rep(FALSE, nrow(df))
+            if(is.null(df$size))
+                df$size <- rep(NA, nrow(df))
         }
 
         df$remoteItem <- lapply(seq_len(nrow(df)),

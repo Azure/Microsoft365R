@@ -1,3 +1,7 @@
+# Microsoft365R 2.3.4.9000
+
+- Fix broken functionality for shared items in OneDrive/Sharepoint. In particular, this should allow using the MS365 backend with the pins package (#149/#129).
+
 # Microsoft365R 2.3.4
 
 - Fix a bug in retrieving a drive by name (#104).

@@ -181,45 +181,43 @@ public=list(
         self$get_item(path)$update(...)
     },
 
-    list_shared_items=function(info=c("partial", "items", "all"), allow_external=TRUE,
-                               filter=NULL, n=Inf, pagesize=1000)
+    list_shared_items=function(allow_external=TRUE, filter=NULL, n=Inf, pagesize=1000)
     {
-        info <- match.arg(info)
         opts <- list(`$top`=pagesize)
         if(allow_external)
             opts$allowExternal <- "true"
         if(!is.null(filter))
             opts$`filter` <- filter
-        children <- self$do_operation("sharedWithMe", options=opts, simplify=TRUE)
+        children <- self$do_operation("sharedWithMe", options=opts, simplify=FALSE)
 
         # get file list as a data frame, or return the iterator immediately if n is NULL
-        df <- extract_list_values(self$get_list_pager(children), n)
-        if(is.null(n))
-            return(df)
+        extract_list_values(self$get_list_pager(children), n)
+        # if(is.null(n))
+        #     return(df)
 
-        if(is_empty(df))
-            df <- data.frame(name=character(), size=numeric(), isdir=logical(), remoteItem=I(list()))
-        else if(info != "items")
-        {
-            df$isdir <- if(!is.null(df$folder))
-                !is.na(df$folder$childCount)
-            else rep(FALSE, nrow(df))
-            if(is.null(df$size))
-                df$size <- rep(NA, nrow(df))
-        }
+        # if(is_empty(df))
+        #     df <- data.frame(name=character(), size=numeric(), isdir=logical(), remoteItem=I(list()))
+        # else if(info != "items")
+        # {
+        #     df$isdir <- if(!is.null(df$folder))
+        #         !is.na(df$folder$childCount)
+        #     else rep(FALSE, nrow(df))
+        #     if(is.null(df$size))
+        #         df$size <- rep(NA, nrow(df))
+        # }
 
-        df$remoteItem <- lapply(seq_len(nrow(df)),
-            function(i) ms_drive_item$new(self$token, self$tenant, df$remoteItem[i, ], remote=TRUE))
+        # df$remoteItem <- lapply(seq_len(nrow(df)),
+        #     function(i) ms_drive_item$new(self$token, self$tenant, df$remoteItem[i, ], remote=TRUE))
 
-        switch(info,
-            partial=df[c("name", "size", "isdir", "remoteItem")],
-            items=df$remoteItem,
-            all=
-            {
-                firstcols <- c("name", "size", "isdir", "remoteItem")
-                df[c(firstcols, setdiff(names(df), firstcols))]
-            }
-        )
+        # switch(info,
+        #     partial=df[c("name", "size", "isdir", "remoteItem")],
+        #     items=df$remoteItem,
+        #     all=
+        #     {
+        #         firstcols <- c("name", "size", "isdir", "remoteItem")
+        #         df[c(firstcols, setdiff(names(df), firstcols))]
+        #     }
+        # )
     },
 
     print=function(...)

@@ -109,10 +109,10 @@ ms_drive_item <- R6::R6Class("ms_drive_item", inherit=ms_object,
 
 public=list(
 
-    initialize=function(token, tenant=NULL, properties=NULL, remote=FALSE)
+    initialize=function(token, tenant=NULL, properties=NULL, remote=NULL)
     {
         self$type <- "drive item"
-        private$remote <- remote
+        private$remote <- !is.null(properties$remoteItem)
         private$api_type <- file.path("drives", properties$parentReference$driveId, "items")
         super$initialize(token, tenant, properties)
     },
@@ -153,7 +153,9 @@ public=list(
 
     is_folder=function()
     {
-        children <- self$properties$folder$childCount
+        children <- if(private$remote)
+            self$properties$remoteItem$folder$childCount
+        else self$properties$folder$childCount
         !is.null(children) && !is.na(children)
     },
 
@@ -353,18 +355,23 @@ private=list(
         if(use_itemid == "remote")
             use_itemid <- private$remote
 
+        # use remote item props if present
+        props <- if(!is.null(self$properties$remoteItem))
+            self$properties$remoteItem
+        else self$properties
+
         if(use_itemid)
-            private$make_absolute_path_with_itemid(dest)
-        else private$make_absolute_path_from_root(dest)
+            private$make_absolute_path_with_itemid(props, dest)
+        else private$make_absolute_path_from_root(props, dest)
     },
 
-    make_absolute_path_from_root=function(dest=".")
+    make_absolute_path_from_root=function(props, dest=".")
     {
         if(dest == ".")
             dest <- ""
 
-        parent <- self$properties$parentReference
-        name <- self$properties$name
+        parent <- props$parentReference
+        name <- props$name
         op <- if(name == "root")
             file.path("drives", parent$driveId, "root:")
         else
@@ -383,10 +390,10 @@ private=list(
 
     # construct path using this item's ID
     # ".." not supported
-    make_absolute_path_with_itemid=function(dest=".")
+    make_absolute_path_with_itemid=function(props, dest=".")
     {
-        driveid <- self$properties$parentReference$driveId
-        id <- self$properties$id
+        driveid <- props$parentReference$driveId
+        id <- props$id
         base <- sprintf("drives/%s/items/%s", driveid, id)
 
         if(dest == "." || dest == "")

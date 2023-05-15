@@ -1,6 +1,7 @@
 # Microsoft365R 2.3.4.9000
 
 - Fix broken functionality for shared items in OneDrive/Sharepoint. In particular, this should allow using the MS365 backend with the pins package (#149/#129).
+- The `list_shared_items`/`list_shared_files` method for drives now always returns a list of drive item objects, rather than a data frame. If the `info` argument is supplied with a value other than "items", a warning is issued.
 
 # Microsoft365R 2.3.4
 

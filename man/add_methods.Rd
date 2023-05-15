@@ -7,7 +7,9 @@
 Methods for the \code{\link[AzureGraph:ms_graph]{AzureGraph::ms_graph}}, \code{\link[AzureGraph:az_user]{AzureGraph::az_user}} and \code{\link[AzureGraph:az_group]{AzureGraph::az_group}} classes.
 }
 \section{Usage}{
-\preformatted{## R6 method for class 'az_user'
+
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{## R6 method for class 'az_user'
 get_chat(chat_id)
 
 ## R6 method for class 'ms_graph'
@@ -51,7 +53,7 @@ list_sharepoint_sites(filter = NULL, n = Inf)
 
 ## R6 method for class 'az_user'
 list_teams(filter = NULL, n = Inf)
-}
+}\if{html}{\out{</div>}}
 }
 
 \section{Arguments}{

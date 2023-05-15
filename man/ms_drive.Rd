@@ -74,15 +74,13 @@ This class exposes methods for carrying out common operations on files and folde
 
 \section{Shared items}{
 
-The \code{list_shared_items} method lists the files and folders that have been shared with you. This is similar to \code{list_items}, modified to handle the fact that the listed items reside on another drive or document library. The arguments are:
+The \code{list_shared_items} method shows the files and folders that have been shared with you. This is a named list of drive items, that you can use to access the shared files/folders. The arguments are:
 \itemize{
-\item \code{info}: The information to return: either "partial", "items" or "all". If "partial", a data frame is returned containing the name, size, whether the item is a file or folder, and a list of drive item objects. If "items", only the list of drive items is returned. If "all", a data frame is returned containing all the properties for each item.
 \item \code{allow_external}: Whether to include items that were shared from outside tenants. The default is FALSE.
 \item \verb{filter, n}: See 'List methods' below.
 \item \code{pagesize}: The number of results to return for each call to the REST endpoint. You can try reducing this argument below the default of 1000 if you are experiencing timeouts.
+\item \code{info}: Deprecated, will be ignored. In previous versions, controlled the return type of the method.
 }
-
-The returned object will contain a list of drive items, that you can use to access the shared files/folders. If \code{info} is "item", the returned object is the list; if "partial" or "all" it is the \code{remoteItem} column in the data frame.
 
 \code{list_shared_files} is a synonym for \code{list_shared_items}.
 }

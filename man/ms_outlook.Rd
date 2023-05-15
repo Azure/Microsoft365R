@@ -46,9 +46,11 @@ Creating new objects of this class should be done via the \code{get_personal_out
 
 To create a new email, call the \code{create_email()} method. The default behaviour is to create a new draft email in the Drafts folder, which can then be edited further to add attachments, recipients etc; or the email can be sent immediately.
 
-The \code{create_email()} method has the following signature:\preformatted{create_email(body = "", content_type = c("text", "html"), subject = "",
+The \code{create_email()} method has the following signature:
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{create_email(body = "", content_type = c("text", "html"), subject = "",
              to = NULL, cc = NULL, bcc = NULL, reply_to = NULL, send_now = FALSE)
-}
+}\if{html}{\out{</div>}}
 \itemize{
 \item \code{body}: The body of the message. This should be a string or vector of strings, which will be pasted together with newlines as separators. You can also supply a message object as created by the blastula or emayili packages---see the examples below.
 \item \code{content_type}: The format of the body, either "text" (the default) or HTML.
@@ -64,8 +66,10 @@ You can also supply message objects as created by the blastula and emayili packa
 
 \section{Listing emails}{
 
-To list the emails in the Inbox, call the \code{list_emails()} method. This returns a list of objects of class \code{\link{ms_outlook_email}}, and has the following signature:\preformatted{list_emails(by = "received desc", n = 100, pagesize = 10)
-}
+To list the emails in the Inbox, call the \code{list_emails()} method. This returns a list of objects of class \code{\link{ms_outlook_email}}, and has the following signature:
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{list_emails(by = "received desc", n = 100, pagesize = 10)
+}\if{html}{\out{</div>}}
 \itemize{
 \item \code{by}: The sorting order of the message list. The possible fields are "received" (received date, the default), "from" and "subject". To sort in descending order, add a " desc". You can specify multiple sorting fields, with later fields used to break ties in earlier ones. The last sorting field is always "received desc" unless it appears earlier.
 \item \verb{filter, n}: See below.

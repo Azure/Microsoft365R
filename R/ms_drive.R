@@ -53,13 +53,11 @@
 #' `set_item_properties` sets the properties of a file or folder. The new properties should be specified as individual named arguments to the method. Any existing properties that aren't listed as arguments will retain their previous values or be recalculated based on changes to other properties, as appropriate. You can also call the `update` method on the corresponding `ms_drive_item` object.
 #'
 #' @section Shared items:
-#' The `list_shared_items` method lists the files and folders that have been shared with you. This is similar to `list_items`, modified to handle the fact that the listed items reside on another drive or document library. The arguments are:
-#' - `info`: The information to return: either "partial", "items" or "all". If "partial", a data frame is returned containing the name, size, whether the item is a file or folder, and a list of drive item objects. If "items", only the list of drive items is returned. If "all", a data frame is returned containing all the properties for each item.
+#' The `list_shared_items` method shows the files and folders that have been shared with you. This is a named list of drive items, that you can use to access the shared files/folders. The arguments are:
 #' - `allow_external`: Whether to include items that were shared from outside tenants. The default is FALSE.
 #' - `filter, n`: See 'List methods' below.
 #' - `pagesize`: The number of results to return for each call to the REST endpoint. You can try reducing this argument below the default of 1000 if you are experiencing timeouts.
-#'
-#' The returned object will contain a list of drive items, that you can use to access the shared files/folders. If `info` is "item", the returned object is the list; if "partial" or "all" it is the `remoteItem` column in the data frame.
+#' - `info`: Deprecated, will be ignored. In previous versions, controlled the return type of the method.
 #'
 #' `list_shared_files` is a synonym for `list_shared_items`.
 #'
@@ -181,8 +179,11 @@ public=list(
         self$get_item(path)$update(...)
     },
 
-    list_shared_items=function(allow_external=TRUE, filter=NULL, n=Inf, pagesize=1000)
+    list_shared_items=function(allow_external=TRUE, filter=NULL, n=Inf, pagesize=1000, info=NULL)
     {
+        if(!is.null(info) && info != "items")
+            warning("Ignoring 'info' argument, returning a list of drive items")
+
         opts <- list(`$top`=pagesize)
         if(allow_external)
             opts$allowExternal <- "true"
@@ -191,33 +192,9 @@ public=list(
         children <- self$do_operation("sharedWithMe", options=opts, simplify=FALSE)
 
         # get file list as a data frame, or return the iterator immediately if n is NULL
-        extract_list_values(self$get_list_pager(children), n)
-        # if(is.null(n))
-        #     return(df)
-
-        # if(is_empty(df))
-        #     df <- data.frame(name=character(), size=numeric(), isdir=logical(), remoteItem=I(list()))
-        # else if(info != "items")
-        # {
-        #     df$isdir <- if(!is.null(df$folder))
-        #         !is.na(df$folder$childCount)
-        #     else rep(FALSE, nrow(df))
-        #     if(is.null(df$size))
-        #         df$size <- rep(NA, nrow(df))
-        # }
-
-        # df$remoteItem <- lapply(seq_len(nrow(df)),
-        #     function(i) ms_drive_item$new(self$token, self$tenant, df$remoteItem[i, ], remote=TRUE))
-
-        # switch(info,
-        #     partial=df[c("name", "size", "isdir", "remoteItem")],
-        #     items=df$remoteItem,
-        #     all=
-        #     {
-        #         firstcols <- c("name", "size", "isdir", "remoteItem")
-        #         df[c(firstcols, setdiff(names(df), firstcols))]
-        #     }
-        # )
+        out <- extract_list_values(self$get_list_pager(children), n)
+        names(out) <- sapply(out, function(obj) obj$properties$name)
+        out
     },
 
     print=function(...)

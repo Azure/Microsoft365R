@@ -48,9 +48,11 @@ Creating new objects of this class should be done via the \code{get_folder}, \co
 
 \section{Creating and sending emails}{
 
-Outlook allows creating new draft emails in any folder, not just the Drafts folder (although that is the default location for the Outlook app, and the \code{ms_outlook} client class). To create a new email, call the \code{create_email()} method, which has the following signature:\preformatted{create_email(body = "", content_type = c("text", "html"), subject = "",
+Outlook allows creating new draft emails in any folder, not just the Drafts folder (although that is the default location for the Outlook app, and the \code{ms_outlook} client class). To create a new email, call the \code{create_email()} method, which has the following signature:
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{create_email(body = "", content_type = c("text", "html"), subject = "",
              to = NULL, cc = NULL, bcc = NULL, reply_to = NULL, send_now = FALSE)
-}
+}\if{html}{\out{</div>}}
 \itemize{
 \item \code{body}: The body of the message. This should be a string or vector of strings, which will be pasted together with newlines as separators. You can also supply a message object as created by the blastula or emayili packages---see the examples below.
 \item \code{content_type}: The format of the body, either "text" (the default) or HTML.
@@ -68,8 +70,10 @@ To reply to or forward an email, first retrieve it using \code{get_email()} or \
 
 \section{Listing emails}{
 
-To list the emails in a folder, call the \code{list_emails()} method. This returns a list of objects of class \code{\link{ms_outlook_email}}, and has the following signature:\preformatted{list_emails(by = "received desc", search = NULL, filter = NULL, n = 100, pagesize = 10)
-}
+To list the emails in a folder, call the \code{list_emails()} method. This returns a list of objects of class \code{\link{ms_outlook_email}}, and has the following signature:
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{list_emails(by = "received desc", search = NULL, filter = NULL, n = 100, pagesize = 10)
+}\if{html}{\out{</div>}}
 \itemize{
 \item \code{by}: The sorting order of the message list. The possible fields are "received" (received date, the default), "from" and "subject". To sort in descending order, add a " desc". You can specify multiple sorting fields, with later fields used to break ties in earlier ones. The last sorting field is always "received desc" unless it appears earlier.
 \item \code{search}: An optional string to search for. Only emails that contain the search string will be returned. See the \href{https://docs.microsoft.com/en-us/graph/query-parameters#search-parameter}{description of this parameter} for more information.

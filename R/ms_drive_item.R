@@ -309,18 +309,21 @@ public=list(
         invisible(ms_drive_item$new(self$token, self$tenant, httr::content(res)))
     },
 
-    download=function(dest=self$properties$name, overwrite=FALSE)
+    download=function(dest=self$properties$name, overwrite=FALSE, recursive=FALSE, parallel=FALSE)
     {
-        private$assert_is_file()
-        res <- self$do_operation("content", config=httr::write_disk(dest, overwrite=overwrite),
-                                 http_status_handler="pass")
-        if(httr::status_code(res) >= 300)
+        if(self$is_folder())
         {
-            on.exit(file.remove(dest))
-            httr::stop_for_status(res, paste0("complete operation. Message:\n",
-                sub("\\.$", "", error_message(httr::content(res)))))
+            children <- self$list_items()
+            isdir <- children$isdir
+            if(!recursive)
+                children <- children[!isdir, , drop=FALSE]
+
+            dir.create(dest, showWarnings=FALSE)
+            for(f in children$name)
+                self$get_item(f)$download(file.path(dest, f), overwrite=overwrite,
+                                          recursive=recursive, parallel=parallel)
         }
-        invisible(NULL)
+        else private$download_file(dest, overwrite)
     },
 
     get_path=function()
@@ -345,7 +348,22 @@ public=list(
 private=list(
 
     # flag: whether this object is a shared file/folder on another drive
+    # not actually needed! retained for backcompat
     remote=NULL,
+
+    download_file=function(dest, overwrite)
+    {
+        private$assert_is_file()
+        res <- self$do_operation("content", config=httr::write_disk(dest, overwrite=overwrite),
+                                 http_status_handler="pass")
+        if(httr::status_code(res) >= 300)
+        {
+            on.exit(file.remove(dest))
+            httr::stop_for_status(res, paste0("complete operation. Message:\n",
+                sub("\\.$", "", error_message(httr::content(res)))))
+        }
+        invisible(NULL)
+    },
 
     # dest = . or '' --> this item
     # dest = .. --> parent folder

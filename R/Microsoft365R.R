@@ -9,7 +9,7 @@ utils::globalVariables(c("self", "private"))
     options(azure_graph_api_version="beta")
 
     # whether to use item IDs in OD/SPO paths: values are TRUE, FALSE, "remote"
-    options(microsoft365r_use_itemid_in_path="remote")
+    options(microsoft365r_use_itemid_in_path=TRUE)
 
     register_graph_class("site", ms_site,
         function(props) grepl("sharepoint", props$id, fixed=TRUE))

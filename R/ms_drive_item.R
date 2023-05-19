@@ -16,7 +16,7 @@
 #' - `sync_fields()`: Synchronise the R object with the item metadata in Microsoft Graph.
 #' - `open()`: Open the item in your browser.
 #' - `list_items(...), list_files(...)`: List the files and folders under the specified path.
-#' - `download(dest, overwrite)`: Download the file. Only applicable for a file item.
+#' - `download(dest, overwrite, recursive, parallel)`: Download the file or folder. See below.
 #' - `create_share_link(type, expiry, password, scope)`: Create a shareable link to the file or folder.
 #' - `upload(src, dest, blocksize)`: Upload a file. Only applicable for a folder item.
 #' - `create_folder(path)`: Create a folder. Only applicable for a folder item.
@@ -42,7 +42,12 @@
 #'
 #' `list_files` is a synonym for `list_items`.
 #'
-#' `download` downloads the file item to the local machine. It is an error to try to download a folder item.
+#' `download` downloads the item to the local machine. If this is a file, it is downloaded; if this is a folder, all its files are downloaded. If the `recursive` argument is TRUE and the item is a folder, all subfolders will also be downloaded recursively. The `parallel` argument can have the following values:
+#' - TRUE: A cluster with 5 workers is created and used to parallelise the downloads
+#' - A number: A cluster with this many workers is created and used to parallelise the downloads
+#' - A cluster object, created via the parallel package: The cluster is used
+#' - FALSE: The downloading is done serially
+#' Downloading in parallel can result in substantial speedup, especially for a large number of small files.`
 #'
 #' `upload` uploads a file from the local machine into the folder item, and returns another `ms_drive_item` object representing the uploaded file. The uploading is done in blocks of 32MB by default; you can change this by setting the `blocksize` argument. For technical reasons, the block size [must be a multiple of 320KB](https://docs.microsoft.com/en-us/graph/api/driveitem-createuploadsession?view=graph-rest-1.0#upload-bytes-to-the-upload-session). This returns an `ms_drive_item` object, invisibly.
 #'
@@ -315,13 +320,48 @@ public=list(
         {
             children <- self$list_items()
             isdir <- children$isdir
-            if(!recursive)
-                children <- children[!isdir, , drop=FALSE]
 
+            dest <- normalizePath(dest, mustWork=FALSE)
             dir.create(dest, showWarnings=FALSE)
-            for(f in children$name)
-                self$get_item(f)$download(file.path(dest, f), overwrite=overwrite,
-                                          recursive=recursive, parallel=parallel)
+
+            # parallel can be:
+            # - number: create cluster with this many workers
+            # - cluster obj: use it
+            # - TRUE: create cluster with 5 workers
+            # - FALSE: serial
+            if(isTRUE(parallel))
+                parallel <- 5
+            if(is.numeric(parallel))
+            {
+                parallel <- parallel::makeCluster(parallel)
+                on.exit(parallel::stopCluster(parallel))
+            }
+
+            if(inherits(parallel, "cluster"))
+            {
+                files <- children$name[!isdir]
+                dirs <- children$name[isdir]
+
+                # parallelise file downloads
+                parallel::parLapply(parallel, files, function(f, item, dest, overwrite)
+                {
+                    item$get_item(f)$download(file.path(dest, f), overwrite=overwrite)
+                }, item=self, dest=dest, overwrite=overwrite)
+
+                # recursive call is done serially
+                if(recursive) for(d in dirs)
+                    self$get_item(d)$download(file.path(dest, d), overwrite=overwrite,
+                                              parallel=parallel)
+            }
+            else if(isFALSE(parallel))
+            {
+                if(!recursive)
+                    children <- children[!isdir, , drop=FALSE]
+                for(f in children$name)
+                    self$get_item(f)$download(file.path(dest, f), overwrite=overwrite,
+                                              recursive=recursive, parallel=parallel)
+            }
+            else stop("Unknown value for 'parallel' argument", call.=FALSE)
         }
         else private$download_file(dest, overwrite)
     },

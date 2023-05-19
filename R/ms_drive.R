@@ -16,6 +16,7 @@
 #' - `sync_fields()`: Synchronise the R object with the drive metadata in Microsoft Graph.
 #' - `list_items(...), list_files(...)`: List the files and folders under the specified path. See 'File and folder operations' below.
 #' - `download_file(src, dest, overwrite)`: Download a file.
+#' - `download_folder(src, dest, overwrite, recursive, parallel)`: Download a folder.
 #' - `upload_file(src, dest, blocksize)`: Upload a file.
 #' - `create_folder(path)`: Create a folder.
 #' - `open_item(path)`: Open a file or folder.
@@ -39,6 +40,13 @@
 #' `list_files` is a synonym for `list_items`.
 #'
 #' `download_file` and `upload_file` transfer files between the local machine and the drive. For `download_file`, the default destination folder is the current (working) directory of your R session. For `upload_file`, there is no default destination folder; make sure you specify the destination explicitly.
+#'
+#' `download_folder` downloads all the files in a folder. If `recursive` is TRUE, all subfolders will also be downloaded recursively. The `parallel` argument can have the following values:
+#' - TRUE: A cluster with 5 workers is created and used to parallelise the downloads
+#' - A number: A cluster with this many workers is created and used to parallelise the downloads
+#' - A cluster object, created via the parallel package: The cluster is used
+#' - FALSE: The downloading is done serially
+#' Downloading in parallel can result in substantial speedup, especially for a large number of small files.
 #'
 #' `create_folder` creates a folder with the specified path. Trying to create an already existing folder is an error.
 #'
@@ -140,6 +148,11 @@ public=list(
     download_file=function(src, dest=basename(src), overwrite=FALSE)
     {
         self$get_item(src)$download(dest, overwrite=overwrite)
+    },
+
+    download_folder=function(src, dest=basename(src), overwrite=FALSE, recursive=FALSE, parallel=FALSE)
+    {
+        self$get_item(src)$download(dest, overwrite=overwrite, recursive=recursive, parallel=parallel)
     },
 
     create_share_link=function(path, type=c("view", "edit", "embed"), expiry="7 days", password=NULL, scope=NULL)

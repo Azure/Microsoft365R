@@ -268,50 +268,27 @@ public=list(
         invisible(ms_drive_item$new(self$token, self$tenant, res))
     },
 
-    upload=function(src, dest=basename(src), blocksize=32768000)
+    upload=function(src, dest=basename(src), blocksize=32768000, recursive=FALSE, parallel=FALSE)
     {
         private$assert_is_folder()
-        con <- file(src, open="rb")
-        on.exit(close(con))
 
-        fullpath <- private$make_absolute_path(dest)
-        # possible fullpath formats -> string to append:
-        # drives/xxx/root -> /createUploadSession
-        # drives/xxx/root:/foo/bar -> :/createUploadSession
-        # drives/xxx/items/yyy -> /createUploadSession
-        # drives/xxx/items/yyy:/foo/bar -> :/createUploadSession
-        op <- if(grepl(":/", fullpath))
-            paste0(fullpath, ":/createUploadSession")
-        else paste0(fullpath, "/createUploadSession")
-        upload_dest <- call_graph_endpoint(self$token, op, http_verb="POST")$uploadUrl
-
-        size <- file.size(src)
-        next_blockstart <- 0
-        next_blockend <- size - 1
-        repeat
+        # check if uploading a folder
+        if(dir.exists(src))
         {
-            next_blocksize <- min(next_blockend - next_blockstart + 1, blocksize)
-            seek(con, next_blockstart)
-            body <- readBin(con, "raw", next_blocksize)
-            thisblock <- length(body)
-            if(thisblock == 0)
-                break
+            files <- dir(src, all.files=TRUE, no..=TRUE, recursive=recursive, full.names=FALSE)
 
-            headers <- httr::add_headers(
-                `Content-Length`=thisblock,
-                `Content-Range`=sprintf("bytes %.0f-%.0f/%.0f",
-                    next_blockstart, next_blockstart + thisblock - 1, size)
-            )
-            res <- httr::PUT(upload_dest, headers, body=body)
-            httr::stop_for_status(res)
+            # dir() will always include subdirs if recursive is FALSE, must use horrible hack
+            if(!recursive)
+                files <- setdiff(files, list.dirs(src, recursive=FALSE, full.names=FALSE))
 
-            next_block <- parse_upload_range(httr::content(res), blocksize)
-            if(is.null(next_block))
-                break
-            next_blockstart <- next_block[1]
-            next_blockend <- next_block[2]
+            for(f in files)
+            {
+                srcf <- file.path(src, f)
+                destf <- file.path(dest, f)
+                private$upload_file(normalizePath(srcf), destf, blocksize=blocksize)
+            }
         }
-        invisible(ms_drive_item$new(self$token, self$tenant, httr::content(res)))
+        else private$upload_file(src, dest, blocksize)
     },
 
     download=function(dest=self$properties$name, overwrite=FALSE, recursive=FALSE, parallel=FALSE)
@@ -390,6 +367,51 @@ private=list(
     # flag: whether this object is a shared file/folder on another drive
     # not actually needed! retained for backcompat
     remote=NULL,
+
+    upload_file=function(src, dest, blocksize)
+    {
+        con <- file(src, open="rb")
+        on.exit(close(con))
+
+        fullpath <- private$make_absolute_path(dest)
+        # possible fullpath formats -> string to append:
+        # drives/xxx/root -> /createUploadSession
+        # drives/xxx/root:/foo/bar -> :/createUploadSession
+        # drives/xxx/items/yyy -> /createUploadSession
+        # drives/xxx/items/yyy:/foo/bar -> :/createUploadSession
+        op <- if(grepl(":/", fullpath))
+            paste0(fullpath, ":/createUploadSession")
+        else paste0(fullpath, "/createUploadSession")
+        upload_dest <- call_graph_endpoint(self$token, op, http_verb="POST")$uploadUrl
+
+        size <- file.size(src)
+        next_blockstart <- 0
+        next_blockend <- size - 1
+        repeat
+        {
+            next_blocksize <- min(next_blockend - next_blockstart + 1, blocksize)
+            seek(con, next_blockstart)
+            body <- readBin(con, "raw", next_blocksize)
+            thisblock <- length(body)
+            if(thisblock == 0)
+                break
+
+            headers <- httr::add_headers(
+                `Content-Length`=thisblock,
+                `Content-Range`=sprintf("bytes %.0f-%.0f/%.0f",
+                    next_blockstart, next_blockstart + thisblock - 1, size)
+            )
+            res <- httr::PUT(upload_dest, headers, body=body)
+            httr::stop_for_status(res)
+
+            next_block <- parse_upload_range(httr::content(res), blocksize)
+            if(is.null(next_block))
+                break
+            next_blockstart <- next_block[1]
+            next_blockend <- next_block[2]
+        }
+        invisible(ms_drive_item$new(self$token, self$tenant, httr::content(res)))
+    },
 
     download_file=function(dest, overwrite)
     {

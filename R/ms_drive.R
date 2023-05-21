@@ -18,6 +18,7 @@
 #' - `download_file(src, dest, overwrite)`: Download a file.
 #' - `download_folder(src, dest, overwrite, recursive, parallel)`: Download a folder.
 #' - `upload_file(src, dest, blocksize)`: Upload a file.
+#' - `upload_folder(src, dest, blocksize, recursive, parallel)`: Upload a folder.
 #' - `create_folder(path)`: Create a folder.
 #' - `open_item(path)`: Open a file or folder.
 #' - `create_share_link(...)`: Create a shareable link for a file or folder.
@@ -41,12 +42,12 @@
 #'
 #' `download_file` and `upload_file` transfer files between the local machine and the drive. For `download_file`, the default destination folder is the current (working) directory of your R session. For `upload_file`, there is no default destination folder; make sure you specify the destination explicitly.
 #'
-#' `download_folder` downloads all the files in a folder. If `recursive` is TRUE, all subfolders will also be downloaded recursively. The `parallel` argument can have the following values:
-#' - TRUE: A cluster with 5 workers is created and used to parallelise the downloads
-#' - A number: A cluster with this many workers is created and used to parallelise the downloads
-#' - A cluster object, created via the parallel package: The cluster is used
-#' - FALSE: The downloading is done serially
-#' Downloading in parallel can result in substantial speedup, especially for a large number of small files.
+#' `download_folder` and `upload_folder` transfer all the files in a folder. If `recursive` is TRUE, all subfolders will also be transferred recursively. The `parallel` argument can have the following values:
+#' - TRUE: A cluster with 5 workers is created
+#' - A number: A cluster with this many workers is created
+#' - A cluster object, created via the parallel package
+#' - FALSE: The transfer is done serially
+#' Transferring files in parallel can result in substantial speedup for a large number of small files.
 #'
 #' `create_folder` creates a folder with the specified path. Trying to create an already existing folder is an error.
 #'
@@ -138,6 +139,11 @@ public=list(
     upload_file=function(src, dest, blocksize=32768000)
     {
         private$get_root()$upload(src, dest, blocksize)
+    },
+
+    upload_folder=function(src, dest, blocksize=32768000, recursive=FALSE, parallel=FALSE)
+    {
+        private$get_root()$upload(src, dest, blocksize=blocksize, recursive=recursive, parallel=parallel)
     },
 
     create_folder=function(path)

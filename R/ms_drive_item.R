@@ -18,7 +18,7 @@
 #' - `list_items(...), list_files(...)`: List the files and folders under the specified path.
 #' - `download(dest, overwrite, recursive, parallel)`: Download the file or folder. See below.
 #' - `create_share_link(type, expiry, password, scope)`: Create a shareable link to the file or folder.
-#' - `upload(src, dest, blocksize)`: Upload a file. Only applicable for a folder item.
+#' - `upload(src, dest, blocksize, , recursive, parallel)`: Upload a file or folder. See below.
 #' - `create_folder(path)`: Create a folder. Only applicable for a folder item.
 #' - `get_item(path)`: Get a child item (file or folder) under this folder.
 #' - `get_parent_folder()`: Get the parent folder for this item, as a drive item object. Returns the root folder for the root.
@@ -42,16 +42,17 @@
 #'
 #' `list_files` is a synonym for `list_items`.
 #'
-#' `download` downloads the item to the local machine. If this is a file, it is downloaded; if this is a folder, all its files are downloaded. If the `recursive` argument is TRUE and the item is a folder, all subfolders will also be downloaded recursively. The `parallel` argument can have the following values:
-#' - TRUE: A cluster with 5 workers is created and used to parallelise the downloads
-#' - A number: A cluster with this many workers is created and used to parallelise the downloads
-#' - A cluster object, created via the parallel package: The cluster is used
-#' - FALSE: The downloading is done serially
-#' Downloading in parallel can result in substantial speedup, especially for a large number of small files.`
+#' `download` downloads the item to the local machine. If this is a file, it is downloaded; if this is a folder, all its files are downloaded. If the `recursive` argument is TRUE and the item is a folder, all subfolders will also be downloaded recursively.
 #'
-#' `upload` uploads a file from the local machine into the folder item, and returns another `ms_drive_item` object representing the uploaded file. The uploading is done in blocks of 32MB by default; you can change this by setting the `blocksize` argument. For technical reasons, the block size [must be a multiple of 320KB](https://docs.microsoft.com/en-us/graph/api/driveitem-createuploadsession?view=graph-rest-1.0#upload-bytes-to-the-upload-session). This returns an `ms_drive_item` object, invisibly.
+#' `upload` uploads a file or folder from the local machine into the folder item. If this is a folder, and the `recursive` argument iS TRUE, all subfolders are also uploaded. The uploading is done in blocks of 32MB by default; you can change this by setting the `blocksize` argument. For technical reasons, the block size [must be a multiple of 320KB](https://docs.microsoft.com/en-us/graph/api/driveitem-createuploadsession?view=graph-rest-1.0#upload-bytes-to-the-upload-session).
 #'
-#' It is an error to try to upload to a file item, or to upload a source directory.
+#' `upload` returns an `ms_drive_item` object invisibly if a file was uploaded, or NULL if a folder was uploaded.
+#'
+#' Uploading and downloading folders can be done in parallel, which can result in substantial speedup when transferring a large number of small files. This is controlled by the `parallel` argument to `upload` and `download`, which can have the following values:
+#' - TRUE: A cluster with 5 workers is created
+#' - A number: A cluster with this many workers is created
+#' - A cluster object, created via the parallel package
+#' - FALSE: The transfer is done serially
 #'
 #' `get_item` retrieves the file or folder with the given path, as another object of class `ms_drive_item`.
 #'
@@ -281,12 +282,40 @@ public=list(
             if(!recursive)
                 files <- setdiff(files, list.dirs(src, recursive=FALSE, full.names=FALSE))
 
-            for(f in files)
+            # parallel can be:
+            # - number: create cluster with this many workers
+            # - cluster obj: use it
+            # - TRUE: create cluster with 5 workers
+            # - FALSE: serial
+            if(isTRUE(parallel))
+                parallel <- 5
+            if(is.numeric(parallel))
             {
-                srcf <- file.path(src, f)
-                destf <- file.path(dest, f)
-                private$upload_file(normalizePath(srcf), destf, blocksize=blocksize)
+                parallel <- parallel::makeCluster(parallel)
+                on.exit(parallel::stopCluster(parallel))
             }
+
+            if(inherits(parallel, "cluster"))
+            {
+                parallel::parLapply(parallel, files, function(f, item, src, dest, blocksize)
+                {
+                    srcf <- file.path(src, f)
+                    destf <- file.path(dest, f)
+                    item$upload(srcf, destf, blocksize=blocksize)
+                }, item=self, src=normalizePath(src), dest=dest, blocksize=blocksize)
+            }
+            else if(isFALSE(parallel))
+            {
+                for(f in files)
+                {
+                    srcf <- file.path(src, f)
+                    destf <- file.path(dest, f)
+                    private$upload_file(normalizePath(srcf), destf, blocksize=blocksize)
+                }
+            }
+            else stop("Unknown value for 'parallel' argument", call.=FALSE)
+
+            invisible(NULL)
         }
         else private$upload_file(src, dest, blocksize)
     },

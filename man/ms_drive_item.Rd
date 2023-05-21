@@ -32,7 +32,7 @@ Class representing an item (file or folder) in a OneDrive or SharePoint document
 \item \verb{list_items(...), list_files(...)}: List the files and folders under the specified path.
 \item \code{download(dest, overwrite, recursive, parallel)}: Download the file or folder. See below.
 \item \code{create_share_link(type, expiry, password, scope)}: Create a shareable link to the file or folder.
-\item \code{upload(src, dest, blocksize)}: Upload a file. Only applicable for a folder item.
+\item \code{upload(src, dest, blocksize, , recursive, parallel)}: Upload a file or folder. See below.
 \item \code{create_folder(path)}: Create a folder. Only applicable for a folder item.
 \item \code{get_item(path)}: Get a child item (file or folder) under this folder.
 \item \code{get_parent_folder()}: Get the parent folder for this item, as a drive item object. Returns the root folder for the root.
@@ -63,18 +63,19 @@ This class exposes methods for carrying out common operations on files and folde
 
 \code{list_files} is a synonym for \code{list_items}.
 
-\code{download} downloads the item to the local machine. If this is a file, it is downloaded; if this is a folder, all its files are downloaded. If the \code{recursive} argument is TRUE and the item is a folder, all subfolders will also be downloaded recursively. The \code{parallel} argument can have the following values:
+\code{download} downloads the item to the local machine. If this is a file, it is downloaded; if this is a folder, all its files are downloaded. If the \code{recursive} argument is TRUE and the item is a folder, all subfolders will also be downloaded recursively.
+
+\code{upload} uploads a file or folder from the local machine into the folder item. If this is a folder, and the \code{recursive} argument iS TRUE, all subfolders are also uploaded. The uploading is done in blocks of 32MB by default; you can change this by setting the \code{blocksize} argument. For technical reasons, the block size \href{https://docs.microsoft.com/en-us/graph/api/driveitem-createuploadsession?view=graph-rest-1.0#upload-bytes-to-the-upload-session}{must be a multiple of 320KB}.
+
+\code{upload} returns an \code{ms_drive_item} object invisibly if a file was uploaded, or NULL if a folder was uploaded.
+
+Uploading and downloading folders can be done in parallel, which can result in substantial speedup when transferring a large number of small files. This is controlled by the \code{parallel} argument to \code{upload} and \code{download}, which can have the following values:
 \itemize{
-\item TRUE: A cluster with 5 workers is created and used to parallelise the downloads
-\item A number: A cluster with this many workers is created and used to parallelise the downloads
-\item A cluster object, created via the parallel package: The cluster is used
-\item FALSE: The downloading is done serially
-Downloading in parallel can result in substantial speedup, especially for a large number of small files.`
+\item TRUE: A cluster with 5 workers is created
+\item A number: A cluster with this many workers is created
+\item A cluster object, created via the parallel package
+\item FALSE: The transfer is done serially
 }
-
-\code{upload} uploads a file from the local machine into the folder item, and returns another \code{ms_drive_item} object representing the uploaded file. The uploading is done in blocks of 32MB by default; you can change this by setting the \code{blocksize} argument. For technical reasons, the block size \href{https://docs.microsoft.com/en-us/graph/api/driveitem-createuploadsession?view=graph-rest-1.0#upload-bytes-to-the-upload-session}{must be a multiple of 320KB}. This returns an \code{ms_drive_item} object, invisibly.
-
-It is an error to try to upload to a file item, or to upload a source directory.
 
 \code{get_item} retrieves the file or folder with the given path, as another object of class \code{ms_drive_item}.
 

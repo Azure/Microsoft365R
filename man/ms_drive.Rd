@@ -30,7 +30,9 @@ Class representing a personal OneDrive or SharePoint document library.
 \item \code{sync_fields()}: Synchronise the R object with the drive metadata in Microsoft Graph.
 \item \verb{list_items(...), list_files(...)}: List the files and folders under the specified path. See 'File and folder operations' below.
 \item \code{download_file(src, dest, overwrite)}: Download a file.
+\item \code{download_folder(src, dest, overwrite, recursive, parallel)}: Download a folder.
 \item \code{upload_file(src, dest, blocksize)}: Upload a file.
+\item \code{upload_folder(src, dest, blocksize, recursive, parallel)}: Upload a folder.
 \item \code{create_folder(path)}: Create a folder.
 \item \code{open_item(path)}: Open a file or folder.
 \item \code{create_share_link(...)}: Create a shareable link for a file or folder.
@@ -58,6 +60,15 @@ This class exposes methods for carrying out common operations on files and folde
 \code{list_files} is a synonym for \code{list_items}.
 
 \code{download_file} and \code{upload_file} transfer files between the local machine and the drive. For \code{download_file}, the default destination folder is the current (working) directory of your R session. For \code{upload_file}, there is no default destination folder; make sure you specify the destination explicitly.
+
+\code{download_folder} and \code{upload_folder} transfer all the files in a folder. If \code{recursive} is TRUE, all subfolders will also be transferred recursively. The \code{parallel} argument can have the following values:
+\itemize{
+\item TRUE: A cluster with 5 workers is created
+\item A number: A cluster with this many workers is created
+\item A cluster object, created via the parallel package
+\item FALSE: The transfer is done serially
+Transferring files in parallel can result in substantial speedup for a large number of small files.
+}
 
 \code{create_folder} creates a folder with the specified path. Trying to create an already existing folder is an error.
 

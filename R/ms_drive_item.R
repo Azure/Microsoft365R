@@ -16,13 +16,13 @@
 #' - `sync_fields()`: Synchronise the R object with the item metadata in Microsoft Graph.
 #' - `open()`: Open the item in your browser.
 #' - `list_items(...), list_files(...)`: List the files and folders under the specified path.
-#' - `download(dest, overwrite)`: Download the file. Only applicable for a file item.
+#' - `download(dest, overwrite, recursive, parallel)`: Download the file or folder. See below.
 #' - `create_share_link(type, expiry, password, scope)`: Create a shareable link to the file or folder.
-#' - `upload(src, dest, blocksize)`: Upload a file. Only applicable for a folder item.
+#' - `upload(src, dest, blocksize, , recursive, parallel)`: Upload a file or folder. See below.
 #' - `create_folder(path)`: Create a folder. Only applicable for a folder item.
 #' - `get_item(path)`: Get a child item (file or folder) under this folder.
-#' - `get_parent_folder()`: Get the parent folder for this item, as a drive item object. Returns the root folder for the root.
-#' - `get_path()`: Get the absolute path for this item, as a character string.
+#' - `get_parent_folder()`: Get the parent folder for this item, as a drive item object. Returns the root folder for the root. Not supported for remote items.
+#' - `get_path()`: Get the absolute path for this item, as a character string. Not supported for remote items.
 #' - `is_folder()`: Information function, returns TRUE if this item is a folder.
 #'
 #' @section Initialization:
@@ -42,11 +42,17 @@
 #'
 #' `list_files` is a synonym for `list_items`.
 #'
-#' `download` downloads the file item to the local machine. It is an error to try to download a folder item.
+#' `download` downloads the item to the local machine. If this is a file, it is downloaded; if this is a folder, all its files are downloaded. If the `recursive` argument is TRUE and the item is a folder, all subfolders will also be downloaded recursively.
 #'
-#' `upload` uploads a file from the local machine into the folder item, and returns another `ms_drive_item` object representing the uploaded file. The uploading is done in blocks of 32MB by default; you can change this by setting the `blocksize` argument. For technical reasons, the block size [must be a multiple of 320KB](https://docs.microsoft.com/en-us/graph/api/driveitem-createuploadsession?view=graph-rest-1.0#upload-bytes-to-the-upload-session). This returns an `ms_drive_item` object, invisibly.
+#' `upload` uploads a file or folder from the local machine into the folder item. If this is a folder, and the `recursive` argument iS TRUE, all subfolders are also uploaded. The uploading is done in blocks of 32MB by default; you can change this by setting the `blocksize` argument. For technical reasons, the block size [must be a multiple of 320KB](https://docs.microsoft.com/en-us/graph/api/driveitem-createuploadsession?view=graph-rest-1.0#upload-bytes-to-the-upload-session).
 #'
-#' It is an error to try to upload to a file item, or to upload a source directory.
+#' `upload` returns an `ms_drive_item` object invisibly if a file was uploaded, or NULL if a folder was uploaded.
+#'
+#' Uploading and downloading folders can be done in parallel, which can result in substantial speedup when transferring a large number of small files. This is controlled by the `parallel` argument to `upload` and `download`, which can have the following values:
+#' - TRUE: A cluster with 5 workers is created
+#' - A number: A cluster with this many workers is created
+#' - A cluster object, created via the parallel package
+#' - FALSE: The transfer is done serially
 #'
 #' `get_item` retrieves the file or folder with the given path, as another object of class `ms_drive_item`.
 #'
@@ -245,7 +251,8 @@ public=list(
 
     get_parent_folder=function()
     {
-        op <- private$make_absolute_path("..")
+        private$assert_is_not_remote()
+        op <- private$make_absolute_path("..", FALSE)
         ms_drive_item$new(self$token, self$tenant, call_graph_endpoint(self$token, op))
     },
 
@@ -263,9 +270,137 @@ public=list(
         invisible(ms_drive_item$new(self$token, self$tenant, res))
     },
 
-    upload=function(src, dest=basename(src), blocksize=32768000)
+    upload=function(src, dest=basename(src), blocksize=32768000, recursive=FALSE, parallel=FALSE)
     {
         private$assert_is_folder()
+
+        # check if uploading a folder
+        if(dir.exists(src))
+        {
+            files <- dir(src, all.files=TRUE, no..=TRUE, recursive=recursive, full.names=FALSE)
+
+            # dir() will always include subdirs if recursive is FALSE, must use horrible hack
+            if(!recursive)
+                files <- setdiff(files, list.dirs(src, recursive=FALSE, full.names=FALSE))
+
+            # parallel can be:
+            # - number: create cluster with this many workers
+            # - cluster obj: use it
+            # - TRUE: create cluster with 5 workers
+            # - FALSE: serial
+            if(isTRUE(parallel))
+                parallel <- 5
+            if(is.numeric(parallel))
+            {
+                parallel <- parallel::makeCluster(parallel)
+                on.exit(parallel::stopCluster(parallel))
+            }
+
+            if(inherits(parallel, "cluster"))
+            {
+                parallel::parLapply(parallel, files, function(f, item, src, dest, blocksize)
+                {
+                    srcf <- file.path(src, f)
+                    destf <- file.path(dest, f)
+                    item$upload(srcf, destf, blocksize=blocksize)
+                }, item=self, src=normalizePath(src), dest=dest, blocksize=blocksize)
+            }
+            else if(isFALSE(parallel))
+            {
+                for(f in files)
+                {
+                    srcf <- file.path(src, f)
+                    destf <- file.path(dest, f)
+                    private$upload_file(normalizePath(srcf), destf, blocksize=blocksize)
+                }
+            }
+            else stop("Unknown value for 'parallel' argument", call.=FALSE)
+
+            invisible(NULL)
+        }
+        else private$upload_file(src, dest, blocksize)
+    },
+
+    download=function(dest=self$properties$name, overwrite=FALSE, recursive=FALSE, parallel=FALSE)
+    {
+        if(self$is_folder())
+        {
+            children <- self$list_items()
+            isdir <- children$isdir
+
+            dest <- normalizePath(dest, mustWork=FALSE)
+            dir.create(dest, showWarnings=FALSE)
+
+            # parallel can be:
+            # - number: create cluster with this many workers
+            # - cluster obj: use it
+            # - TRUE: create cluster with 5 workers
+            # - FALSE: serial
+            if(isTRUE(parallel))
+                parallel <- 5
+            if(is.numeric(parallel))
+            {
+                parallel <- parallel::makeCluster(parallel)
+                on.exit(parallel::stopCluster(parallel))
+            }
+
+            if(inherits(parallel, "cluster"))
+            {
+                files <- children$name[!isdir]
+                dirs <- children$name[isdir]
+
+                # parallelise file downloads
+                parallel::parLapply(parallel, files, function(f, item, dest, overwrite)
+                {
+                    item$get_item(f)$download(file.path(dest, f), overwrite=overwrite)
+                }, item=self, dest=dest, overwrite=overwrite)
+
+                # recursive call is done serially
+                if(recursive) for(d in dirs)
+                    self$get_item(d)$download(file.path(dest, d), overwrite=overwrite,
+                                              parallel=parallel)
+            }
+            else if(isFALSE(parallel))
+            {
+                if(!recursive)
+                    children <- children[!isdir, , drop=FALSE]
+                for(f in children$name)
+                    self$get_item(f)$download(file.path(dest, f), overwrite=overwrite,
+                                              recursive=recursive, parallel=parallel)
+            }
+            else stop("Unknown value for 'parallel' argument", call.=FALSE)
+        }
+        else private$download_file(dest, overwrite)
+    },
+
+    get_path=function()
+    {
+        private$assert_is_not_remote()
+        path <- private$make_absolute_path(use_itemid=FALSE)
+        sub("^.+root:?/?", "/", path)
+    },
+
+    print=function(...)
+    {
+        file_or_dir <- if(self$is_folder()) "file folder" else "file"
+        cat("<Drive item '", self$properties$name, "'>\n", sep="")
+        cat("  directory id:", self$properties$id, "\n")
+        cat("  web link:", self$properties$webUrl, "\n")
+        cat("  type:", file_or_dir, "\n")
+        cat("---\n")
+        cat(format_public_methods(self))
+        invisible(self)
+    }
+),
+
+private=list(
+
+    # flag: whether this object is a shared file/folder on another drive
+    # not actually needed! retained for backcompat
+    remote=NULL,
+
+    upload_file=function(src, dest, blocksize)
+    {
         con <- file(src, open="rb")
         on.exit(close(con))
 
@@ -309,7 +444,7 @@ public=list(
         invisible(ms_drive_item$new(self$token, self$tenant, httr::content(res)))
     },
 
-    download=function(dest=self$properties$name, overwrite=FALSE)
+    download_file=function(dest, overwrite)
     {
         private$assert_is_file()
         res <- self$do_operation("content", config=httr::write_disk(dest, overwrite=overwrite),
@@ -323,37 +458,13 @@ public=list(
         invisible(NULL)
     },
 
-    get_path=function()
-    {
-        path <- private$make_absolute_path()
-        sub("^.+root:?/?", "/", path)
-    },
-
-    print=function(...)
-    {
-        file_or_dir <- if(self$is_folder()) "file folder" else "file"
-        cat("<Drive item '", self$properties$name, "'>\n", sep="")
-        cat("  directory id:", self$properties$id, "\n")
-        cat("  web link:", self$properties$webUrl, "\n")
-        cat("  type:", file_or_dir, "\n")
-        cat("---\n")
-        cat(format_public_methods(self))
-        invisible(self)
-    }
-),
-
-private=list(
-
-    # flag: whether this object is a shared file/folder on another drive
-    remote=NULL,
-
     # dest = . or '' --> this item
     # dest = .. --> parent folder
     # dest = (childname) --> path to named child
     make_absolute_path=function(dest=".", use_itemid=getOption("microsoft365r_use_itemid_in_path"))
     {
         if(use_itemid == "remote")
-            use_itemid <- private$remote
+            use_itemid <- !is.null(private$remoteItem)
 
         # use remote item props if present
         props <- if(!is.null(self$properties$remoteItem))
@@ -417,6 +528,12 @@ private=list(
     {
         if(self$is_folder())
             stop("This method is only applicable for a file item", call.=FALSE)
+    },
+
+    assert_is_not_remote=function()
+    {
+        if(!is.null(self$properties$remoteItem))
+            stop("This method is not applicable for a remote item", call.=FALSE)
     }
 ))
 

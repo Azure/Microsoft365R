@@ -32,9 +32,19 @@
 #' Creating new objects of this class should be done via the `get_drive` methods of the [`ms_graph`], [`az_user`] or [`ms_site`] classes. Calling the `new()` method for this class only constructs the R object; it does not call the Microsoft Graph API to retrieve or create the actual drive.
 #'
 #' @section File and folder operations:
-#' This class exposes methods for carrying out common operations on files and folders. They call down to the corresponding methods for the [`ms_drive_item`] class. In most cases an item can be specified either by path or ID. The former is more user-friendly but subject to change if the file is moved or renamed; the latter is an opaque string but is immutable regardless of file operations. In general, using the path should be good enough for most purposes.
+#' This class exposes methods for carrying out common operations on files and folders. They call down to the corresponding methods for the [`ms_drive_item`] class. In most cases an item can be specified either by path or ID. The former is more user-friendly but subject to change if the file is moved or renamed; the latter is an opaque string but is immutable regardless of file operations.
+#'
+#' `get_item(path, itemid)` retrieves a file or folder, as an object of class [`ms_drive_item`]. Specify either the path or ID, not both.
 #'
 #' `open_item` opens the given file or folder in your browser. If the file has an unrecognised type, most browsers will attempt to download it.
+#'
+#' `delete_item` deletes a file or folder. By default, it will ask for confirmation first.
+#'
+#' `create_share_link(path, itemid, type, expiry, password, scope)` returns a shareable link to the item.
+#'
+#' `get_item_properties` is a convenience function that returns the properties of a file or folder as a list.
+#'
+#' `set_item_properties` sets the properties of a file or folder. The new properties should be specified as individual named arguments to the method. Any existing properties that aren't listed as arguments will retain their previous values or be recalculated based on changes to other properties, as appropriate. You can also call the `update` method on the corresponding `ms_drive_item` object.
 #'
 #' `list_items(path, info, full_names, pagesize)` lists the items under the specified path.
 #'
@@ -50,16 +60,6 @@
 #' Transferring files in parallel can result in substantial speedup for a large number of small files.
 #'
 #' `create_folder` creates a folder with the specified path. Trying to create an already existing folder is an error.
-#'
-#' `create_share_link(path, type, expiry, password, scope)` returns a shareable link to the item.
-#'
-#' `delete_item` deletes a file or folder. By default, it will ask for confirmation first.
-#'
-#' `get_item` retrieves the file or folder with the given path or ID, as an  object of class [`ms_drive_item`].
-#'
-#' `get_item_properties` is a convenience function that returns the properties of a file or folder as a list.
-#'
-#' `set_item_properties` sets the properties of a file or folder. The new properties should be specified as individual named arguments to the method. Any existing properties that aren't listed as arguments will retain their previous values or be recalculated based on changes to other properties, as appropriate. You can also call the `update` method on the corresponding `ms_drive_item` object.
 #'
 #' @section Shared items:
 #' The `list_shared_items` method shows the files and folders that have been shared with you. This is a named list of drive items, that you can use to access the shared files/folders. The arguments are:
@@ -108,8 +108,14 @@
 #' # file metadata (name, date created, etc)
 #' drv$get_item_properties("myfile")
 #'
-#' # rename a file
+#' # rename a file -- item ID remains the same, while name is changed
+#' obj <- drv$get_item("myfile")
 #' drv$set_item_properties("myfile", name="newname")
+#'
+#' # retrieve the renamed object by ID
+#' id <- obj$properties$id
+#' obj2 <- drv$get_item(itemid=id)
+#' obj$properties$id == obj2$properties$id  # TRUE
 #'
 #' # accessing shared files
 #' shared_df <- drv$list_shared_items()

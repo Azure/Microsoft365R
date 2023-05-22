@@ -1,8 +1,15 @@
 # Microsoft365R 2.3.4.9000
 
+## OneDrive/SharePoint
+
 - Fix broken functionality for shared items in OneDrive/Sharepoint. In particular, this should allow using the MS365 backend with the pins package (#149/#129).
 - The `list_shared_items`/`list_shared_files` method for drives now always returns a list of drive item objects, rather than a data frame. If the `info` argument is supplied with a value other than "items", a warning is issued.
 - Add folder upload and download functionality for `ms_drive_item$upload()` and `download()`. Subfolders can also be transferred recursively, and optionally in parallel. There are also corresponding `ms_drive$upload_folder()` and `download_folder()` methods.
+- Add the ability to use object IDs instead of file/folder paths in `ms_drive` methods, including getting, uploading and downloading. This can be useful since the object ID is immutable, whereas file paths can be changed. See `?ms_drive` for more details.
+
+## Outlook
+
+- Fix a bug in specifying multiple addresses in an email (#134, #151).
 
 # Microsoft365R 2.3.4
 

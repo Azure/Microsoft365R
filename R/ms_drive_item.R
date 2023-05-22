@@ -21,8 +21,8 @@
 #' - `upload(src, dest, blocksize, , recursive, parallel)`: Upload a file or folder. See below.
 #' - `create_folder(path)`: Create a folder. Only applicable for a folder item.
 #' - `get_item(path)`: Get a child item (file or folder) under this folder.
-#' - `get_parent_folder()`: Get the parent folder for this item, as a drive item object. Returns the root folder for the root.
-#' - `get_path()`: Get the absolute path for this item, as a character string.
+#' - `get_parent_folder()`: Get the parent folder for this item, as a drive item object. Returns the root folder for the root. Not supported for remote items.
+#' - `get_path()`: Get the absolute path for this item, as a character string. Not supported for remote items.
 #' - `is_folder()`: Information function, returns TRUE if this item is a folder.
 #'
 #' @section Initialization:
@@ -251,7 +251,8 @@ public=list(
 
     get_parent_folder=function()
     {
-        op <- private$make_absolute_path("..")
+        private$assert_is_not_remote()
+        op <- private$make_absolute_path("..", FALSE)
         ms_drive_item$new(self$token, self$tenant, call_graph_endpoint(self$token, op))
     },
 
@@ -374,7 +375,8 @@ public=list(
 
     get_path=function()
     {
-        path <- private$make_absolute_path()
+        private$assert_is_not_remote()
+        path <- private$make_absolute_path(use_itemid=FALSE)
         sub("^.+root:?/?", "/", path)
     },
 
@@ -462,7 +464,7 @@ private=list(
     make_absolute_path=function(dest=".", use_itemid=getOption("microsoft365r_use_itemid_in_path"))
     {
         if(use_itemid == "remote")
-            use_itemid <- private$remote
+            use_itemid <- !is.null(private$remoteItem)
 
         # use remote item props if present
         props <- if(!is.null(self$properties$remoteItem))
@@ -526,6 +528,12 @@ private=list(
     {
         if(self$is_folder())
             stop("This method is only applicable for a file item", call.=FALSE)
+    },
+
+    assert_is_not_remote=function()
+    {
+        if(!is.null(self$properties$remoteItem))
+            stop("This method is not applicable for a remote item", call.=FALSE)
     }
 ))
 

@@ -31,7 +31,7 @@ test_that("OneDrive for Business works",
     dest <- file.path(newfolder, basename(src))
     newsrc <- tempfile()
     expect_silent(od$upload_file(src, dest))
-    expect_silent(od$download_file(dest, newsrc))
+    expect_silent(od$download_file(dest, dest=newsrc))
 
     expect_true(files_identical(src, newsrc))
 

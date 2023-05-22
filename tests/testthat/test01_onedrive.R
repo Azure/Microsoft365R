@@ -31,8 +31,8 @@ test_that("OneDrive personal works",
     src <- "../resources/file.json"
     dest <- file.path(newfolder, basename(src))
     newsrc <- tempfile()
-    expect_silent(od$upload_file(src, dest))
-    expect_silent(od$download_file(dest, newsrc))
+    expect_silent(od$upload_file(src, dest=dest))
+    expect_silent(od$download_file(dest, dest=newsrc))
 
     expect_true(files_identical(src, newsrc))
 
@@ -174,6 +174,20 @@ test_that("Nested folder creation/deletion works",
     expect_is(it123, "ms_drive_item")
 
     expect_silent(it1$delete(confirm=FALSE, by_item=TRUE))
+})
+
+
+test_that("Get item by ID works",
+{
+    dir1 <- make_name(10)
+    src <- "../resources/file.json"
+
+    obj <- od$upload_file(src, file.path(dir1, "file.json"))
+    id <- obj$properties$id
+    obj2 <- od$get_item(itemid=id)
+    expect_identical(obj$properties$id, obj2$properties$id)
+
+    expect_silent(obj2$delete(confirm=FALSE))
 })
 
 

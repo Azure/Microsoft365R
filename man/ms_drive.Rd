@@ -29,17 +29,17 @@ Class representing a personal OneDrive or SharePoint document library.
 \item \code{do_operation(...)}: Carry out an arbitrary operation on the drive.
 \item \code{sync_fields()}: Synchronise the R object with the drive metadata in Microsoft Graph.
 \item \verb{list_items(...), list_files(...)}: List the files and folders under the specified path. See 'File and folder operations' below.
-\item \code{download_file(src, dest, overwrite)}: Download a file.
-\item \code{download_folder(src, dest, overwrite, recursive, parallel)}: Download a folder.
+\item \code{download_file(src, srcid, dest, overwrite)}: Download a file.
+\item \code{download_folder(src, srcid, dest, overwrite, recursive, parallel)}: Download a folder.
 \item \code{upload_file(src, dest, blocksize)}: Upload a file.
 \item \code{upload_folder(src, dest, blocksize, recursive, parallel)}: Upload a folder.
 \item \code{create_folder(path)}: Create a folder.
-\item \code{open_item(path)}: Open a file or folder.
+\item \code{open_item(path, itemid)}: Open a file or folder.
 \item \code{create_share_link(...)}: Create a shareable link for a file or folder.
-\item \code{delete_item(path, confirm, by_item)}: Delete a file or folder. By default, ask for confirmation first. For personal OneDrive, deleting a folder will also automatically delete its contents; for business OneDrive or SharePoint document libraries, you may need to set \code{by_item=TRUE} to delete the contents first depending on your organisation's policies. Note that this can be slow for large folders.
-\item \code{get_item(path)}: Get an item representing a file or folder.
-\item \code{get_item_properties(path)}: Get the properties (metadata) for a file or folder.
-\item \code{set_item_properties(path, ...)}: Set the properties for a file or folder.
+\item \code{delete_item(path, itemid, confirm, by_item)}: Delete a file or folder. By default, ask for confirmation first. For personal OneDrive, deleting a folder will also automatically delete its contents; for business OneDrive or SharePoint document libraries, you may need to set \code{by_item=TRUE} to delete the contents first depending on your organisation's policies. Note that this can be slow for large folders.
+\item \code{get_item(path, itemid)}: Get an item representing a file or folder.
+\item \code{get_item_properties(path, itemid)}: Get the properties (metadata) for a file or folder.
+\item \code{set_item_properties(path, itemid, ...)}: Set the properties for a file or folder.
 \item \verb{list_shared_items(...), list_shared_files(...)}: List the drive items shared with you. See 'Shared items' below.
 }
 }
@@ -51,9 +51,19 @@ Creating new objects of this class should be done via the \code{get_drive} metho
 
 \section{File and folder operations}{
 
-This class exposes methods for carrying out common operations on files and folders. They call down to the corresponding methods for the \code{\link{ms_drive_item}} class. In this context, any paths to child items are relative to the root folder of the drive.
+This class exposes methods for carrying out common operations on files and folders. They call down to the corresponding methods for the \code{\link{ms_drive_item}} class. In most cases an item can be specified either by path or ID. The former is more user-friendly but subject to change if the file is moved or renamed; the latter is an opaque string but is immutable regardless of file operations.
+
+\code{get_item(path, itemid)} retrieves a file or folder, as an object of class \code{\link{ms_drive_item}}. Specify either the path or ID, not both.
 
 \code{open_item} opens the given file or folder in your browser. If the file has an unrecognised type, most browsers will attempt to download it.
+
+\code{delete_item} deletes a file or folder. By default, it will ask for confirmation first.
+
+\code{create_share_link(path, itemid, type, expiry, password, scope)} returns a shareable link to the item.
+
+\code{get_item_properties} is a convenience function that returns the properties of a file or folder as a list.
+
+\code{set_item_properties} sets the properties of a file or folder. The new properties should be specified as individual named arguments to the method. Any existing properties that aren't listed as arguments will retain their previous values or be recalculated based on changes to other properties, as appropriate. You can also call the \code{update} method on the corresponding \code{ms_drive_item} object.
 
 \code{list_items(path, info, full_names, pagesize)} lists the items under the specified path.
 
@@ -71,16 +81,6 @@ Transferring files in parallel can result in substantial speedup for a large num
 }
 
 \code{create_folder} creates a folder with the specified path. Trying to create an already existing folder is an error.
-
-\code{create_share_link(path, type, expiry, password, scope)} returns a shareable link to the item.
-
-\code{delete_item} deletes a file or folder. By default, it will ask for confirmation first.
-
-\code{get_item} retrieves the file or folder with the given path, as an  object of class \code{\link{ms_drive_item}}.
-
-\code{get_item_properties} is a convenience function that returns the properties of a file or folder as a list.
-
-\code{set_item_properties} sets the properties of a file or folder. The new properties should be specified as individual named arguments to the method. Any existing properties that aren't listed as arguments will retain their previous values or be recalculated based on changes to other properties, as appropriate. You can also call the \code{update} method on the corresponding \code{ms_drive_item} object.
 }
 
 \section{Shared items}{
@@ -131,8 +131,14 @@ drv$create_share_link("myfile", password="Use-strong-passwords!")
 # file metadata (name, date created, etc)
 drv$get_item_properties("myfile")
 
-# rename a file
+# rename a file -- item ID remains the same, while name is changed
+obj <- drv$get_item("myfile")
 drv$set_item_properties("myfile", name="newname")
+
+# retrieve the renamed object by ID
+id <- obj$properties$id
+obj2 <- drv$get_item(itemid=id)
+obj$properties$id == obj2$properties$id  # TRUE
 
 # accessing shared files
 shared_df <- drv$list_shared_items()

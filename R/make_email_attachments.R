@@ -56,7 +56,6 @@ add_external_attachments.envelope <- function(object, email)
             name=name_a,
             contentType=unclass(sub(";.+$", "", a$type))
         )
-        # print(att)
         email$do_operation("attachments", body=att, http_verb="POST")
     }
 }

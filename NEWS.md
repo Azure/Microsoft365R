@@ -10,6 +10,7 @@
 ## Outlook
 
 - Fix a bug in specifying multiple addresses in an email (#134, #151).
+- Fix multiple inline images not showing up in emails (#107). Many thanks to @vorpalvorpal.
 
 # Microsoft365R 2.3.4
 

@@ -94,6 +94,8 @@ The \code{list_shared_items} method shows the files and folders that have been s
 }
 
 \code{list_shared_files} is a synonym for \code{list_shared_items}.
+
+Because of how the Graph API handles access to shared items linked in the root, you cannot directly access subitems of shared folders via the drive \code{get_item} method, like this: \code{drv$get_item("shared_folder/path/to/file")}. Instead, get the item into its own object, and use its \code{get_item} method: \code{drv$get_item("shared_folder")$get_item("path/to/file")}.
 }
 
 \section{List methods}{

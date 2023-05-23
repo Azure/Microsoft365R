@@ -70,6 +70,8 @@
 #'
 #' `list_shared_files` is a synonym for `list_shared_items`.
 #'
+#' Because of how the Graph API handles access to shared items linked in the root, you cannot directly access subitems of shared folders via the drive `get_item` method, like this: `drv$get_item("shared_folder/path/to/file")`. Instead, get the item into its own object, and use its `get_item` method: `drv$get_item("shared_folder")$get_item("path/to/file")`.
+#'
 #' @section List methods:
 #' All `list_*` methods have `filter` and `n` arguments to limit the number of results. The former should be an [OData expression](https://docs.microsoft.com/en-us/graph/query-parameters#filter-parameter) as a string to filter the result set on. The latter should be a number setting the maximum number of (filtered) results to return. The default values are `filter=NULL` and `n=Inf`. If `n=NULL`, the `ms_graph_pager` iterator object is returned instead to allow manual iteration over the results.
 #'

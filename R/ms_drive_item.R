@@ -42,11 +42,11 @@
 #'
 #' `list_files` is a synonym for `list_items`.
 #'
-#' `download` downloads the item to the local machine. If this is a file, it is downloaded; if this is a folder, all its files are downloaded. If the `recursive` argument is TRUE and the item is a folder, all subfolders will also be downloaded recursively.
+#' `download` downloads the item to the local machine. If this is a file, it is downloaded; in this case, the `dest` argument can be the path to the destination file, or NULL to return the downloaded content in a raw vector. If the item is a folder, all its files are downloaded, including subfolders if the `recursive` argument is TRUE.
 #'
-#' `upload` uploads a file or folder from the local machine into the folder item. If this is a folder, and the `recursive` argument iS TRUE, all subfolders are also uploaded. The uploading is done in blocks of 32MB by default; you can change this by setting the `blocksize` argument. For technical reasons, the block size [must be a multiple of 320KB](https://docs.microsoft.com/en-us/graph/api/driveitem-createuploadsession?view=graph-rest-1.0#upload-bytes-to-the-upload-session).
+#' `upload` uploads a file or folder from the local machine into the folder item. The `src` argument can be the path to the source file, a [rawConnection] or a [textConnection] object. If `src` is a folder, all its files are uploaded, including subfolders if the `recursive` argument iS TRUE. An `ms_drive_item` object is returned invisibly.
 #'
-#' `upload` returns an `ms_drive_item` object invisibly if a file was uploaded, or NULL if a folder was uploaded.
+#' Uploading is done in blocks of 32MB by default; you can change this by setting the `blocksize` argument. For technical reasons, the block size [must be a multiple of 320KB](https://docs.microsoft.com/en-us/graph/api/driveitem-createuploadsession?view=graph-rest-1.0#upload-bytes-to-the-upload-session).
 #'
 #' Uploading and downloading folders can be done in parallel, which can result in substantial speedup when transferring a large number of small files. This is controlled by the `parallel` argument to `upload` and `download`, which can have the following values:
 #' - TRUE: A cluster with 5 workers is created
@@ -275,7 +275,7 @@ public=list(
         private$assert_is_folder()
 
         # check if uploading a folder
-        if(dir.exists(src))
+        if(is.character(src) && dir.exists(src))
         {
             files <- dir(src, all.files=TRUE, no..=TRUE, recursive=recursive, full.names=FALSE)
 
@@ -316,7 +316,7 @@ public=list(
             }
             else stop("Unknown value for 'parallel' argument", call.=FALSE)
 
-            invisible(NULL)
+            invisible(self$get_item(dest))
         }
         else private$upload_file(src, dest, blocksize)
     },
@@ -327,6 +327,9 @@ public=list(
         {
             children <- self$list_items()
             isdir <- children$isdir
+
+            if(!is.character(dest))
+                stop("Must supply a destination folder", call.=FALSE)
 
             dest <- normalizePath(dest, mustWork=FALSE)
             dir.create(dest, showWarnings=FALSE)
@@ -401,8 +404,8 @@ private=list(
 
     upload_file=function(src, dest, blocksize)
     {
-        con <- file(src, open="rb")
-        on.exit(close(con))
+        src <- normalize_src(src)
+        on.exit(close(src$con))
 
         fullpath <- private$make_absolute_path(dest)
         # possible fullpath formats -> string to append:
@@ -415,14 +418,14 @@ private=list(
         else paste0(fullpath, "/createUploadSession")
         upload_dest <- call_graph_endpoint(self$token, op, http_verb="POST")$uploadUrl
 
-        size <- file.size(src)
+        size <- src$size
         next_blockstart <- 0
         next_blockend <- size - 1
         repeat
         {
             next_blocksize <- min(next_blockend - next_blockstart + 1, blocksize)
-            seek(con, next_blockstart)
-            body <- readBin(con, "raw", next_blocksize)
+            seek(src$con, next_blockstart)
+            body <- readBin(src$con, "raw", next_blocksize)
             thisblock <- length(body)
             if(thisblock == 0)
                 break
@@ -447,15 +450,22 @@ private=list(
     download_file=function(dest, overwrite)
     {
         private$assert_is_file()
-        res <- self$do_operation("content", config=httr::write_disk(dest, overwrite=overwrite),
-                                 http_status_handler="pass")
+
+        # TODO: make less hacky
+        config <- if(is.character(dest))
+            httr::write_disk(dest, overwrite=overwrite)
+        else list()
+
+        res <- self$do_operation("content", config=config, http_status_handler="pass")
         if(httr::status_code(res) >= 300)
         {
-            on.exit(file.remove(dest))
+            if(is.character(dest))
+                on.exit(file.remove(dest))
             httr::stop_for_status(res, paste0("complete operation. Message:\n",
                 sub("\\.$", "", error_message(httr::content(res)))))
         }
-        invisible(NULL)
+
+        if(is.character(dest)) invisible(NULL) else httr::content(res, as="raw")
     },
 
     # dest = . or '' --> this item

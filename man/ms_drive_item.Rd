@@ -63,11 +63,11 @@ This class exposes methods for carrying out common operations on files and folde
 
 \code{list_files} is a synonym for \code{list_items}.
 
-\code{download} downloads the item to the local machine. If this is a file, it is downloaded; if this is a folder, all its files are downloaded. If the \code{recursive} argument is TRUE and the item is a folder, all subfolders will also be downloaded recursively.
+\code{download} downloads the item to the local machine. If this is a file, it is downloaded; in this case, the \code{dest} argument can be the path to the destination file, or NULL to return the downloaded content in a raw vector. If the item is a folder, all its files are downloaded, including subfolders if the \code{recursive} argument is TRUE.
 
-\code{upload} uploads a file or folder from the local machine into the folder item. If this is a folder, and the \code{recursive} argument iS TRUE, all subfolders are also uploaded. The uploading is done in blocks of 32MB by default; you can change this by setting the \code{blocksize} argument. For technical reasons, the block size \href{https://docs.microsoft.com/en-us/graph/api/driveitem-createuploadsession?view=graph-rest-1.0#upload-bytes-to-the-upload-session}{must be a multiple of 320KB}.
+\code{upload} uploads a file or folder from the local machine into the folder item. The \code{src} argument can be the path to the source file, a \link{rawConnection} or a \link{textConnection} object. If \code{src} is a folder, all its files are uploaded, including subfolders if the \code{recursive} argument iS TRUE. An \code{ms_drive_item} object is returned invisibly.
 
-\code{upload} returns an \code{ms_drive_item} object invisibly if a file was uploaded, or NULL if a folder was uploaded.
+Uploading is done in blocks of 32MB by default; you can change this by setting the \code{blocksize} argument. For technical reasons, the block size \href{https://docs.microsoft.com/en-us/graph/api/driveitem-createuploadsession?view=graph-rest-1.0#upload-bytes-to-the-upload-session}{must be a multiple of 320KB}.
 
 Uploading and downloading folders can be done in parallel, which can result in substantial speedup when transferring a large number of small files. This is controlled by the \code{parallel} argument to \code{upload} and \code{download}, which can have the following values:
 \itemize{

@@ -38,6 +38,12 @@ Class representing an item (file or folder) in a OneDrive or SharePoint document
 \item \code{get_parent_folder()}: Get the parent folder for this item, as a drive item object. Returns the root folder for the root. Not supported for remote items.
 \item \code{get_path()}: Get the absolute path for this item, as a character string. Not supported for remote items.
 \item \code{is_folder()}: Information function, returns TRUE if this item is a folder.
+\item \code{load_dataframe(delim=NULL, ...)}: Download a delimited file and return its contents as a data frame. See 'Saving and loading data' below.
+\item \code{load_rds()}: Download a .rds file and return the saved object.
+\item \code{load_rdata(envir)}: Load a .RData or .Rda file into the specified environment.
+\item \code{save_dataframe(df, file, delim=",", ...)} Save a dataframe to a delimited file.
+\item \code{save_rds(object, file)}: Save an R object to a .rds file.
+\item \code{save_rdata(..., file)}: Save the specified objects to a .RData file.
 }
 }
 
@@ -63,11 +69,11 @@ This class exposes methods for carrying out common operations on files and folde
 
 \code{list_files} is a synonym for \code{list_items}.
 
-\code{download} downloads the item to the local machine. If this is a file, it is downloaded; if this is a folder, all its files are downloaded. If the \code{recursive} argument is TRUE and the item is a folder, all subfolders will also be downloaded recursively.
+\code{download} downloads the item to the local machine. If this is a file, it is downloaded; in this case, the \code{dest} argument can be the path to the destination file, or NULL to return the downloaded content in a raw vector. If the item is a folder, all its files are downloaded, including subfolders if the \code{recursive} argument is TRUE.
 
-\code{upload} uploads a file or folder from the local machine into the folder item. If this is a folder, and the \code{recursive} argument iS TRUE, all subfolders are also uploaded. The uploading is done in blocks of 32MB by default; you can change this by setting the \code{blocksize} argument. For technical reasons, the block size \href{https://docs.microsoft.com/en-us/graph/api/driveitem-createuploadsession?view=graph-rest-1.0#upload-bytes-to-the-upload-session}{must be a multiple of 320KB}.
+\code{upload} uploads a file or folder from the local machine into the folder item. The \code{src} argument can be the path to the source file, a \link{rawConnection} or a \link{textConnection} object. If \code{src} is a folder, all its files are uploaded, including subfolders if the \code{recursive} argument iS TRUE. An \code{ms_drive_item} object is returned invisibly.
 
-\code{upload} returns an \code{ms_drive_item} object invisibly if a file was uploaded, or NULL if a folder was uploaded.
+Uploading is done in blocks of 32MB by default; you can change this by setting the \code{blocksize} argument. For technical reasons, the block size \href{https://docs.microsoft.com/en-us/graph/api/driveitem-createuploadsession?view=graph-rest-1.0#upload-bytes-to-the-upload-session}{must be a multiple of 320KB}.
 
 Uploading and downloading folders can be done in parallel, which can result in substantial speedup when transferring a large number of small files. This is controlled by the \code{parallel} argument to \code{upload} and \code{download}, which can have the following values:
 \itemize{
@@ -91,6 +97,19 @@ Uploading and downloading folders can be done in parallel, which can result in s
 }
 
 This method returns a URL to access the item, for \code{type="view"} or "\verb{type=edit"}. For \code{type="embed"}, it returns a list with components \code{webUrl} containing the URL, and \code{webHtml} containing a HTML fragment to embed the link in an IFRAME. The default is a viewable link, expiring in 7 days.
+}
+
+\section{Saving and loading data}{
+
+The following methods are provided to simplify the task of loading and saving datasets and R objects.
+\itemize{
+\item \code{load_dataframe} downloads a delimited file and returns its contents as a data frame. The delimiter can be specified with the \code{delim} argument; if omitted, this is "," if the file extension is .csv, ";" if the file extension is .csv2, and a tab otherwise. If the readr package is installed, the \code{readr::read_delim} function is used to parse the file, otherwise \code{utils::read.delim} is used. You can supply other arguments to the parsing function via the \code{...} argument.
+\item \code{save_dataframe} is the inverse of \code{load_dataframe}: it uploads the given data frame to a folder item. Specify the delimiter with the \code{delim} argument. The \code{readr::write_delim} function is used to serialise the data if that package is installed, and \code{utils::write.table} otherwise.
+\item \code{load_rds} downloads a .rds file and returns its contents as an R object. It is analogous to the base \code{readRDS} function but for OneDrive/SharePoint drive items.
+\item \code{save_rds} uploads a given R object as a .rds file, analogously to \code{saveRDS}.
+\item \code{load_rdata} downloads a .RData or .Rda file and loads its contents into the given environment. It is analogous to the base \code{load} function but for OneDrive/SharePoint drive items.
+\item \code{save_rdata} uploads the given R objects as a .RData file, analogously to \code{save}.
+}
 }
 
 \section{List methods}{
@@ -130,6 +149,16 @@ myfile$create_share_link(password="Use-strong-passwords!")
 
 # delete the file (will ask for confirmation first)
 myfile$delete()
+
+# saving and loading data
+myfolder <- mydrv$get_item("myfolder")
+myfolder$save_dataframe(iris, "iris.csv")
+iris2 <- myfolder$get_item("iris.csv")$load_dataframe()
+identical(iris, iris2)  # TRUE
+
+myfolder$save_rds(iris, "iris.rds")
+iris3 <- myfolder$get_item("iris.rds")$load_rds()
+identical(iris, iris3)  # TRUE
 
 }
 }

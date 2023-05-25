@@ -24,7 +24,7 @@
 #' - `get_parent_folder()`: Get the parent folder for this item, as a drive item object. Returns the root folder for the root. Not supported for remote items.
 #' - `get_path()`: Get the absolute path for this item, as a character string. Not supported for remote items.
 #' - `is_folder()`: Information function, returns TRUE if this item is a folder.
-#' - `load_dataframe(delim=NULL, ...)`: Download a delimited file and return its contents as a data frame. See 'Convenience methods' below.
+#' - `load_dataframe(delim=NULL, ...)`: Download a delimited file and return its contents as a data frame. See 'Saving and loading data' below.
 #' - `load_rds()`: Download a .rds file and return the saved object.
 #' - `load_rdata(envir)`: Load a .RData or .Rda file into the specified environment.
 #' - `save_dataframe(df, file, delim=",", ...)` Save a dataframe to a delimited file.
@@ -73,7 +73,7 @@
 #'
 #' This method returns a URL to access the item, for `type="view"` or "`type=edit"`. For `type="embed"`, it returns a list with components `webUrl` containing the URL, and `webHtml` containing a HTML fragment to embed the link in an IFRAME. The default is a viewable link, expiring in 7 days.
 #'
-#' @section Convenience methods:
+#' @section Saving and loading data:
 #' The following methods are provided to simplify the task of loading and saving datasets and R objects.
 #' - `load_dataframe` downloads a delimited file and returns its contents as a data frame. The delimiter can be specified with the `delim` argument; if omitted, this is "," if the file extension is .csv, ";" if the file extension is .csv2, and a tab otherwise. If the readr package is installed, the `readr::read_delim` function is used to parse the file, otherwise `utils::read.delim` is used. You can supply other arguments to the parsing function via the `...` argument.
 #' - `save_dataframe` is the inverse of `load_dataframe`: it uploads the given data frame to a folder item. Specify the delimiter with the `delim` argument. The `readr::write_delim` function is used to serialise the data if that package is installed, and `utils::write.table` otherwise.
@@ -122,6 +122,16 @@
 #'
 #' # delete the file (will ask for confirmation first)
 #' myfile$delete()
+#'
+#' # saving and loading data
+#' myfolder <- mydrv$get_item("myfolder")
+#' myfolder$save_dataframe(iris, "iris.csv")
+#' iris2 <- myfolder$get_item("iris.csv")$load_dataframe()
+#' identical(iris, iris2)  # TRUE
+#'
+#' myfolder$save_rds(iris, "iris.rds")
+#' iris3 <- myfolder$get_item("iris.rds")$load_rds()
+#' identical(iris, iris3)  # TRUE
 #'
 #' }
 #' @format An R6 object of class `ms_drive_item`, inheriting from `ms_object`.

@@ -41,6 +41,12 @@ Class representing a personal OneDrive or SharePoint document library.
 \item \code{get_item_properties(path, itemid)}: Get the properties (metadata) for a file or folder.
 \item \code{set_item_properties(path, itemid, ...)}: Set the properties for a file or folder.
 \item \verb{list_shared_items(...), list_shared_files(...)}: List the drive items shared with you. See 'Shared items' below.
+\item \code{load_dataframe(path, itemid, ...)}: Download a delimited file and return its contents as a data frame. See 'Saving and loading data' below.
+\item \code{load_rds(path, itemid)}: Download a .rds file and return the saved object.
+\item \code{load_rdata(path, itemid)}: Load a .RData or .Rda file into the specified environment.
+\item \code{save_dataframe(df, file, ...)} Save a dataframe to a delimited file.
+\item \code{save_rds(object, file)}: Save an R object to a .rds file.
+\item \code{save_rdata(..., file)}: Save the specified objects to a .RData file.
 }
 }
 
@@ -81,6 +87,19 @@ Transferring files in parallel can result in substantial speedup for a large num
 }
 
 \code{create_folder} creates a folder with the specified path. Trying to create an already existing folder is an error.
+}
+
+\section{Saving and loading data}{
+
+The following methods are provided to simplify the task of loading and saving datasets and R objects. They call down to the corresponding methods for the \code{ms_drive_item} class. The `load_*`` methods allow specifying the file to be loaded by either a path or item ID.
+\itemize{
+\item \code{load_dataframe} downloads a delimited file and returns its contents as a data frame. The delimiter can be specified with the \code{delim} argument; if omitted, this is "," if the file extension is .csv, ";" if the file extension is .csv2, and a tab otherwise. If the readr package is installed, the \code{readr::read_delim} function is used to parse the file, otherwise \code{utils::read.delim} is used. You can supply other arguments to the parsing function via the \code{...} argument.
+\item \code{save_dataframe} is the inverse of \code{load_dataframe}: it uploads the given data frame to a folder item. Specify the delimiter with the \code{delim} argument. The \code{readr::write_delim} function is used to serialise the data if that package is installed, and \code{utils::write.table} otherwise.
+\item \code{load_rds} downloads a .rds file and returns its contents as an R object. It is analogous to the base \code{readRDS} function but for OneDrive/SharePoint drive items.
+\item \code{save_rds} uploads a given R object as a .rds file, analogously to \code{saveRDS}.
+\item \code{load_rdata} downloads a .RData or .Rda file and loads its contents into the given environment. It is analogous to the base \code{load} function but for OneDrive/SharePoint drive items.
+\item \code{save_rdata} uploads the given R objects as a .RData file, analogously to \code{save}.
+}
 }
 
 \section{Shared items}{
@@ -141,6 +160,15 @@ drv$set_item_properties("myfile", name="newname")
 id <- obj$properties$id
 obj2 <- drv$get_item(itemid=id)
 obj$properties$id == obj2$properties$id  # TRUE
+
+# saving and loading data
+drv$save_dataframe(iris, "path/to/iris.csv")
+iris2 <- drv$load_dataframe("path/to/iris.csv")
+identical(iris, iris2)  # TRUE
+
+drv$save_rds(iris, "path/to/iris.rds")
+iris3 <- drv$load_rds("path/to/iris.rds")
+identical(iris, iris3)  # TRUE
 
 # accessing shared files
 shared_df <- drv$list_shared_items()

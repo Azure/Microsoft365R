@@ -38,7 +38,7 @@ Class representing an item (file or folder) in a OneDrive or SharePoint document
 \item \code{get_parent_folder()}: Get the parent folder for this item, as a drive item object. Returns the root folder for the root. Not supported for remote items.
 \item \code{get_path()}: Get the absolute path for this item, as a character string. Not supported for remote items.
 \item \code{is_folder()}: Information function, returns TRUE if this item is a folder.
-\item \code{load_dataframe(delim=NULL, ...)}: Download a delimited file and return its contents as a data frame. See 'Convenience methods' below.
+\item \code{load_dataframe(delim=NULL, ...)}: Download a delimited file and return its contents as a data frame. See 'Saving and loading data' below.
 \item \code{load_rds()}: Download a .rds file and return the saved object.
 \item \code{load_rdata(envir)}: Load a .RData or .Rda file into the specified environment.
 \item \code{save_dataframe(df, file, delim=",", ...)} Save a dataframe to a delimited file.
@@ -99,7 +99,7 @@ Uploading and downloading folders can be done in parallel, which can result in s
 This method returns a URL to access the item, for \code{type="view"} or "\verb{type=edit"}. For \code{type="embed"}, it returns a list with components \code{webUrl} containing the URL, and \code{webHtml} containing a HTML fragment to embed the link in an IFRAME. The default is a viewable link, expiring in 7 days.
 }
 
-\section{Convenience methods}{
+\section{Saving and loading data}{
 
 The following methods are provided to simplify the task of loading and saving datasets and R objects.
 \itemize{
@@ -149,6 +149,16 @@ myfile$create_share_link(password="Use-strong-passwords!")
 
 # delete the file (will ask for confirmation first)
 myfile$delete()
+
+# saving and loading data
+myfolder <- mydrv$get_item("myfolder")
+myfolder$save_dataframe(iris, "iris.csv")
+iris2 <- myfolder$get_item("iris.csv")$load_dataframe()
+identical(iris, iris2)  # TRUE
+
+myfolder$save_rds(iris, "iris.rds")
+iris3 <- myfolder$get_item("iris.rds")$load_rds()
+identical(iris, iris3)  # TRUE
 
 }
 }

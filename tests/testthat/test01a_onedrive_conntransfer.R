@@ -46,6 +46,31 @@ test_that("OneDrive file transfer extras work",
 })
 
 
+test_that("OneDrive load/save methods work",
+{
+    fname <- folder$properties$name
+
+    name1 <- file.path(fname, "iris.csv")
+    expect_silent(od$save_dataframe(iris, name1))
+    ir1 <- od$load_dataframe(name1)
+    expect_s3_class(ir1, "data.frame")
+    expect_identical(dim(ir1), dim(iris))
+
+    name2 <- file.path(fname, "iris.rds")
+    expect_silent(od$save_rds(iris, name2))
+    ir2 <- od$load_rds(name2)
+    expect_s3_class(ir2, "data.frame")
+    expect_identical(dim(ir2), dim(iris))
+
+    name3 <- file.path(fname, "iris.rdata")
+    ir3 <- iris
+    expect_silent(od$save_rdata(ir3, file=name3))
+    rm(ir3)
+    od$load_rdata(name3)
+    expect_identical(ir3, iris)
+})
+
+
 teardown({
     options(opt_use_itemid)
     folder$delete(confirm=FALSE)

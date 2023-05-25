@@ -38,6 +38,12 @@ Class representing an item (file or folder) in a OneDrive or SharePoint document
 \item \code{get_parent_folder()}: Get the parent folder for this item, as a drive item object. Returns the root folder for the root. Not supported for remote items.
 \item \code{get_path()}: Get the absolute path for this item, as a character string. Not supported for remote items.
 \item \code{is_folder()}: Information function, returns TRUE if this item is a folder.
+\item \code{load_dataframe(delim=NULL, ...)}: Download a delimited file and return its contents as a data frame. See 'Convenience methods' below.
+\item \code{load_rds()}: Download a .rds file and return the saved object.
+\item \code{load_rdata(envir)}: Load a .RData or .Rda file into the specified environment.
+\item \code{save_dataframe(df, file, delim=",", ...)} Save a dataframe to a delimited file.
+\item \code{save_rds(object, file)}: Save an R object to a .rds file.
+\item \code{save_rdata(..., file)}: Save the specified objects to a .RData file.
 }
 }
 
@@ -91,6 +97,19 @@ Uploading and downloading folders can be done in parallel, which can result in s
 }
 
 This method returns a URL to access the item, for \code{type="view"} or "\verb{type=edit"}. For \code{type="embed"}, it returns a list with components \code{webUrl} containing the URL, and \code{webHtml} containing a HTML fragment to embed the link in an IFRAME. The default is a viewable link, expiring in 7 days.
+}
+
+\section{Convenience methods}{
+
+The following methods are provided to simplify the task of loading and saving datasets and R objects.
+\itemize{
+\item \code{load_dataframe} downloads a delimited file and returns its contents as a data frame. The delimiter can be specified with the \code{delim} argument; if omitted, this is "," if the file extension is .csv, ";" if the file extension is .csv2, and a tab otherwise. If the readr package is installed, the \code{readr::read_delim} function is used to parse the file, otherwise \code{utils::read.delim} is used. You can supply other arguments to the parsing function via the \code{...} argument.
+\item \code{save_dataframe} is the inverse of \code{load_dataframe}: it uploads the given data frame to a folder item. Specify the delimiter with the \code{delim} argument. The \code{readr::write_delim} function is used to serialise the data if that package is installed, and \code{utils::write.table} otherwise.
+\item \code{load_rds} downloads a .rds file and returns its contents as an R object. It is analogous to the base \code{readRDS} function but for OneDrive/SharePoint drive items.
+\item \code{save_rds} uploads a given R object as a .rds file, analogously to \code{saveRDS}.
+\item \code{load_rdata} downloads a .RData or .Rda file and loads its contents into the given environment. It is analogous to the base \code{load} function but for OneDrive/SharePoint drive items.
+\item \code{save_rdata} uploads the given R objects as a .RData file, analogously to \code{save}.
+}
 }
 
 \section{List methods}{

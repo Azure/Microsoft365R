@@ -26,6 +26,8 @@
 #' - `get_item(path, itemid)`: Get an item representing a file or folder.
 #' - `get_item_properties(path, itemid)`: Get the properties (metadata) for a file or folder.
 #' - `set_item_properties(path, itemid, ...)`: Set the properties for a file or folder.
+#' - `copy_item(path, itemid, dest, dest_item_id)`: Copy a file or folder.
+#' - `move_item(path, itemid, dest, dest_item_id)`: Move a file or folder.
 #' - `list_shared_items(...), list_shared_files(...)`: List the drive items shared with you. See 'Shared items' below.
 #' - `load_dataframe(path, itemid, ...)`: Download a delimited file and return its contents as a data frame. See 'Saving and loading data' below.
 #' - `load_rds(path, itemid)`: Download a .rds file and return the saved object.
@@ -51,6 +53,10 @@
 #' `get_item_properties` is a convenience function that returns the properties of a file or folder as a list.
 #'
 #' `set_item_properties` sets the properties of a file or folder. The new properties should be specified as individual named arguments to the method. Any existing properties that aren't listed as arguments will retain their previous values or be recalculated based on changes to other properties, as appropriate. You can also call the `update` method on the corresponding `ms_drive_item` object.
+#'
+#' - `copy_item` and `move_item` can take the destination location as either a full pathname (in the `dest` argument), or a name plus a drive item object (in the `dest_folder_item` argument). If the latter is supplied, any path in `dest` is ignored with a warning. Note that copying is an _asynchronous_ operation, meaning the method returns before the copy is complete.
+#'
+#' For copying and moving, the destination folder must exist beforehand. When copying/moving a large number of files, it's much more efficient to supply the destination folder in the `dest_folder_item` argument rather than as a path.
 #'
 #' `list_items(path, info, full_names, pagesize)` lists the items under the specified path.
 #'
@@ -234,6 +240,16 @@ public=list(
     set_item_properties=function(path=NULL, itemid=NULL, ...)
     {
         self$get_item(path, itemid)$update(...)
+    },
+
+    copy_item=function(path=NULL, itemid=NULL, dest, dest_folder_item=NULL)
+    {
+        self$get_item(path, itemid)$copy(dest, dest_folder_item)
+    },
+
+    move_item=function(path=NULL, itemid=NULL, dest, dest_folder_item=NULL)
+    {
+        self$get_item(path, itemid)$move(dest, dest_folder_item)
     },
 
     list_shared_items=function(allow_external=TRUE, filter=NULL, n=Inf, pagesize=1000, info=NULL)

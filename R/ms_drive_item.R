@@ -15,6 +15,8 @@
 #' - `do_operation(...)`: Carry out an arbitrary operation on the item.
 #' - `sync_fields()`: Synchronise the R object with the item metadata in Microsoft Graph.
 #' - `open()`: Open the item in your browser.
+#' - `copy(dest, dest_folder_item=NULL)`: Copy the item to the given location.
+#' - `move(dest, dest_folder_item=NULL)`: Move the item to the given location.
 #' - `list_items(...), list_files(...)`: List the files and folders under the specified path.
 #' - `download(dest, overwrite, recursive, parallel)`: Download the file or folder. See below.
 #' - `create_share_link(type, expiry, password, scope)`: Create a shareable link to the file or folder.
@@ -62,6 +64,10 @@
 #'
 #' `get_item` retrieves the file or folder with the given path, as another object of class `ms_drive_item`.
 #'
+#' - `copy` and `move` can take the destination location as either a full pathname (in the `dest` argument), or a name plus a drive item object (in the `dest_folder_item` argument). If the latter is supplied, any path in `dest` is ignored with a warning. Note that copying is an _asynchronous_ operation, meaning the method returns before the copy is complete.
+#'
+#' For copying and moving, the destination folder must exist beforehand. When copying/moving a large number of files, it's much more efficient to supply the destination folder in the `dest_folder_item` argument rather than as a path.
+#'
 #' `create_folder` creates a folder with the specified path. Trying to create an already existing folder is an error. This returns an `ms_drive_item` object, invisibly.
 #'
 #' `create_share_link(path, type, expiry, password, scope)` returns a shareable link to the item. Its arguments are
@@ -108,6 +114,16 @@
 #'
 #' # rename a file
 #' myfile$update(name="newname.docx")
+#'
+#' # copy a file (destination folder must exist)
+#' myfile$copy("/Documents/folder2/myfile_copied.docx")
+#'
+#' # alternate way of copying: supply the destination folder
+#' destfolder <- docs$get_item("folder2")
+#' myfile$copy("myfile_copied.docx", dest_folder_item=destfolder)
+#'
+#' # move a file (destination folder must exist)
+#' myfile$move("Documents/folder2/myfile_moved.docx")
 #'
 #' # open the file in the browser
 #' myfile$open()
@@ -466,6 +482,58 @@ public=list(
         self$upload(tmpsave, file)
     },
 
+    copy=function(dest, dest_folder_item=NULL)
+    {
+        path <- dirname(dest)
+        body <- list(name=basename(dest))
+
+        if(!is.null(dest_folder_item))
+        {
+            if(path != ".")
+                warning("Destination folder object supplied; path will be ignored")
+            body$parentReference <- list(
+                driveId=dest_folder_item$properties$parentReference$driveId,
+                id=dest_folder_item$properties$id
+            )
+        }
+        else if(path != ".")
+        {
+            dest_folder_item <- private$get_drive()$get_item(path)
+            body$parentReference <- list(
+                driveId=dest_folder_item$properties$parentReference$driveId,
+                id=dest_folder_item$properties$id
+            )
+        }
+
+        self$do_operation("copy", body=body, http_verb="POST")
+        invisible(NULL)
+    },
+
+    move=function(dest, dest_folder_item=NULL)
+    {
+        path <- dirname(dest)
+        body <- list(name=basename(dest))
+
+        if(!is.null(dest_folder_item))
+        {
+            if(path != ".")
+                warning("Destination folder object supplied; path will be ignored")
+            body$parentReference <- list(
+                id=dest_folder_item$properties$id
+            )
+        }
+        else if(path != ".")
+        {
+            dest_folder_item <- private$get_drive()$get_item(path)
+            body$parentReference <- list(
+                id=dest_folder_item$properties$id
+            )
+        }
+
+        self$properties <- self$do_operation(body=body, encode="json", http_verb="PATCH")
+        invisible(self)
+    },
+
     get_path=function()
     {
         private$assert_is_not_remote()
@@ -616,6 +684,12 @@ private=list(
 
         op <- sprintf("%s:/%s", base, dest)
         utils::URLencode(enc2utf8(op))
+    },
+
+    get_drive=function()
+    {
+        dummy_props <- list(id=self$properties$parentReference$driveId)
+        ms_drive$new(self$token, self$tenant, dummy_props)
     },
 
     assert_is_folder=function()

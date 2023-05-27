@@ -40,6 +40,8 @@ Class representing a personal OneDrive or SharePoint document library.
 \item \code{get_item(path, itemid)}: Get an item representing a file or folder.
 \item \code{get_item_properties(path, itemid)}: Get the properties (metadata) for a file or folder.
 \item \code{set_item_properties(path, itemid, ...)}: Set the properties for a file or folder.
+\item \code{copy_item(path, itemid, dest, dest_item_id)}: Copy a file or folder.
+\item \code{move_item(path, itemid, dest, dest_item_id)}: Move a file or folder.
 \item \verb{list_shared_items(...), list_shared_files(...)}: List the drive items shared with you. See 'Shared items' below.
 \item \code{load_dataframe(path, itemid, ...)}: Download a delimited file and return its contents as a data frame. See 'Saving and loading data' below.
 \item \code{load_rds(path, itemid)}: Download a .rds file and return the saved object.
@@ -70,6 +72,11 @@ This class exposes methods for carrying out common operations on files and folde
 \code{get_item_properties} is a convenience function that returns the properties of a file or folder as a list.
 
 \code{set_item_properties} sets the properties of a file or folder. The new properties should be specified as individual named arguments to the method. Any existing properties that aren't listed as arguments will retain their previous values or be recalculated based on changes to other properties, as appropriate. You can also call the \code{update} method on the corresponding \code{ms_drive_item} object.
+\itemize{
+\item \code{copy_item} and \code{move_item} can take the destination location as either a full pathname (in the \code{dest} argument), or a name plus a drive item object (in the \code{dest_folder_item} argument). If the latter is supplied, any path in \code{dest} is ignored with a warning. Note that copying is an \emph{asynchronous} operation, meaning the method returns before the copy is complete.
+}
+
+For copying and moving, the destination folder must exist beforehand. When copying/moving a large number of files, it's much more efficient to supply the destination folder in the \code{dest_folder_item} argument rather than as a path.
 
 \code{list_items(path, info, full_names, pagesize)} lists the items under the specified path.
 

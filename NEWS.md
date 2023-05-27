@@ -6,6 +6,7 @@
 - The `list_shared_items()`/`list_shared_files()` method for drives now always returns a list of drive item objects, rather than a data frame. If the `info` argument is supplied with a value other than "items", a warning is issued.
 - Add folder upload and download functionality for `ms_drive_item$upload()` and `download()`. Subfolders can also be transferred recursively, and optionally in parallel. There are also corresponding `ms_drive$upload_folder()` and `download_folder()` methods.
 - Add convenience methods for saving and loading datasets and R objects: `save_dataframe()`, `save_rds()`, `save_rdata()`, `load_dataframe()`, `load_rds()`, and `load_rdata()`. See `?ms_drive_item` and `?ms_drive` for more details.
+- Add `copy` and `move` methods for drive items, and corresponding `copy_item` and `move_item` methods for drives.
 - Add ability to upload and download via connections/raw vectors instead of files. You can specify the source to `ms_drive_item$upload()` to be a raw or text connection. Similarly, if the destination for `ms_drive_item$download()` is NULL, the downloaded data is returned as a raw vector.
 - Add the ability to use object IDs instead of file/folder paths in `ms_drive` methods, including getting, uploading and downloading. This can be useful since the object ID is immutable, whereas file paths can change, eg if the file is moved or renamed. See `?ms_drive` for more details.
 

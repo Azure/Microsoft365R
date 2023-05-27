@@ -29,6 +29,8 @@ Class representing an item (file or folder) in a OneDrive or SharePoint document
 \item \code{do_operation(...)}: Carry out an arbitrary operation on the item.
 \item \code{sync_fields()}: Synchronise the R object with the item metadata in Microsoft Graph.
 \item \code{open()}: Open the item in your browser.
+\item \code{copy(dest, dest_folder_item=NULL)}: Copy the item to the given location.
+\item \code{move(dest, dest_folder_item=NULL)}: Move the item to the given location.
 \item \verb{list_items(...), list_files(...)}: List the files and folders under the specified path.
 \item \code{download(dest, overwrite, recursive, parallel)}: Download the file or folder. See below.
 \item \code{create_share_link(type, expiry, password, scope)}: Create a shareable link to the file or folder.
@@ -84,6 +86,11 @@ Uploading and downloading folders can be done in parallel, which can result in s
 }
 
 \code{get_item} retrieves the file or folder with the given path, as another object of class \code{ms_drive_item}.
+\itemize{
+\item \code{copy} and \code{move} can take the destination location as either a full pathname (in the \code{dest} argument), or a name plus a drive item object (in the \code{dest_folder_item} argument). If the latter is supplied, any path in \code{dest} is ignored with a warning. Note that copying is an \emph{asynchronous} operation, meaning the method returns before the copy is complete.
+}
+
+For copying and moving, the destination folder must exist beforehand. When copying/moving a large number of files, it's much more efficient to supply the destination folder in the \code{dest_folder_item} argument rather than as a path.
 
 \code{create_folder} creates a folder with the specified path. Trying to create an already existing folder is an error. This returns an \code{ms_drive_item} object, invisibly.
 
@@ -135,6 +142,16 @@ myfile$properties
 
 # rename a file
 myfile$update(name="newname.docx")
+
+# copy a file (destination folder must exist)
+myfile$copy("/Documents/folder2/myfile_copied.docx")
+
+# alternate way of copying: supply the destination folder
+destfolder <- docs$get_item("folder2")
+myfile$copy("myfile_copied.docx", dest_folder_item=destfolder)
+
+# move a file (destination folder must exist)
+myfile$move("Documents/folder2/myfile_moved.docx")
 
 # open the file in the browser
 myfile$open()

@@ -28,15 +28,15 @@ The app registration for an unattended script looks slightly different to that f
 
 - In nearly all cases, the **intended audience** of your app registration should be only members of your AAD tenant.
 
-- Ensure that you give your app **application permissions** instead of delegated permissions. Refer to the complete [list of Graph permissions](https://docs.microsoft.com/en-us/graph/permissions-reference?context=graph%2Fapi%2Fbeta&view=graph-rest-beta) to determine which ones you need.
+- Ensure that you give your app **application permissions** instead of delegated permissions. Refer to the complete [list of Graph permissions](https://learn.microsoft.com/en-us/graph/permissions-reference?context=graph%2Fapi%2Fbeta&view=graph-rest-beta) to determine which ones you need.
 
 The following pages at the AAD documentation will be helpful:
 
-- [A step-by-step guide](https://docs.microsoft.com/en-us/azure/active-directory/develop/quickstart-register-app) to registering an app in the Azure portal.
+- [A step-by-step guide](https://learn.microsoft.com/en-us/azure/active-directory/develop/quickstart-register-app) to registering an app in the Azure portal.
 
-- [How to set permissions for an app](https://docs.microsoft.com/en-us/azure/active-directory/develop/quickstart-configure-app-access-web-apis).
+- [How to set permissions for an app](https://learn.microsoft.com/en-us/azure/active-directory/develop/quickstart-configure-app-access-web-apis).
 
-- [Authentication and authorization basics for Microsoft Graph](https://docs.microsoft.com/en-us/graph/auth/auth-concepts#microsoft-graph-permissions).
+- [Authentication and authorization basics for Microsoft Graph](https://learn.microsoft.com/en-us/graph/auth/auth-concepts#microsoft-graph-permissions).
 
 ### Application permissions and security
 
@@ -87,7 +87,7 @@ drv$list_files()
 
 Using a service principal is the Microsoft-recommended approach, but as noted above, is potentially very powerful. For this reason, you may want to consider using a service account instead. This is a normal user account that is not intended for interactive use, but instead authenticates via a script. The advantage is that the account only needs delegated permissions and so won't have access to all of your tenant's resources.
 
-To authenticate a service account with AAD non-interactively, you use the [resource owner password grant](https://docs.microsoft.com/en-au/azure/active-directory/develop/v2-oauth-ropc) flow. You can use any app registration that has access to your tenant and has the correct delegated permissions to work with Microsoft Graph; see the "Authenticating to Microsoft 365" vignette for more information on creating an app registration. Note that you (or an admin) must grant consent for the permissions beforehand.
+To authenticate a service account with AAD non-interactively, you use the [resource owner password grant](https://learn.microsoft.com/en-au/azure/active-directory/develop/v2-oauth-ropc) flow. You can use any app registration that has access to your tenant and has the correct delegated permissions to work with Microsoft Graph; see the "Authenticating to Microsoft 365" vignette for more information on creating an app registration. Note that you (or an admin) must grant consent for the permissions beforehand.
 
 ### Creating a service account
 

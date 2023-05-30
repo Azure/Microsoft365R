@@ -18,7 +18,7 @@ In addition, some functions request the following permissions:
 - Mail.ReadWrite.Shared
 - Chat.ReadWrite
 
-These are Microsoft Graph permissions (`https://graph.microsoft.com/`). They are all delegated permissions, not application-level permissions, so a signed-in user is required. As the [Graph documentation](https://docs.microsoft.com/en-us/graph/auth/auth-concepts#microsoft-graph-permissions) notes:
+These are Microsoft Graph permissions (`https://graph.microsoft.com/`). They are all delegated permissions, not application-level permissions, so a signed-in user is required. As the [Graph documentation](https://learn.microsoft.com/en-us/graph/auth/auth-concepts#microsoft-graph-permissions) notes:
 
 > For delegated permissions, the effective permissions of your app are the intersection of the delegated permissions the app has been granted (via consent) and the privileges of the currently signed-in user. Your app can never have more privileges than the signed-in user. Within organizations, the privileges of the signed-in user are determined by policy or by membership in one or more administrator roles.
 

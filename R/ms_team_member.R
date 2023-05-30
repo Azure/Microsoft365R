@@ -22,8 +22,8 @@
 #' @seealso
 #' [`ms_team`], [`ms_channel`]
 #'
-#' [Microsoft Graph overview](https://docs.microsoft.com/en-us/graph/overview),
-#' [Microsoft Teams API reference](https://docs.microsoft.com/en-us/graph/api/resources/teams-api-overview?view=graph-rest-1.0)
+#' [Microsoft Graph overview](https://learn.microsoft.com/en-us/graph/overview),
+#' [Microsoft Teams API reference](https://learn.microsoft.com/en-us/graph/api/resources/teams-api-overview?view=graph-rest-1.0)
 #' @format An R6 object of class `ms_team_member`, inheriting from `ms_object`.
 #' @export
 ms_team_member <- R6::R6Class("ms_team_member", inherit=ms_object,

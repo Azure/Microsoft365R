@@ -76,7 +76,7 @@ To list the emails in a folder, call the \code{list_emails()} method. This retur
 }\if{html}{\out{</div>}}
 \itemize{
 \item \code{by}: The sorting order of the message list. The possible fields are "received" (received date, the default), "from" and "subject". To sort in descending order, add a " desc". You can specify multiple sorting fields, with later fields used to break ties in earlier ones. The last sorting field is always "received desc" unless it appears earlier.
-\item \code{search}: An optional string to search for. Only emails that contain the search string will be returned. See the \href{https://docs.microsoft.com/en-us/graph/query-parameters#search-parameter}{description of this parameter} for more information.
+\item \code{search}: An optional string to search for. Only emails that contain the search string will be returned. See the \href{https://learn.microsoft.com/en-us/graph/query-parameters#search-parameter}{description of this parameter} for more information.
 \item \verb{filter, n}: See below.
 \item \code{pagesize}: The number of emails per page. You can change this to a larger number to increase throughput, at the risk of running into timeouts.
 }
@@ -86,7 +86,7 @@ Currently, searching and filtering the message list is subject to some limitatio
 
 \section{List methods generally}{
 
-All \verb{list_*} methods have \code{filter} and \code{n} arguments to limit the number of results. The former should be an \href{https://docs.microsoft.com/en-us/graph/query-parameters#filter-parameter}{OData expression} as a string to filter the result set on. The latter should be a number setting the maximum number of (filtered) results to return. The default values are \code{filter=NULL} and \code{n=100} for listing emails, and \code{n=Inf} for listing folders. If \code{n=NULL}, the \code{ms_graph_pager} iterator object is returned instead to allow manual iteration over the results.
+All \verb{list_*} methods have \code{filter} and \code{n} arguments to limit the number of results. The former should be an \href{https://learn.microsoft.com/en-us/graph/query-parameters#filter-parameter}{OData expression} as a string to filter the result set on. The latter should be a number setting the maximum number of (filtered) results to return. The default values are \code{filter=NULL} and \code{n=100} for listing emails, and \code{n=Inf} for listing folders. If \code{n=NULL}, the \code{ms_graph_pager} iterator object is returned instead to allow manual iteration over the results.
 
 Support in the underlying Graph API for OData queries is patchy. Not all endpoints that return lists of objects support filtering, and if they do, they may not allow all of the defined operators. If your filtering expression results in an error, you can carry out the operation without filtering and then filter the results on the client side.
 }
@@ -165,6 +165,6 @@ folder$create_email(ey_email)
 \seealso{
 \code{\link{ms_outlook}}, \code{\link{ms_outlook_email}}
 
-\href{https://docs.microsoft.com/en-us/graph/overview}{Microsoft Graph overview},
-\href{https://docs.microsoft.com/en-us/graph/api/resources/mail-api-overview?view=graph-rest-1.0}{Outlook API reference}
+\href{https://learn.microsoft.com/en-us/graph/overview}{Microsoft Graph overview},
+\href{https://learn.microsoft.com/en-us/graph/api/resources/mail-api-overview?view=graph-rest-1.0}{Outlook API reference}
 }

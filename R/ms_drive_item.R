@@ -566,6 +566,23 @@ private=list(
         on.exit(close(src$con))
 
         fullpath <- private$make_absolute_path(dest)
+
+        # handle zero-length files correctly: cannot use resumable upload
+        if(src$size == 0)
+        {
+            # possible fullpath formats -> string to append:
+            # drives/xxx/root -> /content
+            # drives/xxx/root:/foo/bar -> :/content
+            # drives/xxx/items/yyy -> /content
+            # drives/xxx/items/yyy:/foo/bar -> :/content
+            op <- if(grepl(":/", fullpath))
+                paste0(fullpath, ":/content")
+            else paste0(fullpath, "/content")
+
+            res <- call_graph_endpoint(self$token, op, http_verb="PUT", body=raw(0))
+            return(invisible(ms_drive_item$new(self$token, self$tenant, httr::content(res))))
+        }
+
         # possible fullpath formats -> string to append:
         # drives/xxx/root -> /createUploadSession
         # drives/xxx/root:/foo/bar -> :/createUploadSession

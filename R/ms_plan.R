@@ -101,7 +101,7 @@ public=list(
 
     get_details=function()
     {
-        do_operation("details")
+        self$do_operation("details")
     },
 
     print=function(...)

@@ -1,3 +1,9 @@
+# Microsoft365R 2.4.0.9000
+
+## Planner
+
+- Fix a bug in the `ms_plan$get_details()` method.
+
 # Microsoft365R 2.4.0
 
 ## OneDrive/SharePoint

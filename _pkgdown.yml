@@ -43,3 +43,7 @@ reference:
   desc: Microsoft 365 object accessor methods
 - contents:
   - add_methods
+- title: Microsoft365r Options
+  desc: Global options for interaction with the underlying Graph API
+- contents:
+  - microsoft365r_options

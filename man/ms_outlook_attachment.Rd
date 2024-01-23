@@ -55,6 +55,6 @@ atts[[1]]$download()
 \seealso{
 \code{\link{ms_outlook}}, \code{\link{ms_outlook_email}}
 
-\href{https://docs.microsoft.com/en-us/graph/overview}{Microsoft Graph overview},
-\href{https://docs.microsoft.com/en-us/graph/api/resources/mail-api-overview?view=graph-rest-1.0}{Outlook API reference}
+\href{https://learn.microsoft.com/en-us/graph/overview}{Microsoft Graph overview},
+\href{https://learn.microsoft.com/en-us/graph/api/resources/mail-api-overview?view=graph-rest-1.0}{Outlook API reference}
 }

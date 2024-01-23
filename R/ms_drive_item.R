@@ -15,15 +15,23 @@
 #' - `do_operation(...)`: Carry out an arbitrary operation on the item.
 #' - `sync_fields()`: Synchronise the R object with the item metadata in Microsoft Graph.
 #' - `open()`: Open the item in your browser.
+#' - `copy(dest, dest_folder_item=NULL)`: Copy the item to the given location.
+#' - `move(dest, dest_folder_item=NULL)`: Move the item to the given location.
 #' - `list_items(...), list_files(...)`: List the files and folders under the specified path.
-#' - `download(dest, overwrite)`: Download the file. Only applicable for a file item.
+#' - `download(dest, overwrite, recursive, parallel)`: Download the file or folder. See below.
 #' - `create_share_link(type, expiry, password, scope)`: Create a shareable link to the file or folder.
-#' - `upload(src, dest, blocksize)`: Upload a file. Only applicable for a folder item.
+#' - `upload(src, dest, blocksize, , recursive, parallel)`: Upload a file or folder. See below.
 #' - `create_folder(path)`: Create a folder. Only applicable for a folder item.
 #' - `get_item(path)`: Get a child item (file or folder) under this folder.
-#' - `get_parent_folder()`: Get the parent folder for this item, as a drive item object. Returns the root folder for the root.
-#' - `get_path()`: Get the absolute path for this item, as a character string.
+#' - `get_parent_folder()`: Get the parent folder for this item, as a drive item object. Returns the root folder for the root. Not supported for remote items.
+#' - `get_path()`: Get the absolute path for this item, as a character string. Not supported for remote items.
 #' - `is_folder()`: Information function, returns TRUE if this item is a folder.
+#' - `load_dataframe(delim=NULL, ...)`: Download a delimited file and return its contents as a data frame. See 'Saving and loading data' below.
+#' - `load_rds()`: Download a .rds file and return the saved object.
+#' - `load_rdata(envir)`: Load a .RData or .Rda file into the specified environment.
+#' - `save_dataframe(df, file, delim=",", ...)` Save a dataframe to a delimited file.
+#' - `save_rds(object, file)`: Save an R object to a .rds file.
+#' - `save_rdata(..., file)`: Save the specified objects to a .RData file.
 #'
 #' @section Initialization:
 #' Creating new objects of this class should be done via the `get_item` method of the [`ms_drive`] class. Calling the `new()` method for this class only constructs the R object; it does not call the Microsoft Graph API to retrieve or create the actual item.
@@ -42,13 +50,23 @@
 #'
 #' `list_files` is a synonym for `list_items`.
 #'
-#' `download` downloads the file item to the local machine. It is an error to try to download a folder item.
+#' `download` downloads the item to the local machine. If this is a file, it is downloaded; in this case, the `dest` argument can be the path to the destination file, or NULL to return the downloaded content in a raw vector. If the item is a folder, all its files are downloaded, including subfolders if the `recursive` argument is TRUE.
 #'
-#' `upload` uploads a file from the local machine into the folder item, and returns another `ms_drive_item` object representing the uploaded file. The uploading is done in blocks of 32MB by default; you can change this by setting the `blocksize` argument. For technical reasons, the block size [must be a multiple of 320KB](https://docs.microsoft.com/en-us/graph/api/driveitem-createuploadsession?view=graph-rest-1.0#upload-bytes-to-the-upload-session). This returns an `ms_drive_item` object, invisibly.
+#' `upload` uploads a file or folder from the local machine into the folder item. The `src` argument can be the path to the source file, a [rawConnection] or a [textConnection] object. If `src` is a folder, all its files are uploaded, including subfolders if the `recursive` argument iS TRUE. An `ms_drive_item` object is returned invisibly.
 #'
-#' It is an error to try to upload to a file item, or to upload a source directory.
+#' Uploading is done in blocks of 32MB by default; you can change this by setting the `blocksize` argument. For technical reasons, the block size [must be a multiple of 320KB](https://learn.microsoft.com/en-us/graph/api/driveitem-createuploadsession?view=graph-rest-1.0#upload-bytes-to-the-upload-session).
+#'
+#' Uploading and downloading folders can be done in parallel, which can result in substantial speedup when transferring a large number of small files. This is controlled by the `parallel` argument to `upload` and `download`, which can have the following values:
+#' - TRUE: A cluster with 5 workers is created
+#' - A number: A cluster with this many workers is created
+#' - A cluster object, created via the parallel package
+#' - FALSE: The transfer is done serially
 #'
 #' `get_item` retrieves the file or folder with the given path, as another object of class `ms_drive_item`.
+#'
+#' - `copy` and `move` can take the destination location as either a full pathname (in the `dest` argument), or a name plus a drive item object (in the `dest_folder_item` argument). If the latter is supplied, any path in `dest` is ignored with a warning. Note that copying is an _asynchronous_ operation, meaning the method returns before the copy is complete.
+#'
+#' For copying and moving, the destination folder must exist beforehand. When copying/moving a large number of files, it's much more efficient to supply the destination folder in the `dest_folder_item` argument rather than as a path.
 #'
 #' `create_folder` creates a folder with the specified path. Trying to create an already existing folder is an error. This returns an `ms_drive_item` object, invisibly.
 #'
@@ -61,15 +79,24 @@
 #'
 #' This method returns a URL to access the item, for `type="view"` or "`type=edit"`. For `type="embed"`, it returns a list with components `webUrl` containing the URL, and `webHtml` containing a HTML fragment to embed the link in an IFRAME. The default is a viewable link, expiring in 7 days.
 #'
+#' @section Saving and loading data:
+#' The following methods are provided to simplify the task of loading and saving datasets and R objects.
+#' - `load_dataframe` downloads a delimited file and returns its contents as a data frame. The delimiter can be specified with the `delim` argument; if omitted, this is "," if the file extension is .csv, ";" if the file extension is .csv2, and a tab otherwise. If the readr package is installed, the `readr::read_delim` function is used to parse the file, otherwise `utils::read.delim` is used. You can supply other arguments to the parsing function via the `...` argument.
+#' - `save_dataframe` is the inverse of `load_dataframe`: it uploads the given data frame to a folder item. Specify the delimiter with the `delim` argument. The `readr::write_delim` function is used to serialise the data if that package is installed, and `utils::write.table` otherwise.
+#' - `load_rds` downloads a .rds file and returns its contents as an R object. It is analogous to the base `readRDS` function but for OneDrive/SharePoint drive items.
+#' - `save_rds` uploads a given R object as a .rds file, analogously to `saveRDS`.
+#' - `load_rdata` downloads a .RData or .Rda file and loads its contents into the given environment. It is analogous to the base `load` function but for OneDrive/SharePoint drive items.
+#' - `save_rdata` uploads the given R objects as a .RData file, analogously to `save`.
+#'
 #' @section List methods:
-#' All `list_*` methods have `filter` and `n` arguments to limit the number of results. The former should be an [OData expression](https://docs.microsoft.com/en-us/graph/query-parameters#filter-parameter) as a string to filter the result set on. The latter should be a number setting the maximum number of (filtered) results to return. The default values are `filter=NULL` and `n=Inf`. If `n=NULL`, the `ms_graph_pager` iterator object is returned instead to allow manual iteration over the results.
+#' All `list_*` methods have `filter` and `n` arguments to limit the number of results. The former should be an [OData expression](https://learn.microsoft.com/en-us/graph/query-parameters#filter-parameter) as a string to filter the result set on. The latter should be a number setting the maximum number of (filtered) results to return. The default values are `filter=NULL` and `n=Inf`. If `n=NULL`, the `ms_graph_pager` iterator object is returned instead to allow manual iteration over the results.
 #'
 #' Support in the underlying Graph API for OData queries is patchy. Not all endpoints that return lists of objects support filtering, and if they do, they may not allow all of the defined operators. If your filtering expression results in an error, you can carry out the operation without filtering and then filter the results on the client side.
 #' @seealso
 #' [`ms_graph`], [`ms_site`], [`ms_drive`]
 #'
-#' [Microsoft Graph overview](https://docs.microsoft.com/en-us/graph/overview),
-#' [OneDrive API reference](https://docs.microsoft.com/en-us/graph/api/resources/onedrive?view=graph-rest-1.0)
+#' [Microsoft Graph overview](https://learn.microsoft.com/en-us/graph/overview),
+#' [OneDrive API reference](https://learn.microsoft.com/en-us/graph/api/resources/onedrive?view=graph-rest-1.0)
 #'
 #' @examples
 #' \dontrun{
@@ -88,6 +115,16 @@
 #' # rename a file
 #' myfile$update(name="newname.docx")
 #'
+#' # copy a file (destination folder must exist)
+#' myfile$copy("/Documents/folder2/myfile_copied.docx")
+#'
+#' # alternate way of copying: supply the destination folder
+#' destfolder <- docs$get_item("folder2")
+#' myfile$copy("myfile_copied.docx", dest_folder_item=destfolder)
+#'
+#' # move a file (destination folder must exist)
+#' myfile$move("Documents/folder2/myfile_moved.docx")
+#'
 #' # open the file in the browser
 #' myfile$open()
 #'
@@ -102,6 +139,16 @@
 #' # delete the file (will ask for confirmation first)
 #' myfile$delete()
 #'
+#' # saving and loading data
+#' myfolder <- mydrv$get_item("myfolder")
+#' myfolder$save_dataframe(iris, "iris.csv")
+#' iris2 <- myfolder$get_item("iris.csv")$load_dataframe()
+#' identical(iris, iris2)  # TRUE
+#'
+#' myfolder$save_rds(iris, "iris.rds")
+#' iris3 <- myfolder$get_item("iris.rds")$load_rds()
+#' identical(iris, iris3)  # TRUE
+#'
 #' }
 #' @format An R6 object of class `ms_drive_item`, inheriting from `ms_object`.
 #' @export
@@ -109,10 +156,10 @@ ms_drive_item <- R6::R6Class("ms_drive_item", inherit=ms_object,
 
 public=list(
 
-    initialize=function(token, tenant=NULL, properties=NULL, remote=FALSE)
+    initialize=function(token, tenant=NULL, properties=NULL, remote=NULL)
     {
         self$type <- "drive item"
-        private$remote <- remote
+        private$remote <- !is.null(properties$remoteItem)
         private$api_type <- file.path("drives", properties$parentReference$driveId, "items")
         super$initialize(token, tenant, properties)
     },
@@ -153,7 +200,9 @@ public=list(
 
     is_folder=function()
     {
-        children <- self$properties$folder$childCount
+        children <- if(private$remote)
+            self$properties$remoteItem$folder$childCount
+        else self$properties$folder$childCount
         !is.null(children) && !is.na(children)
     },
 
@@ -198,7 +247,13 @@ public=list(
         if(!is.null(filter))
             opts$`filter` <- filter
 
-        op <- sub("root:/children", "root/children", paste0(private$make_absolute_path(path), ":/children"))
+        fullpath <- private$make_absolute_path(path)
+        # possible fullpath formats -> string to append:
+        # drives/xxx/root -> /children
+        # drives/xxx/root:/foo/bar -> :/children
+        # drives/xxx/items/yyy -> /children
+        # drives/xxx/items/yyy:/foo/bar -> :/children
+        op <- if(grepl(":/", fullpath)) paste0(fullpath, ":/children") else paste0(fullpath, "/children")
         children <- call_graph_endpoint(self$token, op, options=opts, simplify=TRUE)
 
         # get file list as a data frame, or return the iterator immediately if n is NULL
@@ -237,7 +292,8 @@ public=list(
 
     get_parent_folder=function()
     {
-        op <- private$make_absolute_path("..")
+        private$assert_is_not_remote()
+        op <- private$make_absolute_path("..", FALSE)
         ms_drive_item$new(self$token, self$tenant, call_graph_endpoint(self$token, op))
     },
 
@@ -255,23 +311,296 @@ public=list(
         invisible(ms_drive_item$new(self$token, self$tenant, res))
     },
 
-    upload=function(src, dest=basename(src), blocksize=32768000)
+    upload=function(src, dest=basename(src), blocksize=32768000, recursive=FALSE, parallel=FALSE)
     {
         private$assert_is_folder()
-        con <- file(src, open="rb")
-        on.exit(close(con))
 
-        op <- paste0(private$make_absolute_path(dest), ":/createUploadSession")
+        # check if uploading a folder
+        if(is.character(src) && dir.exists(src))
+        {
+            files <- dir(src, all.files=TRUE, no..=TRUE, recursive=recursive, full.names=FALSE)
+
+            # dir() will always include subdirs if recursive is FALSE, must use horrible hack
+            if(!recursive)
+                files <- setdiff(files, list.dirs(src, recursive=FALSE, full.names=FALSE))
+
+            # parallel can be:
+            # - number: create cluster with this many workers
+            # - cluster obj: use it
+            # - TRUE: create cluster with 5 workers
+            # - FALSE: serial
+            if(isTRUE(parallel))
+                parallel <- 5
+            if(is.numeric(parallel))
+            {
+                parallel <- parallel::makeCluster(parallel)
+                on.exit(parallel::stopCluster(parallel))
+            }
+
+            if(inherits(parallel, "cluster"))
+            {
+                parallel::parLapply(parallel, files, function(f, item, src, dest, blocksize)
+                {
+                    srcf <- file.path(src, f)
+                    destf <- file.path(dest, f)
+                    item$upload(srcf, destf, blocksize=blocksize)
+                }, item=self, src=normalizePath(src), dest=dest, blocksize=blocksize)
+            }
+            else if(isFALSE(parallel))
+            {
+                for(f in files)
+                {
+                    srcf <- file.path(src, f)
+                    destf <- file.path(dest, f)
+                    private$upload_file(normalizePath(srcf), destf, blocksize=blocksize)
+                }
+            }
+            else stop("Unknown value for 'parallel' argument", call.=FALSE)
+
+            invisible(self$get_item(dest))
+        }
+        else private$upload_file(src, dest, blocksize)
+    },
+
+    download=function(dest=self$properties$name, overwrite=FALSE, recursive=FALSE, parallel=FALSE)
+    {
+        if(self$is_folder())
+        {
+            children <- self$list_items()
+            isdir <- children$isdir
+
+            if(!is.character(dest))
+                stop("Must supply a destination folder", call.=FALSE)
+
+            dest <- normalizePath(dest, mustWork=FALSE)
+            dir.create(dest, showWarnings=FALSE)
+
+            # parallel can be:
+            # - number: create cluster with this many workers
+            # - cluster obj: use it
+            # - TRUE: create cluster with 5 workers
+            # - FALSE: serial
+            if(isTRUE(parallel))
+                parallel <- 5
+            if(is.numeric(parallel))
+            {
+                parallel <- parallel::makeCluster(parallel)
+                on.exit(parallel::stopCluster(parallel))
+            }
+
+            if(inherits(parallel, "cluster"))
+            {
+                files <- children$name[!isdir]
+                dirs <- children$name[isdir]
+
+                # parallelise file downloads
+                parallel::parLapply(parallel, files, function(f, item, dest, overwrite)
+                {
+                    item$get_item(f)$download(file.path(dest, f), overwrite=overwrite)
+                }, item=self, dest=dest, overwrite=overwrite)
+
+                # recursive call is done serially
+                if(recursive) for(d in dirs)
+                    self$get_item(d)$download(file.path(dest, d), overwrite=overwrite,
+                                              parallel=parallel)
+            }
+            else if(isFALSE(parallel))
+            {
+                if(!recursive)
+                    children <- children[!isdir, , drop=FALSE]
+                for(f in children$name)
+                    self$get_item(f)$download(file.path(dest, f), overwrite=overwrite,
+                                              recursive=recursive, parallel=parallel)
+            }
+            else stop("Unknown value for 'parallel' argument", call.=FALSE)
+        }
+        else private$download_file(dest, overwrite)
+    },
+
+    load_dataframe=function(delim=NULL, ...)
+    {
+        private$assert_is_file()
+        ext <- tolower(tools::file_ext(self$properties$name))
+        if(is.null(delim))
+        {
+            delim <- if(ext == "csv") "," else if(ext == "csv2") ";" else "\t"
+        }
+        dat <- self$download(NULL)
+        if(requireNamespace("readr"))
+        {
+            con <- rawConnection(dat, "r")
+            on.exit(try(close(con), silent=TRUE))
+            readr::read_delim(con, delim=delim)
+        }
+        else utils::read.delim(text=rawToChar(dat), sep=delim, ...)
+    },
+
+    load_rdata=function(envir=parent.frame())
+    {
+        private$assert_is_file()
+        private$assert_file_extension_is("rdata", "rda")
+        rdata <- self$download(NULL)
+        load(rawConnection(rdata, open="rb"), envir=envir)
+    },
+
+    load_rds=function()
+    {
+        private$assert_is_file()
+        private$assert_file_extension_is("rds")
+        rds <- self$download(NULL)
+        unserialize(memDecompress(rds))
+    },
+
+    save_dataframe=function(df, file, delim=",", ...)
+    {
+        private$assert_is_folder()
+        conn <- rawConnection(raw(0), open="r+b")
+        if(requireNamespace("readr"))
+            readr::write_delim(df, conn, delim=delim, ...)
+        else utils::write.table(df, conn, sep=delim, ...)
+        seek(conn, 0)
+        self$upload(conn, file)
+    },
+
+    save_rdata=function(..., file, envir=parent.frame())
+    {
+        private$assert_is_folder()
+        # save to a temporary file as saving to a connection disables compression
+        tmpsave <- tempfile(fileext=".rdata")
+        on.exit(unlink(tmpsave))
+        save(..., file=tmpsave, envir=envir)
+        self$upload(tmpsave, file)
+    },
+
+    save_rds=function(object, file)
+    {
+        private$assert_is_folder()
+        # save to a temporary file to avoid dealing with memCompress/memDecompress hassles
+        tmpsave <- tempfile(fileext=".rdata")
+        on.exit(unlink(tmpsave))
+        saveRDS(object, tmpsave)
+        self$upload(tmpsave, file)
+    },
+
+    copy=function(dest, dest_folder_item=NULL)
+    {
+        path <- dirname(dest)
+        body <- list(name=basename(dest))
+
+        if(!is.null(dest_folder_item))
+        {
+            if(path != ".")
+                warning("Destination folder object supplied; path will be ignored")
+            body$parentReference <- list(
+                driveId=dest_folder_item$properties$parentReference$driveId,
+                id=dest_folder_item$properties$id
+            )
+        }
+        else if(path != ".")
+        {
+            dest_folder_item <- private$get_drive()$get_item(path)
+            body$parentReference <- list(
+                driveId=dest_folder_item$properties$parentReference$driveId,
+                id=dest_folder_item$properties$id
+            )
+        }
+
+        self$do_operation("copy", body=body, http_verb="POST")
+        invisible(NULL)
+    },
+
+    move=function(dest, dest_folder_item=NULL)
+    {
+        path <- dirname(dest)
+        body <- list(name=basename(dest))
+
+        if(!is.null(dest_folder_item))
+        {
+            if(path != ".")
+                warning("Destination folder object supplied; path will be ignored")
+            body$parentReference <- list(
+                id=dest_folder_item$properties$id
+            )
+        }
+        else if(path != ".")
+        {
+            dest_folder_item <- private$get_drive()$get_item(path)
+            body$parentReference <- list(
+                id=dest_folder_item$properties$id
+            )
+        }
+
+        self$properties <- self$do_operation(body=body, encode="json", http_verb="PATCH")
+        invisible(self)
+    },
+
+    get_path=function()
+    {
+        private$assert_is_not_remote()
+        path <- private$make_absolute_path(use_itemid=FALSE)
+        sub("^.+root:?/?", "/", path)
+    },
+
+    print=function(...)
+    {
+        file_or_dir <- if(self$is_folder()) "file folder" else "file"
+        cat("<Drive item '", self$properties$name, "'>\n", sep="")
+        cat("  directory id:", self$properties$id, "\n")
+        cat("  web link:", self$properties$webUrl, "\n")
+        cat("  type:", file_or_dir, "\n")
+        cat("---\n")
+        cat(format_public_methods(self))
+        invisible(self)
+    }
+),
+
+private=list(
+
+    # flag: whether this object is a shared file/folder on another drive
+    # not actually needed! retained for backcompat
+    remote=NULL,
+
+    upload_file=function(src, dest, blocksize)
+    {
+        src <- normalize_src(src)
+        on.exit(close(src$con))
+
+        fullpath <- private$make_absolute_path(dest)
+
+        # handle zero-length files correctly: cannot use resumable upload
+        if(src$size == 0)
+        {
+            # possible fullpath formats -> string to append:
+            # drives/xxx/root -> /content
+            # drives/xxx/root:/foo/bar -> :/content
+            # drives/xxx/items/yyy -> /content
+            # drives/xxx/items/yyy:/foo/bar -> :/content
+            op <- if(grepl(":/", fullpath))
+                paste0(fullpath, ":/content")
+            else paste0(fullpath, "/content")
+
+            res <- call_graph_endpoint(self$token, op, http_verb="PUT", body=raw(0))
+            return(invisible(ms_drive_item$new(self$token, self$tenant, httr::content(res))))
+        }
+
+        # possible fullpath formats -> string to append:
+        # drives/xxx/root -> /createUploadSession
+        # drives/xxx/root:/foo/bar -> :/createUploadSession
+        # drives/xxx/items/yyy -> /createUploadSession
+        # drives/xxx/items/yyy:/foo/bar -> :/createUploadSession
+        op <- if(grepl(":/", fullpath))
+            paste0(fullpath, ":/createUploadSession")
+        else paste0(fullpath, "/createUploadSession")
         upload_dest <- call_graph_endpoint(self$token, op, http_verb="POST")$uploadUrl
 
-        size <- file.size(src)
+        size <- src$size
         next_blockstart <- 0
         next_blockend <- size - 1
         repeat
         {
             next_blocksize <- min(next_blockend - next_blockstart + 1, blocksize)
-            seek(con, next_blockstart)
-            body <- readBin(con, "raw", next_blocksize)
+            seek(src$con, next_blockstart)
+            body <- readBin(src$con, "raw", next_blocksize)
             thisblock <- length(body)
             if(thisblock == 0)
                 break
@@ -293,58 +622,52 @@ public=list(
         invisible(ms_drive_item$new(self$token, self$tenant, httr::content(res)))
     },
 
-    download=function(dest=self$properties$name, overwrite=FALSE)
+    download_file=function(dest, overwrite)
     {
         private$assert_is_file()
-        res <- self$do_operation("content", config=httr::write_disk(dest, overwrite=overwrite),
-                                 http_status_handler="pass")
+
+        # TODO: make less hacky
+        config <- if(is.character(dest))
+            httr::write_disk(dest, overwrite=overwrite)
+        else list()
+
+        res <- self$do_operation("content", config=config, http_status_handler="pass")
         if(httr::status_code(res) >= 300)
         {
-            on.exit(file.remove(dest))
+            if(is.character(dest))
+                on.exit(file.remove(dest))
             httr::stop_for_status(res, paste0("complete operation. Message:\n",
                 sub("\\.$", "", error_message(httr::content(res)))))
         }
-        invisible(NULL)
+
+        if(is.character(dest)) invisible(NULL) else httr::content(res, as="raw")
     },
-
-    get_path=function()
-    {
-        path <- private$make_absolute_path()
-        sub("^.+root:?/?", "/", path)
-    },
-
-    print=function(...)
-    {
-        file_or_dir <- if(self$is_folder()) "file folder" else "file"
-        cat("<Drive item '", self$properties$name, "'>\n", sep="")
-        cat("  directory id:", self$properties$id, "\n")
-        cat("  web link:", self$properties$webUrl, "\n")
-        cat("  type:", file_or_dir, "\n")
-        cat("---\n")
-        cat(format_public_methods(self))
-        invisible(self)
-    }
-),
-
-private=list(
-
-    # flag: whether this object is a shared file/folder on another drive
-    remote=NULL,
 
     # dest = . or '' --> this item
     # dest = .. --> parent folder
     # dest = (childname) --> path to named child
-    make_absolute_path=function(dest=".")
+    make_absolute_path=function(dest=".", use_itemid=getOption("microsoft365r_use_itemid_in_path"))
+    {
+        if(use_itemid == "remote")
+            use_itemid <- !is.null(private$remoteItem)
+
+        # use remote item props if present
+        props <- if(!is.null(self$properties$remoteItem))
+            self$properties$remoteItem
+        else self$properties
+
+        if(use_itemid)
+            private$make_absolute_path_with_itemid(props, dest)
+        else private$make_absolute_path_from_root(props, dest)
+    },
+
+    make_absolute_path_from_root=function(props, dest=".")
     {
         if(dest == ".")
             dest <- ""
 
-        # this is needed to find the correct parent folder for a shared item
-        if(private$remote)
-            self$sync_fields()
-
-        parent <- self$properties$parentReference
-        name <- self$properties$name
+        parent <- props$parentReference
+        name <- props$name
         op <- if(name == "root")
             file.path("drives", parent$driveId, "root:")
         else
@@ -361,6 +684,31 @@ private=list(
         utils::URLencode(enc2utf8(sub(":?/?$", "", op)))
     },
 
+    # construct path using this item's ID
+    # ".." not supported
+    make_absolute_path_with_itemid=function(props, dest=".")
+    {
+        driveid <- props$parentReference$driveId
+        id <- props$id
+        base <- sprintf("drives/%s/items/%s", driveid, id)
+
+        if(dest == "." || dest == "")
+            return(base)
+        else if(dest == "..")
+            stop("Path with item ID to parent folder not supported", call.=FALSE)
+        else if(substr(dest, 1, 1) == "/")
+            stop("Absolute path incompatible with path starting from item ID", call.=FALSE)
+
+        op <- sprintf("%s:/%s", base, dest)
+        utils::URLencode(enc2utf8(op))
+    },
+
+    get_drive=function()
+    {
+        dummy_props <- list(id=self$properties$parentReference$driveId)
+        ms_drive$new(self$token, self$tenant, dummy_props)
+    },
+
     assert_is_folder=function()
     {
         if(!self$is_folder())
@@ -371,6 +719,19 @@ private=list(
     {
         if(self$is_folder())
             stop("This method is only applicable for a file item", call.=FALSE)
+    },
+
+    assert_is_not_remote=function()
+    {
+        if(!is.null(self$properties$remoteItem))
+            stop("This method is not applicable for a remote item", call.=FALSE)
+    },
+
+    assert_file_extension_is=function(...)
+    {
+        ext <- tolower(tools::file_ext(self$properties$name))
+        if(!(ext %in% unlist(list(...))))
+            stop("Not an allowed file type")
     }
 ))
 

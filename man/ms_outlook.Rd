@@ -46,9 +46,11 @@ Creating new objects of this class should be done via the \code{get_personal_out
 
 To create a new email, call the \code{create_email()} method. The default behaviour is to create a new draft email in the Drafts folder, which can then be edited further to add attachments, recipients etc; or the email can be sent immediately.
 
-The \code{create_email()} method has the following signature:\preformatted{create_email(body = "", content_type = c("text", "html"), subject = "",
+The \code{create_email()} method has the following signature:
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{create_email(body = "", content_type = c("text", "html"), subject = "",
              to = NULL, cc = NULL, bcc = NULL, reply_to = NULL, send_now = FALSE)
-}
+}\if{html}{\out{</div>}}
 \itemize{
 \item \code{body}: The body of the message. This should be a string or vector of strings, which will be pasted together with newlines as separators. You can also supply a message object as created by the blastula or emayili packages---see the examples below.
 \item \code{content_type}: The format of the body, either "text" (the default) or HTML.
@@ -64,8 +66,10 @@ You can also supply message objects as created by the blastula and emayili packa
 
 \section{Listing emails}{
 
-To list the emails in the Inbox, call the \code{list_emails()} method. This returns a list of objects of class \code{\link{ms_outlook_email}}, and has the following signature:\preformatted{list_emails(by = "received desc", n = 100, pagesize = 10)
-}
+To list the emails in the Inbox, call the \code{list_emails()} method. This returns a list of objects of class \code{\link{ms_outlook_email}}, and has the following signature:
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{list_emails(by = "received desc", n = 100, pagesize = 10)
+}\if{html}{\out{</div>}}
 \itemize{
 \item \code{by}: The sorting order of the message list. The possible fields are "received" (received date, the default), "from" and "subject". To sort in descending order, add a " desc". You can specify multiple sorting fields, with later fields used to break ties in earlier ones. The last sorting field is always "received desc" unless it appears earlier.
 \item \verb{filter, n}: See below.
@@ -75,7 +79,7 @@ To list the emails in the Inbox, call the \code{list_emails()} method. This retu
 
 \section{List methods generally}{
 
-All \verb{list_*} methods have \code{filter} and \code{n} arguments to limit the number of results. The former should be an \href{https://docs.microsoft.com/en-us/graph/query-parameters#filter-parameter}{OData expression} as a string to filter the result set on. The latter should be a number setting the maximum number of (filtered) results to return. The default values are \code{filter=NULL} and \code{n=100} for listing emails, and \code{n=Inf} for listing folders. If \code{n=NULL}, the \code{ms_graph_pager} iterator object is returned instead to allow manual iteration over the results.
+All \verb{list_*} methods have \code{filter} and \code{n} arguments to limit the number of results. The former should be an \href{https://learn.microsoft.com/en-us/graph/query-parameters#filter-parameter}{OData expression} as a string to filter the result set on. The latter should be a number setting the maximum number of (filtered) results to return. The default values are \code{filter=NULL} and \code{n=100} for listing emails, and \code{n=Inf} for listing folders. If \code{n=NULL}, the \code{ms_graph_pager} iterator object is returned instead to allow manual iteration over the results.
 
 Support in the underlying Graph API for OData queries is patchy. Not all endpoints that return lists of objects support filtering, and if they do, they may not allow all of the defined operators. If your filtering expression results in an error, you can carry out the operation without filtering and then filter the results on the client side.
 }
@@ -164,6 +168,6 @@ outl$create_email(ey_email)
 \seealso{
 \code{\link{ms_outlook_folder}}, \code{\link{ms_outlook_email}}
 
-\href{https://docs.microsoft.com/en-us/graph/overview}{Microsoft Graph overview},
-\href{https://docs.microsoft.com/en-us/graph/api/resources/mail-api-overview?view=graph-rest-1.0}{Outlook API reference}
+\href{https://learn.microsoft.com/en-us/graph/overview}{Microsoft Graph overview},
+\href{https://learn.microsoft.com/en-us/graph/api/resources/mail-api-overview?view=graph-rest-1.0}{Outlook API reference}
 }

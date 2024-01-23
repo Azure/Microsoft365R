@@ -33,14 +33,14 @@
 #' Call `get_details()` to get a list containing the details for the plan.
 #'
 #' @section List methods:
-#' All `list_*` methods have `filter` and `n` arguments to limit the number of results. The former should be an [OData expression](https://docs.microsoft.com/en-us/graph/query-parameters#filter-parameter) as a string to filter the result set on. The latter should be a number setting the maximum number of (filtered) results to return. The default values are `filter=NULL` and `n=Inf`. If `n=NULL`, the `ms_graph_pager` iterator object is returned instead to allow manual iteration over the results.
+#' All `list_*` methods have `filter` and `n` arguments to limit the number of results. The former should be an [OData expression](https://learn.microsoft.com/en-us/graph/query-parameters#filter-parameter) as a string to filter the result set on. The latter should be a number setting the maximum number of (filtered) results to return. The default values are `filter=NULL` and `n=Inf`. If `n=NULL`, the `ms_graph_pager` iterator object is returned instead to allow manual iteration over the results.
 #'
 #' Support in the underlying Graph API for OData queries is patchy. Not all endpoints that return lists of objects support filtering, and if they do, they may not allow all of the defined operators. If your filtering expression results in an error, you can carry out the operation without filtering and then filter the results on the client side.
 #' @seealso
 #' [`ms_plan_task`], [`ms_plan_bucket`]
 #'
-#' [Microsoft Graph overview](https://docs.microsoft.com/en-us/graph/overview),
-#' [Plans overview](https://docs.microsoft.com/en-us/graph/api/resources/planner-overview?view=graph-rest-beta)
+#' [Microsoft Graph overview](https://learn.microsoft.com/en-us/graph/overview),
+#' [Plans overview](https://learn.microsoft.com/en-us/graph/api/resources/planner-overview?view=graph-rest-beta)
 #'
 #' @format An R6 object of class `ms_plan`, inheriting from `ms_object`.
 #' @export
@@ -101,7 +101,7 @@ public=list(
 
     get_details=function()
     {
-        do_operation("details")
+        self$do_operation("details")
     },
 
     print=function(...)

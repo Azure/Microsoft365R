@@ -48,9 +48,11 @@ Creating new objects of this class should be done via the \code{get_folder}, \co
 
 \section{Creating and sending emails}{
 
-Outlook allows creating new draft emails in any folder, not just the Drafts folder (although that is the default location for the Outlook app, and the \code{ms_outlook} client class). To create a new email, call the \code{create_email()} method, which has the following signature:\preformatted{create_email(body = "", content_type = c("text", "html"), subject = "",
+Outlook allows creating new draft emails in any folder, not just the Drafts folder (although that is the default location for the Outlook app, and the \code{ms_outlook} client class). To create a new email, call the \code{create_email()} method, which has the following signature:
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{create_email(body = "", content_type = c("text", "html"), subject = "",
              to = NULL, cc = NULL, bcc = NULL, reply_to = NULL, send_now = FALSE)
-}
+}\if{html}{\out{</div>}}
 \itemize{
 \item \code{body}: The body of the message. This should be a string or vector of strings, which will be pasted together with newlines as separators. You can also supply a message object as created by the blastula or emayili packages---see the examples below.
 \item \code{content_type}: The format of the body, either "text" (the default) or HTML.
@@ -68,11 +70,13 @@ To reply to or forward an email, first retrieve it using \code{get_email()} or \
 
 \section{Listing emails}{
 
-To list the emails in a folder, call the \code{list_emails()} method. This returns a list of objects of class \code{\link{ms_outlook_email}}, and has the following signature:\preformatted{list_emails(by = "received desc", search = NULL, filter = NULL, n = 100, pagesize = 10)
-}
+To list the emails in a folder, call the \code{list_emails()} method. This returns a list of objects of class \code{\link{ms_outlook_email}}, and has the following signature:
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{list_emails(by = "received desc", search = NULL, filter = NULL, n = 100, pagesize = 10)
+}\if{html}{\out{</div>}}
 \itemize{
 \item \code{by}: The sorting order of the message list. The possible fields are "received" (received date, the default), "from" and "subject". To sort in descending order, add a " desc". You can specify multiple sorting fields, with later fields used to break ties in earlier ones. The last sorting field is always "received desc" unless it appears earlier.
-\item \code{search}: An optional string to search for. Only emails that contain the search string will be returned. See the \href{https://docs.microsoft.com/en-us/graph/query-parameters#search-parameter}{description of this parameter} for more information.
+\item \code{search}: An optional string to search for. Only emails that contain the search string will be returned. See the \href{https://learn.microsoft.com/en-us/graph/query-parameters#search-parameter}{description of this parameter} for more information.
 \item \verb{filter, n}: See below.
 \item \code{pagesize}: The number of emails per page. You can change this to a larger number to increase throughput, at the risk of running into timeouts.
 }
@@ -82,7 +86,7 @@ Currently, searching and filtering the message list is subject to some limitatio
 
 \section{List methods generally}{
 
-All \verb{list_*} methods have \code{filter} and \code{n} arguments to limit the number of results. The former should be an \href{https://docs.microsoft.com/en-us/graph/query-parameters#filter-parameter}{OData expression} as a string to filter the result set on. The latter should be a number setting the maximum number of (filtered) results to return. The default values are \code{filter=NULL} and \code{n=100} for listing emails, and \code{n=Inf} for listing folders. If \code{n=NULL}, the \code{ms_graph_pager} iterator object is returned instead to allow manual iteration over the results.
+All \verb{list_*} methods have \code{filter} and \code{n} arguments to limit the number of results. The former should be an \href{https://learn.microsoft.com/en-us/graph/query-parameters#filter-parameter}{OData expression} as a string to filter the result set on. The latter should be a number setting the maximum number of (filtered) results to return. The default values are \code{filter=NULL} and \code{n=100} for listing emails, and \code{n=Inf} for listing folders. If \code{n=NULL}, the \code{ms_graph_pager} iterator object is returned instead to allow manual iteration over the results.
 
 Support in the underlying Graph API for OData queries is patchy. Not all endpoints that return lists of objects support filtering, and if they do, they may not allow all of the defined operators. If your filtering expression results in an error, you can carry out the operation without filtering and then filter the results on the client side.
 }
@@ -161,6 +165,6 @@ folder$create_email(ey_email)
 \seealso{
 \code{\link{ms_outlook}}, \code{\link{ms_outlook_email}}
 
-\href{https://docs.microsoft.com/en-us/graph/overview}{Microsoft Graph overview},
-\href{https://docs.microsoft.com/en-us/graph/api/resources/mail-api-overview?view=graph-rest-1.0}{Outlook API reference}
+\href{https://learn.microsoft.com/en-us/graph/overview}{Microsoft Graph overview},
+\href{https://learn.microsoft.com/en-us/graph/api/resources/mail-api-overview?view=graph-rest-1.0}{Outlook API reference}
 }

@@ -30,9 +30,9 @@ The main things to set in your app registration are:
 
 The following pages at the AAD documentation will be helpful:
 
-- [A step-by-step guide](https://docs.microsoft.com/en-us/azure/active-directory/develop/quickstart-register-app) to registering an app in the Azure portal.
+- [A step-by-step guide](https://learn.microsoft.com/en-us/azure/active-directory/develop/quickstart-register-app) to registering an app in the Azure portal.
 
-- [How to set permissions for an app](https://docs.microsoft.com/en-us/azure/active-directory/develop/quickstart-configure-app-access-web-apis). For a Shiny app, note that you want _delegated_ permissions from the Microsoft Graph API, not application permissions.
+- [How to set permissions for an app](https://learn.microsoft.com/en-us/azure/active-directory/develop/quickstart-configure-app-access-web-apis). For a Shiny app, note that you want _delegated_ permissions from the Microsoft Graph API, not application permissions.
 
 ## Shiny code skeleton
 

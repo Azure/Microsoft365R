@@ -29,15 +29,23 @@ Class representing an item (file or folder) in a OneDrive or SharePoint document
 \item \code{do_operation(...)}: Carry out an arbitrary operation on the item.
 \item \code{sync_fields()}: Synchronise the R object with the item metadata in Microsoft Graph.
 \item \code{open()}: Open the item in your browser.
+\item \code{copy(dest, dest_folder_item=NULL)}: Copy the item to the given location.
+\item \code{move(dest, dest_folder_item=NULL)}: Move the item to the given location.
 \item \verb{list_items(...), list_files(...)}: List the files and folders under the specified path.
-\item \code{download(dest, overwrite)}: Download the file. Only applicable for a file item.
+\item \code{download(dest, overwrite, recursive, parallel)}: Download the file or folder. See below.
 \item \code{create_share_link(type, expiry, password, scope)}: Create a shareable link to the file or folder.
-\item \code{upload(src, dest, blocksize)}: Upload a file. Only applicable for a folder item.
+\item \code{upload(src, dest, blocksize, , recursive, parallel)}: Upload a file or folder. See below.
 \item \code{create_folder(path)}: Create a folder. Only applicable for a folder item.
 \item \code{get_item(path)}: Get a child item (file or folder) under this folder.
-\item \code{get_parent_folder()}: Get the parent folder for this item, as a drive item object. Returns the root folder for the root.
-\item \code{get_path()}: Get the absolute path for this item, as a character string.
+\item \code{get_parent_folder()}: Get the parent folder for this item, as a drive item object. Returns the root folder for the root. Not supported for remote items.
+\item \code{get_path()}: Get the absolute path for this item, as a character string. Not supported for remote items.
 \item \code{is_folder()}: Information function, returns TRUE if this item is a folder.
+\item \code{load_dataframe(delim=NULL, ...)}: Download a delimited file and return its contents as a data frame. See 'Saving and loading data' below.
+\item \code{load_rds()}: Download a .rds file and return the saved object.
+\item \code{load_rdata(envir)}: Load a .RData or .Rda file into the specified environment.
+\item \code{save_dataframe(df, file, delim=",", ...)} Save a dataframe to a delimited file.
+\item \code{save_rds(object, file)}: Save an R object to a .rds file.
+\item \code{save_rdata(..., file)}: Save the specified objects to a .RData file.
 }
 }
 
@@ -63,13 +71,26 @@ This class exposes methods for carrying out common operations on files and folde
 
 \code{list_files} is a synonym for \code{list_items}.
 
-\code{download} downloads the file item to the local machine. It is an error to try to download a folder item.
+\code{download} downloads the item to the local machine. If this is a file, it is downloaded; in this case, the \code{dest} argument can be the path to the destination file, or NULL to return the downloaded content in a raw vector. If the item is a folder, all its files are downloaded, including subfolders if the \code{recursive} argument is TRUE.
 
-\code{upload} uploads a file from the local machine into the folder item, and returns another \code{ms_drive_item} object representing the uploaded file. The uploading is done in blocks of 32MB by default; you can change this by setting the \code{blocksize} argument. For technical reasons, the block size \href{https://docs.microsoft.com/en-us/graph/api/driveitem-createuploadsession?view=graph-rest-1.0#upload-bytes-to-the-upload-session}{must be a multiple of 320KB}. This returns an \code{ms_drive_item} object, invisibly.
+\code{upload} uploads a file or folder from the local machine into the folder item. The \code{src} argument can be the path to the source file, a \link{rawConnection} or a \link{textConnection} object. If \code{src} is a folder, all its files are uploaded, including subfolders if the \code{recursive} argument iS TRUE. An \code{ms_drive_item} object is returned invisibly.
 
-It is an error to try to upload to a file item, or to upload a source directory.
+Uploading is done in blocks of 32MB by default; you can change this by setting the \code{blocksize} argument. For technical reasons, the block size \href{https://learn.microsoft.com/en-us/graph/api/driveitem-createuploadsession?view=graph-rest-1.0#upload-bytes-to-the-upload-session}{must be a multiple of 320KB}.
+
+Uploading and downloading folders can be done in parallel, which can result in substantial speedup when transferring a large number of small files. This is controlled by the \code{parallel} argument to \code{upload} and \code{download}, which can have the following values:
+\itemize{
+\item TRUE: A cluster with 5 workers is created
+\item A number: A cluster with this many workers is created
+\item A cluster object, created via the parallel package
+\item FALSE: The transfer is done serially
+}
 
 \code{get_item} retrieves the file or folder with the given path, as another object of class \code{ms_drive_item}.
+\itemize{
+\item \code{copy} and \code{move} can take the destination location as either a full pathname (in the \code{dest} argument), or a name plus a drive item object (in the \code{dest_folder_item} argument). If the latter is supplied, any path in \code{dest} is ignored with a warning. Note that copying is an \emph{asynchronous} operation, meaning the method returns before the copy is complete.
+}
+
+For copying and moving, the destination folder must exist beforehand. When copying/moving a large number of files, it's much more efficient to supply the destination folder in the \code{dest_folder_item} argument rather than as a path.
 
 \code{create_folder} creates a folder with the specified path. Trying to create an already existing folder is an error. This returns an \code{ms_drive_item} object, invisibly.
 
@@ -85,9 +106,22 @@ It is an error to try to upload to a file item, or to upload a source directory.
 This method returns a URL to access the item, for \code{type="view"} or "\verb{type=edit"}. For \code{type="embed"}, it returns a list with components \code{webUrl} containing the URL, and \code{webHtml} containing a HTML fragment to embed the link in an IFRAME. The default is a viewable link, expiring in 7 days.
 }
 
+\section{Saving and loading data}{
+
+The following methods are provided to simplify the task of loading and saving datasets and R objects.
+\itemize{
+\item \code{load_dataframe} downloads a delimited file and returns its contents as a data frame. The delimiter can be specified with the \code{delim} argument; if omitted, this is "," if the file extension is .csv, ";" if the file extension is .csv2, and a tab otherwise. If the readr package is installed, the \code{readr::read_delim} function is used to parse the file, otherwise \code{utils::read.delim} is used. You can supply other arguments to the parsing function via the \code{...} argument.
+\item \code{save_dataframe} is the inverse of \code{load_dataframe}: it uploads the given data frame to a folder item. Specify the delimiter with the \code{delim} argument. The \code{readr::write_delim} function is used to serialise the data if that package is installed, and \code{utils::write.table} otherwise.
+\item \code{load_rds} downloads a .rds file and returns its contents as an R object. It is analogous to the base \code{readRDS} function but for OneDrive/SharePoint drive items.
+\item \code{save_rds} uploads a given R object as a .rds file, analogously to \code{saveRDS}.
+\item \code{load_rdata} downloads a .RData or .Rda file and loads its contents into the given environment. It is analogous to the base \code{load} function but for OneDrive/SharePoint drive items.
+\item \code{save_rdata} uploads the given R objects as a .RData file, analogously to \code{save}.
+}
+}
+
 \section{List methods}{
 
-All \verb{list_*} methods have \code{filter} and \code{n} arguments to limit the number of results. The former should be an \href{https://docs.microsoft.com/en-us/graph/query-parameters#filter-parameter}{OData expression} as a string to filter the result set on. The latter should be a number setting the maximum number of (filtered) results to return. The default values are \code{filter=NULL} and \code{n=Inf}. If \code{n=NULL}, the \code{ms_graph_pager} iterator object is returned instead to allow manual iteration over the results.
+All \verb{list_*} methods have \code{filter} and \code{n} arguments to limit the number of results. The former should be an \href{https://learn.microsoft.com/en-us/graph/query-parameters#filter-parameter}{OData expression} as a string to filter the result set on. The latter should be a number setting the maximum number of (filtered) results to return. The default values are \code{filter=NULL} and \code{n=Inf}. If \code{n=NULL}, the \code{ms_graph_pager} iterator object is returned instead to allow manual iteration over the results.
 
 Support in the underlying Graph API for OData queries is patchy. Not all endpoints that return lists of objects support filtering, and if they do, they may not allow all of the defined operators. If your filtering expression results in an error, you can carry out the operation without filtering and then filter the results on the client side.
 }
@@ -109,6 +143,16 @@ myfile$properties
 # rename a file
 myfile$update(name="newname.docx")
 
+# copy a file (destination folder must exist)
+myfile$copy("/Documents/folder2/myfile_copied.docx")
+
+# alternate way of copying: supply the destination folder
+destfolder <- docs$get_item("folder2")
+myfile$copy("myfile_copied.docx", dest_folder_item=destfolder)
+
+# move a file (destination folder must exist)
+myfile$move("Documents/folder2/myfile_moved.docx")
+
 # open the file in the browser
 myfile$open()
 
@@ -123,11 +167,21 @@ myfile$create_share_link(password="Use-strong-passwords!")
 # delete the file (will ask for confirmation first)
 myfile$delete()
 
+# saving and loading data
+myfolder <- mydrv$get_item("myfolder")
+myfolder$save_dataframe(iris, "iris.csv")
+iris2 <- myfolder$get_item("iris.csv")$load_dataframe()
+identical(iris, iris2)  # TRUE
+
+myfolder$save_rds(iris, "iris.rds")
+iris3 <- myfolder$get_item("iris.rds")$load_rds()
+identical(iris, iris3)  # TRUE
+
 }
 }
 \seealso{
 \code{\link{ms_graph}}, \code{\link{ms_site}}, \code{\link{ms_drive}}
 
-\href{https://docs.microsoft.com/en-us/graph/overview}{Microsoft Graph overview},
-\href{https://docs.microsoft.com/en-us/graph/api/resources/onedrive?view=graph-rest-1.0}{OneDrive API reference}
+\href{https://learn.microsoft.com/en-us/graph/overview}{Microsoft Graph overview},
+\href{https://learn.microsoft.com/en-us/graph/api/resources/onedrive?view=graph-rest-1.0}{OneDrive API reference}
 }

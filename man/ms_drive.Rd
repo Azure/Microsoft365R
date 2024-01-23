@@ -29,16 +29,26 @@ Class representing a personal OneDrive or SharePoint document library.
 \item \code{do_operation(...)}: Carry out an arbitrary operation on the drive.
 \item \code{sync_fields()}: Synchronise the R object with the drive metadata in Microsoft Graph.
 \item \verb{list_items(...), list_files(...)}: List the files and folders under the specified path. See 'File and folder operations' below.
-\item \code{download_file(src, dest, overwrite)}: Download a file.
+\item \code{download_file(src, srcid, dest, overwrite)}: Download a file.
+\item \code{download_folder(src, srcid, dest, overwrite, recursive, parallel)}: Download a folder.
 \item \code{upload_file(src, dest, blocksize)}: Upload a file.
+\item \code{upload_folder(src, dest, blocksize, recursive, parallel)}: Upload a folder.
 \item \code{create_folder(path)}: Create a folder.
-\item \code{open_item(path)}: Open a file or folder.
+\item \code{open_item(path, itemid)}: Open a file or folder.
 \item \code{create_share_link(...)}: Create a shareable link for a file or folder.
-\item \code{delete_item(path, confirm, by_item)}: Delete a file or folder. By default, ask for confirmation first. For personal OneDrive, deleting a folder will also automatically delete its contents; for business OneDrive or SharePoint document libraries, you may need to set \code{by_item=TRUE} to delete the contents first depending on your organisation's policies. Note that this can be slow for large folders.
-\item \code{get_item(path)}: Get an item representing a file or folder.
-\item \code{get_item_properties(path)}: Get the properties (metadata) for a file or folder.
-\item \code{set_item_properties(path, ...)}: Set the properties for a file or folder.
+\item \code{delete_item(path, itemid, confirm, by_item)}: Delete a file or folder. By default, ask for confirmation first. For personal OneDrive, deleting a folder will also automatically delete its contents; for business OneDrive or SharePoint document libraries, you may need to set \code{by_item=TRUE} to delete the contents first depending on your organisation's policies. Note that this can be slow for large folders.
+\item \code{get_item(path, itemid)}: Get an item representing a file or folder.
+\item \code{get_item_properties(path, itemid)}: Get the properties (metadata) for a file or folder.
+\item \code{set_item_properties(path, itemid, ...)}: Set the properties for a file or folder.
+\item \code{copy_item(path, itemid, dest, dest_item_id)}: Copy a file or folder.
+\item \code{move_item(path, itemid, dest, dest_item_id)}: Move a file or folder.
 \item \verb{list_shared_items(...), list_shared_files(...)}: List the drive items shared with you. See 'Shared items' below.
+\item \code{load_dataframe(path, itemid, ...)}: Download a delimited file and return its contents as a data frame. See 'Saving and loading data' below.
+\item \code{load_rds(path, itemid)}: Download a .rds file and return the saved object.
+\item \code{load_rdata(path, itemid)}: Load a .RData or .Rda file into the specified environment.
+\item \code{save_dataframe(df, file, ...)} Save a dataframe to a delimited file.
+\item \code{save_rds(object, file)}: Save an R object to a .rds file.
+\item \code{save_rdata(..., file)}: Save the specified objects to a .RData file.
 }
 }
 
@@ -49,9 +59,24 @@ Creating new objects of this class should be done via the \code{get_drive} metho
 
 \section{File and folder operations}{
 
-This class exposes methods for carrying out common operations on files and folders. They call down to the corresponding methods for the \code{\link{ms_drive_item}} class. In this context, any paths to child items are relative to the root folder of the drive.
+This class exposes methods for carrying out common operations on files and folders. They call down to the corresponding methods for the \code{\link{ms_drive_item}} class. In most cases an item can be specified either by path or ID. The former is more user-friendly but subject to change if the file is moved or renamed; the latter is an opaque string but is immutable regardless of file operations.
+
+\code{get_item(path, itemid)} retrieves a file or folder, as an object of class \code{\link{ms_drive_item}}. Specify either the path or ID, not both.
 
 \code{open_item} opens the given file or folder in your browser. If the file has an unrecognised type, most browsers will attempt to download it.
+
+\code{delete_item} deletes a file or folder. By default, it will ask for confirmation first.
+
+\code{create_share_link(path, itemid, type, expiry, password, scope)} returns a shareable link to the item.
+
+\code{get_item_properties} is a convenience function that returns the properties of a file or folder as a list.
+
+\code{set_item_properties} sets the properties of a file or folder. The new properties should be specified as individual named arguments to the method. Any existing properties that aren't listed as arguments will retain their previous values or be recalculated based on changes to other properties, as appropriate. You can also call the \code{update} method on the corresponding \code{ms_drive_item} object.
+\itemize{
+\item \code{copy_item} and \code{move_item} can take the destination location as either a full pathname (in the \code{dest} argument), or a name plus a drive item object (in the \code{dest_folder_item} argument). If the latter is supplied, any path in \code{dest} is ignored with a warning. Note that copying is an \emph{asynchronous} operation, meaning the method returns before the copy is complete.
+}
+
+For copying and moving, the destination folder must exist beforehand. When copying/moving a large number of files, it's much more efficient to supply the destination folder in the \code{dest_folder_item} argument rather than as a path.
 
 \code{list_items(path, info, full_names, pagesize)} lists the items under the specified path.
 
@@ -59,37 +84,49 @@ This class exposes methods for carrying out common operations on files and folde
 
 \code{download_file} and \code{upload_file} transfer files between the local machine and the drive. For \code{download_file}, the default destination folder is the current (working) directory of your R session. For \code{upload_file}, there is no default destination folder; make sure you specify the destination explicitly.
 
+\code{download_folder} and \code{upload_folder} transfer all the files in a folder. If \code{recursive} is TRUE, all subfolders will also be transferred recursively. The \code{parallel} argument can have the following values:
+\itemize{
+\item TRUE: A cluster with 5 workers is created
+\item A number: A cluster with this many workers is created
+\item A cluster object, created via the parallel package
+\item FALSE: The transfer is done serially
+Transferring files in parallel can result in substantial speedup for a large number of small files.
+}
+
 \code{create_folder} creates a folder with the specified path. Trying to create an already existing folder is an error.
+}
 
-\code{create_share_link(path, type, expiry, password, scope)} returns a shareable link to the item.
+\section{Saving and loading data}{
 
-\code{delete_item} deletes a file or folder. By default, it will ask for confirmation first.
-
-\code{get_item} retrieves the file or folder with the given path, as an  object of class \code{\link{ms_drive_item}}.
-
-\code{get_item_properties} is a convenience function that returns the properties of a file or folder as a list.
-
-\code{set_item_properties} sets the properties of a file or folder. The new properties should be specified as individual named arguments to the method. Any existing properties that aren't listed as arguments will retain their previous values or be recalculated based on changes to other properties, as appropriate. You can also call the \code{update} method on the corresponding \code{ms_drive_item} object.
+The following methods are provided to simplify the task of loading and saving datasets and R objects. They call down to the corresponding methods for the \code{ms_drive_item} class. The `load_*`` methods allow specifying the file to be loaded by either a path or item ID.
+\itemize{
+\item \code{load_dataframe} downloads a delimited file and returns its contents as a data frame. The delimiter can be specified with the \code{delim} argument; if omitted, this is "," if the file extension is .csv, ";" if the file extension is .csv2, and a tab otherwise. If the readr package is installed, the \code{readr::read_delim} function is used to parse the file, otherwise \code{utils::read.delim} is used. You can supply other arguments to the parsing function via the \code{...} argument.
+\item \code{save_dataframe} is the inverse of \code{load_dataframe}: it uploads the given data frame to a folder item. Specify the delimiter with the \code{delim} argument. The \code{readr::write_delim} function is used to serialise the data if that package is installed, and \code{utils::write.table} otherwise.
+\item \code{load_rds} downloads a .rds file and returns its contents as an R object. It is analogous to the base \code{readRDS} function but for OneDrive/SharePoint drive items.
+\item \code{save_rds} uploads a given R object as a .rds file, analogously to \code{saveRDS}.
+\item \code{load_rdata} downloads a .RData or .Rda file and loads its contents into the given environment. It is analogous to the base \code{load} function but for OneDrive/SharePoint drive items.
+\item \code{save_rdata} uploads the given R objects as a .RData file, analogously to \code{save}.
+}
 }
 
 \section{Shared items}{
 
-The \code{list_shared_items} method lists the files and folders that have been shared with you. This is similar to \code{list_items}, modified to handle the fact that the listed items reside on another drive or document library. The arguments are:
+The \code{list_shared_items} method shows the files and folders that have been shared with you. This is a named list of drive items, that you can use to access the shared files/folders. The arguments are:
 \itemize{
-\item \code{info}: The information to return: either "partial", "items" or "all". If "partial", a data frame is returned containing the name, size, whether the item is a file or folder, and a list of drive item objects. If "items", only the list of drive items is returned. If "all", a data frame is returned containing all the properties for each item.
 \item \code{allow_external}: Whether to include items that were shared from outside tenants. The default is FALSE.
 \item \verb{filter, n}: See 'List methods' below.
 \item \code{pagesize}: The number of results to return for each call to the REST endpoint. You can try reducing this argument below the default of 1000 if you are experiencing timeouts.
+\item \code{info}: Deprecated, will be ignored. In previous versions, controlled the return type of the method.
 }
 
-The returned object will contain a list of drive items, that you can use to access the shared files/folders. If \code{info} is "item", the returned object is the list; if "partial" or "all" it is the \code{remoteItem} column in the data frame.
-
 \code{list_shared_files} is a synonym for \code{list_shared_items}.
+
+Because of how the Graph API handles access to shared items linked in the root, you cannot directly access subitems of shared folders via the drive \code{get_item} method, like this: \code{drv$get_item("shared_folder/path/to/file")}. Instead, get the item into its own object, and use its \code{get_item} method: \code{drv$get_item("shared_folder")$get_item("path/to/file")}.
 }
 
 \section{List methods}{
 
-All \verb{list_*} methods have \code{filter} and \code{n} arguments to limit the number of results. The former should be an \href{https://docs.microsoft.com/en-us/graph/query-parameters#filter-parameter}{OData expression} as a string to filter the result set on. The latter should be a number setting the maximum number of (filtered) results to return. The default values are \code{filter=NULL} and \code{n=Inf}. If \code{n=NULL}, the \code{ms_graph_pager} iterator object is returned instead to allow manual iteration over the results.
+All \verb{list_*} methods have \code{filter} and \code{n} arguments to limit the number of results. The former should be an \href{https://learn.microsoft.com/en-us/graph/query-parameters#filter-parameter}{OData expression} as a string to filter the result set on. The latter should be a number setting the maximum number of (filtered) results to return. The default values are \code{filter=NULL} and \code{n=Inf}. If \code{n=NULL}, the \code{ms_graph_pager} iterator object is returned instead to allow manual iteration over the results.
 
 Support in the underlying Graph API for OData queries is patchy. Not all endpoints that return lists of objects support filtering, and if they do, they may not allow all of the defined operators. If your filtering expression results in an error, you can carry out the operation without filtering and then filter the results on the client side.
 }
@@ -122,8 +159,23 @@ drv$create_share_link("myfile", password="Use-strong-passwords!")
 # file metadata (name, date created, etc)
 drv$get_item_properties("myfile")
 
-# rename a file
+# rename a file -- item ID remains the same, while name is changed
+obj <- drv$get_item("myfile")
 drv$set_item_properties("myfile", name="newname")
+
+# retrieve the renamed object by ID
+id <- obj$properties$id
+obj2 <- drv$get_item(itemid=id)
+obj$properties$id == obj2$properties$id  # TRUE
+
+# saving and loading data
+drv$save_dataframe(iris, "path/to/iris.csv")
+iris2 <- drv$load_dataframe("path/to/iris.csv")
+identical(iris, iris2)  # TRUE
+
+drv$save_rds(iris, "path/to/iris.rds")
+iris3 <- drv$load_rds("path/to/iris.rds")
+identical(iris, iris3)  # TRUE
 
 # accessing shared files
 shared_df <- drv$list_shared_items()
@@ -136,6 +188,6 @@ shared_items[[1]]$open()
 \seealso{
 \code{\link{get_personal_onedrive}}, \code{\link{get_business_onedrive}}, \code{\link{ms_site}}, \code{\link{ms_drive_item}}
 
-\href{https://docs.microsoft.com/en-us/graph/overview}{Microsoft Graph overview},
-\href{https://docs.microsoft.com/en-us/graph/api/resources/onedrive?view=graph-rest-1.0}{OneDrive API reference}
+\href{https://learn.microsoft.com/en-us/graph/overview}{Microsoft Graph overview},
+\href{https://learn.microsoft.com/en-us/graph/api/resources/onedrive?view=graph-rest-1.0}{OneDrive API reference}
 }

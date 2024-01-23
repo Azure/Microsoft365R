@@ -47,7 +47,7 @@ Creating new objects of this class should be done via the \code{get_list} method
 
 \code{list_items} supports the following arguments to customise results returned by the query.
 \itemize{
-\item \code{filter}: A string giving an \href{https://docs.microsoft.com/en-us/graph/query-parameters#filter-parameter}{OData expression} to filter the rows to return. Note that column names used in the expression must be prefixed with \verb{fields/} to distinguish them from item metadata.
+\item \code{filter}: A string giving an \href{https://learn.microsoft.com/en-us/graph/query-parameters#filter-parameter}{OData expression} to filter the rows to return. Note that column names used in the expression must be prefixed with \verb{fields/} to distinguish them from item metadata.
 \item \code{n}: The maximum number of (filtered) results to return. If this is NULL, the \code{ms_graph_pager} iterator object is returned instead to allow manual iteration over the results.
 \item \code{select}: A string containing comma-separated column names to include in the returned data frame. If not supplied, includes all columns.
 \item \code{all_metadata}: If TRUE, the returned data frame will contain extended metadata as separate columns, while the data fields will be in a nested data frame named \code{fields}. This is always set to FALSE if \code{n=NULL} or \code{as_data_frame=FALSE}.
@@ -85,6 +85,6 @@ lst$bulk_import(df)
 \seealso{
 \code{\link{get_sharepoint_site}}, \code{\link{ms_site}}, \code{\link{ms_list_item}}
 
-\href{https://docs.microsoft.com/en-us/graph/overview}{Microsoft Graph overview},
-\href{https://docs.microsoft.com/en-us/graph/api/resources/sharepoint?view=graph-rest-1.0}{SharePoint sites API reference}
+\href{https://learn.microsoft.com/en-us/graph/overview}{Microsoft Graph overview},
+\href{https://learn.microsoft.com/en-us/graph/api/resources/sharepoint?view=graph-rest-1.0}{SharePoint sites API reference}
 }

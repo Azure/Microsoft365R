@@ -1,3 +1,21 @@
+#' Global options
+#'
+#' Microsoft365R has a number of global options that affect how it interacts with the underlying Graph API.
+#'
+#' @section Usage:
+#' ```
+#' options(microsoft365r_use_itemid_in_path = TRUE)
+#' options(microsoft365r_use_outlook_immutable_ids = TRUE)
+#' ```
+#' @section Details:
+#' The `microsoft365r_use_itemid_in_path` option controls when to use item IDs in requests for OneDrive/SharePoint drive items. The default value of TRUE means to use this always; other possible values are FALSE (the default in previous versions of Microsoft365R) and "remote" (use only when dealing with items shared by another user).
+#'
+#' The `microsoft365r_use_outlook_immutable_ids` option controls whether to use immutable object IDs in Outlook. Immutable IDs have the advantage that they don't change when an email is moved or copied between folders, whereas traditional Outlook object IDs can change. The default is to use immutable IDs; set this option to FALSE to revert to traditional Outlook IDs.
+#'
+#' @name microsoft365r_options
+#' @aliases microsoft365r_global
+NULL
+
 #' @import AzureGraph
 NULL
 
@@ -7,6 +25,12 @@ utils::globalVariables(c("self", "private"))
 {
     # set Graph API to beta, for more powerful permissions
     options(azure_graph_api_version="beta")
+
+    # whether to use item IDs in OD/SPO paths: values are TRUE, FALSE, "remote"
+    options(microsoft365r_use_itemid_in_path=TRUE)
+
+    # whether to use immutable message IDs in Outlook
+    options(microsoft365r_use_outlook_immutable_ids=TRUE)
 
     register_graph_class("site", ms_site,
         function(props) grepl("sharepoint", props$id, fixed=TRUE))

@@ -15,6 +15,7 @@ drv <- try(call_graph_endpoint(tok, "me/drive"), silent=TRUE)
 if(inherits(drv, "try-error"))
     skip("OneDrive tests skipped: service not available")
 
+opt_use_itemid <- options(microsoft365r_use_itemid_in_path=TRUE)
 od <- ms_drive$new(tok, tenant, drv)
 
 test_that("OneDrive personal works",
@@ -30,8 +31,8 @@ test_that("OneDrive personal works",
     src <- "../resources/file.json"
     dest <- file.path(newfolder, basename(src))
     newsrc <- tempfile()
-    expect_silent(od$upload_file(src, dest))
-    expect_silent(od$download_file(dest, newsrc))
+    expect_silent(od$upload_file(src, dest=dest))
+    expect_silent(od$download_file(dest, dest=newsrc))
 
     expect_true(files_identical(src, newsrc))
 
@@ -173,4 +174,97 @@ test_that("Nested folder creation/deletion works",
     expect_is(it123, "ms_drive_item")
 
     expect_silent(it1$delete(confirm=FALSE, by_item=TRUE))
+})
+
+
+test_that("Get item by ID works",
+{
+    dir1 <- make_name(10)
+    src <- "../resources/file.json"
+
+    obj <- od$upload_file(src, file.path(dir1, "file.json"))
+    id <- obj$properties$id
+    obj2 <- od$get_item(itemid=id)
+    expect_identical(obj$properties$id, obj2$properties$id)
+
+    expect_silent(obj2$delete(confirm=FALSE))
+})
+
+
+test_that("Folder upload/download works",
+{
+    srcdir <- tempfile()
+    srcdir2 <- tempfile(tmpdir=srcdir)
+    dir.create(srcdir2, showWarnings=FALSE, recursive=TRUE)
+    src1 <- write_file(srcdir)
+    src2 <- write_file(srcdir)
+    src3 <- write_file(srcdir2)
+    src4 <- write_file(srcdir2)
+
+    root <- od$get_item("/")
+
+    # serial, not recursive
+    destdir1 <- basename(tempfile())
+    returndir1 <- tempfile()
+
+    expect_silent(root$upload(srcdir, destdir1, recursive=FALSE, parallel=FALSE))
+
+    obj1 <- root$get_item(destdir1)
+    expect_silent(obj1$download(returndir1, recursive=FALSE, parallel=FALSE))
+    expect_silent(obj1$delete(confirm=FALSE))
+
+    files_identical(src1, file.path(returndir1, basename(src1)))
+    files_identical(src2, file.path(returndir1, basename(src2)))
+    expect_false(file.exists(file.path(returndir1, basename(src3))))
+    expect_false(file.exists(file.path(returndir1, basename(src4))))
+
+    # serial, recursive
+    destdir2 <- basename(tempfile())
+    returndir2 <- tempfile()
+
+    expect_silent(root$upload(srcdir, destdir2, recursive=TRUE, parallel=FALSE))
+
+    obj2 <- root$get_item(destdir2)
+    expect_silent(obj2$download(returndir2, recursive=TRUE, parallel=FALSE))
+    expect_silent(obj2$delete(confirm=FALSE))
+
+    files_identical(src1, file.path(returndir2, basename(src1)))
+    files_identical(src2, file.path(returndir2, basename(src2)))
+    files_identical(src3, file.path(returndir2, basename(srcdir2), basename(src3)))
+    files_identical(src4, file.path(returndir2, basename(srcdir2), basename(src4)))
+
+    # parallel, not recursive
+    destdir3 <- basename(tempfile())
+    returndir3 <- tempfile()
+
+    expect_silent(root$upload(srcdir, destdir3, recursive=FALSE, parallel=TRUE))
+
+    obj3 <- root$get_item(destdir3)
+    expect_silent(obj3$download(returndir3, recursive=FALSE, parallel=TRUE))
+    expect_silent(obj3$delete(confirm=FALSE))
+
+    files_identical(src1, file.path(returndir3, basename(src1)))
+    files_identical(src2, file.path(returndir3, basename(src2)))
+    expect_false(file.exists(file.path(returndir3, basename(src3))))
+    expect_false(file.exists(file.path(returndir3, basename(src4))))
+
+    # parallel, recursive
+    destdir4 <- basename(tempfile())
+    returndir4 <- tempfile()
+
+    expect_silent(root$upload(srcdir, destdir4, recursive=TRUE, parallel=TRUE))
+
+    obj4 <- root$get_item(destdir4)
+    expect_silent(obj4$download(returndir4, recursive=TRUE, parallel=TRUE))
+    expect_silent(obj4$delete(confirm=FALSE))
+
+    files_identical(src1, file.path(returndir4, basename(src1)))
+    files_identical(src2, file.path(returndir4, basename(src2)))
+    files_identical(src3, file.path(returndir4, basename(srcdir2), basename(src3)))
+    files_identical(src4, file.path(returndir4, basename(srcdir2), basename(src4)))
+})
+
+
+teardown({
+    options(opt_use_itemid)
 })

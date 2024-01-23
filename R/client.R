@@ -42,7 +42,7 @@
 #'
 #' For `get_team`, an R6 object of class `ms_team`; for `list_teams`, a list of such objects.
 #' @seealso
-#' [`ms_drive`], [`ms_site`], [`ms_team`], [`ms_chat`]
+#' [`ms_drive`], [`ms_site`], [`ms_team`], [`ms_chat`], [Microsoft365R global options][microsoft365r_options]
 #'
 #' [`add_methods`] for the associated methods that this package adds to the base AzureGraph classes.
 #'

@@ -206,7 +206,7 @@ get_business_onedrive(token=token)
 }
 }
 \seealso{
-\code{\link{ms_drive}}, \code{\link{ms_site}}, \code{\link{ms_team}}, \code{\link{ms_chat}}
+\code{\link{ms_drive}}, \code{\link{ms_site}}, \code{\link{ms_team}}, \code{\link{ms_chat}}, \link[=microsoft365r_options]{Microsoft365R global options}
 
 \code{\link{add_methods}} for the associated methods that this package adds to the base AzureGraph classes.
 

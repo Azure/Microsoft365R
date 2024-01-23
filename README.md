@@ -37,6 +37,14 @@ od$create_folder("Documents/newfolder")
 
 # open a document for editing in Word Online
 od$open_item("Documents/myfile.docx")
+
+# working with data frames and R objects
+od$save_dataframe(iris, "Documents/iris.csv")
+iris2 <- od$load_dataframe("Documents/iris.csv")
+
+wtmod <- lm(wt ~ ., data=mtcars)
+od$save_rds(wtmod, "Documents/wtmod.rds")
+wtmod2 <- od$load_rds("Documents/wtmod.rds")
 ```
 
 ### SharePoint Online

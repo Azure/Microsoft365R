@@ -21,8 +21,8 @@
 #' @seealso
 #' [`ms_graph`], [`ms_site`], [`ms_list`]
 #'
-#' [Microsoft Graph overview](https://docs.microsoft.com/en-us/graph/overview),
-#' [SharePoint sites API reference](https://docs.microsoft.com/en-us/graph/api/resources/sharepoint?view=graph-rest-1.0)
+#' [Microsoft Graph overview](https://learn.microsoft.com/en-us/graph/overview),
+#' [SharePoint sites API reference](https://learn.microsoft.com/en-us/graph/api/resources/sharepoint?view=graph-rest-1.0)
 #'
 #' @examples
 #' \dontrun{

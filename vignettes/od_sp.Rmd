@@ -93,6 +93,23 @@ newfile$open()
 newfile$download("newdocument modified.docx")
 ```
 
+There are also convenience methods for working with data frames and other R objects.
+
+```r
+# saving and loading data to a csv file
+od$save_dataframe(iris, "Documents/iris.csv")
+iris2 <- od$load_dataframe("Documents/iris.csv")
+
+# saving and loading an R object
+wtmod <- lm(wt ~ ., data=mtcars)
+od$save_rds(wtmod, "Documents/wtmod.rds")
+wtmod2 <- od$load_rds("Documents/wtmod.rds")
+
+# saving and loading multiple objects
+od$save_rdata(iris, wtmod, file="Documents/objects.rdata")
+od$load_rdata("Documents/objects.rdata")
+```
+
 ## SharePoint
 
 To access a SharePoint site, use the `get_sharepoint_site()` function and provide the site name, URL or ID. You can also list the sites you're following with `list_sharepoint_sites()`.

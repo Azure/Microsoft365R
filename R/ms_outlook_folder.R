@@ -52,21 +52,21 @@
 #' list_emails(by = "received desc", search = NULL, filter = NULL, n = 100, pagesize = 10)
 #' ```
 #' - `by`: The sorting order of the message list. The possible fields are "received" (received date, the default), "from" and "subject". To sort in descending order, add a " desc". You can specify multiple sorting fields, with later fields used to break ties in earlier ones. The last sorting field is always "received desc" unless it appears earlier.
-#' - `search`: An optional string to search for. Only emails that contain the search string will be returned. See the [description of this parameter](https://docs.microsoft.com/en-us/graph/query-parameters#search-parameter) for more information.
+#' - `search`: An optional string to search for. Only emails that contain the search string will be returned. See the [description of this parameter](https://learn.microsoft.com/en-us/graph/query-parameters#search-parameter) for more information.
 #' - `filter, n`: See below.
 #' - `pagesize`: The number of emails per page. You can change this to a larger number to increase throughput, at the risk of running into timeouts.
 #'
 #' Currently, searching and filtering the message list is subject to some limitations. You can only specify one of `search` and `filter`; searching and filtering at the same time will not work. Ordering the results is only allowed if neither a search term nor a filtering expression is present. If searching or filtering is done, the result is always sorted by date.
 #'
 #' @section List methods generally:
-#' All `list_*` methods have `filter` and `n` arguments to limit the number of results. The former should be an [OData expression](https://docs.microsoft.com/en-us/graph/query-parameters#filter-parameter) as a string to filter the result set on. The latter should be a number setting the maximum number of (filtered) results to return. The default values are `filter=NULL` and `n=100` for listing emails, and `n=Inf` for listing folders. If `n=NULL`, the `ms_graph_pager` iterator object is returned instead to allow manual iteration over the results.
+#' All `list_*` methods have `filter` and `n` arguments to limit the number of results. The former should be an [OData expression](https://learn.microsoft.com/en-us/graph/query-parameters#filter-parameter) as a string to filter the result set on. The latter should be a number setting the maximum number of (filtered) results to return. The default values are `filter=NULL` and `n=100` for listing emails, and `n=Inf` for listing folders. If `n=NULL`, the `ms_graph_pager` iterator object is returned instead to allow manual iteration over the results.
 #'
 #' Support in the underlying Graph API for OData queries is patchy. Not all endpoints that return lists of objects support filtering, and if they do, they may not allow all of the defined operators. If your filtering expression results in an error, you can carry out the operation without filtering and then filter the results on the client side.
 #' @seealso
 #' [`ms_outlook`], [`ms_outlook_email`]
 #'
-#' [Microsoft Graph overview](https://docs.microsoft.com/en-us/graph/overview),
-#' [Outlook API reference](https://docs.microsoft.com/en-us/graph/api/resources/mail-api-overview?view=graph-rest-1.0)
+#' [Microsoft Graph overview](https://learn.microsoft.com/en-us/graph/overview),
+#' [Outlook API reference](https://learn.microsoft.com/en-us/graph/api/resources/mail-api-overview?view=graph-rest-1.0)
 #'
 #' @examples
 #' \dontrun{

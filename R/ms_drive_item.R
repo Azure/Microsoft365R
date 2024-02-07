@@ -430,7 +430,7 @@ public=list(
         {
             con <- rawConnection(dat, "r")
             on.exit(try(close(con), silent=TRUE))
-            readr::read_delim(con, delim=delim)
+            readr::read_delim(con, delim=delim, ...)
         }
         else utils::read.delim(text=rawToChar(dat), sep=delim, ...)
     },

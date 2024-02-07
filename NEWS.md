@@ -1,5 +1,9 @@
 # Microsoft365R 2.4.0.9000
 
+## OneDrive/SharePoint
+
+- In the `ms_drive_item$load_dataframe()` method, pass the `...` argument to `read_delim`.
+
 ## Planner
 
 - Fix a bug in the `ms_plan$get_details()` method.

@@ -34,6 +34,7 @@ Suggests:
     testthat,
     blastula,
     emayili,
-    readr
+    readr,
+    readxl
 Roxygen: list(markdown=TRUE, r6=FALSE)
 RoxygenNote: 7.2.1

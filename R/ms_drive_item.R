@@ -421,6 +421,19 @@ public=list(
     {
         private$assert_is_file()
         ext <- tolower(tools::file_ext(self$properties$name))
+        if(!(ext %in% c("csv", "csv2", "xls", "xlsx")))
+            stop("Data frame can only be loaded from a CSV or Excel file")
+
+        if(ext %in% c("xls", "xlsx"))
+        {
+            if(!requireNamespace("readxl"))
+                stop("The readxl package must be installed to load an Excel spreadsheet")
+            infile <- paste0(tempfile(), ".", ext)
+            self$download(dest=infile)
+            on.exit(unlink(infile, force=TRUE))
+            return(readxl::read_excel(infile, ...))
+        }
+
         if(is.null(delim))
         {
             delim <- if(ext == "csv") "," else if(ext == "csv2") ";" else "\t"

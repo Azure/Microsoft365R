@@ -262,12 +262,20 @@ public=list(
             opts$allowExternal <- "true"
         if(!is.null(filter))
             opts$`filter` <- filter
-        children <- self$do_operation("sharedWithMe", options=opts, simplify=FALSE)
+        children <- self$do_operation("sharedWithMe", options=opts, simplify=TRUE)
 
-        # get file list as a data frame, or return the iterator immediately if n is NULL
+        # get list of objects, or return the iterator immediately if n is NULL
         out <- extract_list_values(self$get_list_pager(children), n)
-        names(out) <- sapply(out, function(obj) obj$properties$name)
-        out
+        if(is.null(n))
+            return(out)
+
+        if(is_empty(out))
+            out <- data.frame(name=character(), size=numeric(), isdir=logical(), remoteItem=I(list()))
+
+        out$remoteItem <- lapply(seq_len(nrow(out)),
+            function(i) ms_drive_item$new(self$token, self$tenant, out$remoteItem[i, ], remote=TRUE))
+
+        out$remoteItem
     },
 
     load_dataframe=function(path=NULL, itemid=NULL, ...)

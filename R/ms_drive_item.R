@@ -26,7 +26,7 @@
 #' - `get_parent_folder()`: Get the parent folder for this item, as a drive item object. Returns the root folder for the root. Not supported for remote items.
 #' - `get_path()`: Get the absolute path for this item, as a character string. Not supported for remote items.
 #' - `is_folder()`: Information function, returns TRUE if this item is a folder.
-#' - `load_dataframe(delim=NULL, ...)`: Download a delimited file and return its contents as a data frame. See 'Saving and loading data' below.
+#' - `load_dataframe(delim=NULL, ...)`: Download an Excel or text file and return its contents as a data frame. See 'Saving and loading data' below.
 #' - `load_rds()`: Download a .rds file and return the saved object.
 #' - `load_rdata(envir)`: Load a .RData or .Rda file into the specified environment.
 #' - `save_dataframe(df, file, delim=",", ...)` Save a dataframe to a delimited file.
@@ -81,8 +81,8 @@
 #'
 #' @section Saving and loading data:
 #' The following methods are provided to simplify the task of loading and saving datasets and R objects.
-#' - `load_dataframe` downloads a delimited file and returns its contents as a data frame. The delimiter can be specified with the `delim` argument; if omitted, this is "," if the file extension is .csv, ";" if the file extension is .csv2, and a tab otherwise. If the readr package is installed, the `readr::read_delim` function is used to parse the file, otherwise `utils::read.delim` is used. You can supply other arguments to the parsing function via the `...` argument.
-#' - `save_dataframe` is the inverse of `load_dataframe`: it uploads the given data frame to a folder item. Specify the delimiter with the `delim` argument. The `readr::write_delim` function is used to serialise the data if that package is installed, and `utils::write.table` otherwise.
+#' - `load_dataframe` downloads an Excel (.xlsx or .xls extension) or text file and returns its contents as a data frame. Loading Excel files uses the `readxl::read_excel` function, and so requires that the readxl package is installed. For a text file, you can specify the delimiter with the `delim` argument; if omitted, this is "," if the file extension is .csv, ";" if the file extension is .csv2, and a tab otherwise. If the readr package is installed, the `readr::read_delim` function is used to parse text files, otherwise `utils::read.delim` is used. You can supply other arguments to these functions via the `...` argument.
+#' - `save_dataframe` is the inverse of `load_dataframe`: it uploads the given data frame to a folder item. Specify the delimiter with the `delim` argument. The `readr::write_delim` function is used to serialise the data if that package is installed, and `utils::write.table` otherwise. Note that unlike loading, saving to an Excel file is not supported.
 #' - `load_rds` downloads a .rds file and returns its contents as an R object. It is analogous to the base `readRDS` function but for OneDrive/SharePoint drive items.
 #' - `save_rds` uploads a given R object as a .rds file, analogously to `saveRDS`.
 #' - `load_rdata` downloads a .RData or .Rda file and loads its contents into the given environment. It is analogous to the base `load` function but for OneDrive/SharePoint drive items.
@@ -421,16 +421,14 @@ public=list(
     {
         private$assert_is_file()
         ext <- tolower(tools::file_ext(self$properties$name))
-        if(!(ext %in% c("csv", "csv2", "xls", "xlsx")))
-            stop("Data frame can only be loaded from a CSV or Excel file")
 
         if(ext %in% c("xls", "xlsx"))
         {
             if(!requireNamespace("readxl"))
                 stop("The readxl package must be installed to load an Excel spreadsheet")
             infile <- paste0(tempfile(), ".", ext)
+            on.exit(unlink(infile))
             self$download(dest=infile)
-            on.exit(unlink(infile, force=TRUE))
             return(readxl::read_excel(infile, ...))
         }
 

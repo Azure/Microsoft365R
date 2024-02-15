@@ -16,7 +16,7 @@
 #' - `sync_fields()`: Synchronise the R object with the team metadata in Microsoft Graph.
 #' - `list_channels(filter=NULL, n=Inf)`: List the channels for this team.
 #' - `get_channel(channel_name, channel_id)`: Retrieve a channel. If the name and ID are not specified, returns the primary channel.
-#' - `create_channel(channel_name, description, membership)`: Create a new channel. Optionally, you can specify a short text description of the channel, and the type of membership: either standard or private (invitation-only).
+#' - `create_channel(channel_name, description, membership)`: Create a new channel. Optionally, you can specify a short text description of the channel, and the type of membership: either standard, shared or private (invitation-only).
 #' - `delete_channel(channel_name, channel_id, confirm=TRUE)`: Delete a channel; by default, ask for confirmation first. You cannot delete the primary channel of a team. Note that Teams keeps track of all channels ever created, even if you delete them (you can see the deleted channels by going to the "Manage team" pane for a team, then the "Channels" tab, and expanding the "Deleted" entry); therefore, try not to create and delete channels unnecessarily.
 #' - `list_drives(filter=NULL, n=Inf)`: List the drives (shared document libraries) associated with this team.
 #' - `get_drive(drive_name, drive_id)`: Retrieve a shared document library for this team. If the name and ID are not specified, this returns the default document library.
@@ -88,10 +88,13 @@ public=list(
         else if(is.null(channel_name) && !is.null(channel_id))
             file.path("channels", channel_id)
         else stop("Do not supply both the channel name and ID", call.=FALSE)
-        ms_channel$new(self$token, self$tenant, self$do_operation(op), team_id=self$properties$id)
+
+        # Prefer header needed to get shared channels
+        obj <- self$do_operation(op, httr::add_headers(Prefer="include-unknown-enum-members"))
+        ms_channel$new(self$token, self$tenant, obj, team_id=self$properties$id)
     },
 
-    create_channel=function(channel_name, description="", membership=c("standard", "private"))
+    create_channel=function(channel_name, description="", membership=c("standard", "private", "shared"))
     {
         membership <- match.arg(membership)
         body <- list(

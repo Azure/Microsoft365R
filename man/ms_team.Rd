@@ -30,7 +30,7 @@ Class representing a team in Microsoft Teams.
 \item \code{sync_fields()}: Synchronise the R object with the team metadata in Microsoft Graph.
 \item \code{list_channels(filter=NULL, n=Inf)}: List the channels for this team.
 \item \code{get_channel(channel_name, channel_id)}: Retrieve a channel. If the name and ID are not specified, returns the primary channel.
-\item \code{create_channel(channel_name, description, membership)}: Create a new channel. Optionally, you can specify a short text description of the channel, and the type of membership: either standard or private (invitation-only).
+\item \code{create_channel(channel_name, description, membership)}: Create a new channel. Optionally, you can specify a short text description of the channel, and the type of membership: either standard, shared or private (invitation-only).
 \item \code{delete_channel(channel_name, channel_id, confirm=TRUE)}: Delete a channel; by default, ask for confirmation first. You cannot delete the primary channel of a team. Note that Teams keeps track of all channels ever created, even if you delete them (you can see the deleted channels by going to the "Manage team" pane for a team, then the "Channels" tab, and expanding the "Deleted" entry); therefore, try not to create and delete channels unnecessarily.
 \item \code{list_drives(filter=NULL, n=Inf)}: List the drives (shared document libraries) associated with this team.
 \item \code{get_drive(drive_name, drive_id)}: Retrieve a shared document library for this team. If the name and ID are not specified, this returns the default document library.

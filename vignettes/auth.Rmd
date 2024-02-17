@@ -50,7 +50,7 @@ Microsoft365R comes with a default app registration for authenticating with AAD;
 
 ### Using your own app registration
 
-Rather than getting the default app registration approved, you can also create your own registration for authentication. If this is for use in a local R session, it should have a mobile & desktop redirect URI of `https://localhost:1410` (not a web or SPA redirect), and the "Allow native client" setting should be enabled. You can use the same permissions as the default app, or set your own: for example, if you know you don't need to interact with Outlook, you can omit the Mail.Send and Mail.ReadWrite permissions.
+Rather than getting the default app registration approved, you can also create your own registration for authentication. If this is for use in a local R session, it should have a mobile & desktop redirect URI of `http://localhost:1410` (not a web or SPA redirect), and the "Allow native client" setting should be enabled. You can use the same permissions as the default app, or set your own: for example, if you know you don't need to interact with Outlook, you can omit the Mail.Send and Mail.ReadWrite permissions.
 
 Once the app has been registered, you can pass the app ID to Microsoft365R in a couple of ways.
 

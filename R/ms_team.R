@@ -57,7 +57,7 @@
 #' }
 #' @format An R6 object of class `ms_team`, inheriting from `ms_object`.
 #' @export
-ms_team <- R6::R6Class("ms_team", inherit=ms_object,
+ms_team <- R6::R6Class("ms_team", inherit=ms_teams_object,
 
 public=list(
 
@@ -89,9 +89,7 @@ public=list(
             file.path("channels", channel_id)
         else stop("Do not supply both the channel name and ID", call.=FALSE)
 
-        # Prefer header needed to get shared channels
-        obj <- self$do_operation(op, httr::add_headers(Prefer="include-unknown-enum-members"))
-        ms_channel$new(self$token, self$tenant, obj, team_id=self$properties$id)
+        ms_channel$new(self$token, self$tenant, self$do_operation(op), team_id=self$properties$id)
     },
 
     create_channel=function(channel_name, description="", membership=c("standard", "private", "shared"))

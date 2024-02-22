@@ -93,7 +93,7 @@
 #' }
 #' @format An R6 object of class `ms_channel`, inheriting from `ms_object`.
 #' @export
-ms_channel <- R6::R6Class("ms_channel", inherit=ms_object,
+ms_channel <- R6::R6Class("ms_channel", inherit=ms_teams_object,
 
 public=list(
 

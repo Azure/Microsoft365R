@@ -16,7 +16,7 @@
 #' - `sync_fields()`: Synchronise the R object with the team metadata in Microsoft Graph.
 #' - `list_channels(filter=NULL, n=Inf)`: List the channels for this team.
 #' - `get_channel(channel_name, channel_id)`: Retrieve a channel. If the name and ID are not specified, returns the primary channel.
-#' - `create_channel(channel_name, description, membership)`: Create a new channel. Optionally, you can specify a short text description of the channel, and the type of membership: either standard, shared or private (invitation-only).
+#' - `create_channel(channel_name, description, membership)`: Create a new channel. Optionally, you can specify a short text description of the channel, and the type of membership: either standard, shared or private (invitation-only). Note that creating a shared channel is an _asynchronous_ operation; the call returns before the creation is finished. You can retrieve the channel with the `get_channel` method after waiting for a short while.
 #' - `delete_channel(channel_name, channel_id, confirm=TRUE)`: Delete a channel; by default, ask for confirmation first. You cannot delete the primary channel of a team. Note that Teams keeps track of all channels ever created, even if you delete them (you can see the deleted channels by going to the "Manage team" pane for a team, then the "Channels" tab, and expanding the "Deleted" entry); therefore, try not to create and delete channels unnecessarily.
 #' - `list_drives(filter=NULL, n=Inf)`: List the drives (shared document libraries) associated with this team.
 #' - `get_drive(drive_name, drive_id)`: Retrieve a shared document library for this team. If the name and ID are not specified, this returns the default document library.
@@ -100,7 +100,13 @@ public=list(
             description=description,
             membershipType=membership
         )
-        ms_channel$new(self$token, self$tenant, self$do_operation("channels", body=body, http_verb="POST"),
+        obj <- self$do_operation("channels", body=body, http_verb="POST")
+        if(membership == "shared")
+        {
+            cat("Shared channel creation started in the background. Use the 'get_channel' method to retrieve it.\n")
+            return(NULL)
+        }
+        ms_channel$new(self$token, self$tenant, ,
                        team_id=self$properties$id)
     },
 

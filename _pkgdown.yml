@@ -1,0 +1,49 @@
+reference:
+- title: Login Clients 
+  desc: Login Clients for Microsoft 365
+- contents:
+  - starts_with('get')
+  - starts_with('list')
+- title: Teams Class Objects
+  desc: R6 Class Objects for Microsoft Teams
+- contents:
+  - ms_team
+  - ms_team_member
+  - ms_channel
+  - ms_chat
+  - ms_chat_message
+- title: OneDrive and SharePoint Class Objects
+  desc: R6 class objects for Microsoft OneDrive and SharePoint
+- contents:
+  - ms_site
+  - ms_drive
+  - ms_drive_item
+  - ms_list
+  - ms_list_item
+- title: Outlook Class Objects
+  desc: R6 class objects for Microsoft Outlook
+- contents:
+  - ms_outlook
+  - ms_outlook_attachment
+  - ms_outlook_email
+  - ms_outlook_folder
+- title: Planner Class Objects
+  desc: R6 class objects for Microsoft Planner
+- contents:
+  - ms_plan
+  - ms_plan_bucket
+  - ms_plan_task
+- title: Deprecated Functions
+  desc: Deprecated functions no longer in use
+- contents:
+  - personal_onedrive
+  - business_onedrive
+  - sharepoint_site
+- title: Accessor Methods
+  desc: Microsoft 365 object accessor methods
+- contents:
+  - add_methods
+- title: Microsoft365r Options
+  desc: Global options for interaction with the underlying Graph API
+- contents:
+  - microsoft365r_options

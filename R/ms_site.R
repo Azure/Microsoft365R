@@ -109,6 +109,31 @@ public=list(
         az_group$new(self$token, self$tenant, res[[1]])
     },
 
+    get_analytics=function()
+    {
+      self$do_operation("analytics")
+    },
+
+    # https://learn.microsoft.com/en-us/graph/api/site-list-columns
+    # FIXME: Add support for OData parameters
+    list_columns=function()
+    {
+      self$do_operation("columns")
+    },
+
+    # https://learn.microsoft.com/en-us/graph/api/site-list-permissions?view=graph-rest-beta&tabs=http
+    # FIXME: Add support for OData parameters
+    list_permissions=function()
+    {
+      self$do_operation("permissions")
+    },
+
+    # https://learn.microsoft.com/en-us/graph/api/site-list-contenttypes?view=graph-rest-beta&tabs=http
+    list_content_types=function()
+    {
+      self$do_operation("contentTypes")
+    },
+
     print=function(...)
     {
         cat("<Sharepoint site '", self$properties$displayName, "'>\n", sep="")

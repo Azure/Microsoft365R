@@ -71,6 +71,12 @@ This class exposes methods for carrying out common operations on files and folde
 
 \code{list_files} is a synonym for \code{list_items}.
 
+\code{list_permissions} returns a list of permissions for a drive item.
+
+\code{list_versions} returns a list of drive item versions.
+
+\code{list_activities} returns a list of activities for a drive item.
+
 \code{download} downloads the item to the local machine. If this is a file, it is downloaded; in this case, the \code{dest} argument can be the path to the destination file, or NULL to return the downloaded content in a raw vector. If the item is a folder, all its files are downloaded, including subfolders if the \code{recursive} argument is TRUE.
 
 \code{upload} uploads a file or folder from the local machine into the folder item. The \code{src} argument can be the path to the source file, a \link{rawConnection} or a \link{textConnection} object. If \code{src} is a folder, all its files are uploaded, including subfolders if the \code{recursive} argument iS TRUE. An \code{ms_drive_item} object is returned invisibly.

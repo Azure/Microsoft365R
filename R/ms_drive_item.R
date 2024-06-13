@@ -50,6 +50,12 @@
 #'
 #' `list_files` is a synonym for `list_items`.
 #'
+#' `list_permissions` returns a list of permissions for a drive item.
+#'
+#' `list_versions` returns a list of drive item versions.
+#'
+#' `list_activities` returns a list of activities for a drive item.
+#'
 #' `download` downloads the item to the local machine. If this is a file, it is downloaded; in this case, the `dest` argument can be the path to the destination file, or NULL to return the downloaded content in a raw vector. If the item is a folder, all its files are downloaded, including subfolders if the `recursive` argument is TRUE.
 #'
 #' `upload` uploads a file or folder from the local machine into the folder item. The `src` argument can be the path to the source file, a [rawConnection] or a [textConnection] object. If `src` is a folder, all its files are uploaded, including subfolders if the `recursive` argument iS TRUE. An `ms_drive_item` object is returned invisibly.
@@ -209,6 +215,21 @@ public=list(
     open=function()
     {
         httr::BROWSE(self$properties$webUrl)
+    },
+
+    # https://learn.microsoft.com/en-us/graph/api/driveitem-list-permissions
+    list_permissions=function() {
+      self$do_operation("permissions")
+    },
+
+    # https://learn.microsoft.com/en-us/graph/api/driveitem-list-versions
+    list_versions=function() {
+      self$do_operation("versions")
+    },
+
+    # https://learn.microsoft.com/en-us/graph/api/activities-list
+    list_activities=function() {
+      self$do_operation("activities")
     },
 
     create_share_link=function(type=c("view", "edit", "embed"), expiry="7 days", password=NULL, scope=NULL)

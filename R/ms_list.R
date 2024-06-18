@@ -15,7 +15,7 @@
 #' - `do_operation(...)`: Carry out an arbitrary operation on the list.
 #' - `sync_fields()`: Synchronise the R object with the list metadata in Microsoft Graph.
 #' - `list_items(filter, select, all_metadata, as_data_frame, pagesize)`: Queries the list and returns items as a data frame. See 'List querying' below.
-#' - `get_column_info(simplify)`: Return a list or data frame containing metadata on the columns (fields) in the list.
+#' - `get_column_info(simplify=TRUE)`: Return a list or data frame containing metadata on the columns (fields) in the list.
 #' - `create_column(definition)`: Create a new column in the list.
 #' - `get_item(id)`: Get an individual list item.
 #' - `create_item(...)`: Create a new list item, using the named arguments as fields.

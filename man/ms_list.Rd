@@ -29,8 +29,8 @@ Class representing a list in a SharePoint site.
 \item \code{do_operation(...)}: Carry out an arbitrary operation on the list.
 \item \code{sync_fields()}: Synchronise the R object with the list metadata in Microsoft Graph.
 \item \code{list_items(filter, select, all_metadata, as_data_frame, pagesize)}: Queries the list and returns items as a data frame. See 'List querying' below.
-\item \code{get_column_info(simplify)}: Return a data frame containing metadata on the columns (fields) in the list.
-\item \code{create_column()}
+\item \code{get_column_info(simplify)}: Return a list or data frame containing metadata on the columns (fields) in the list.
+\item \code{create_column(definition)}: Create a new column in the list.
 \item \code{get_item(id)}: Get an individual list item.
 \item \code{create_item(...)}: Create a new list item, using the named arguments as fields.
 \item \code{update_item(id, ...)}: Update the \emph{data} fields in the given item, using the named arguments. To update the item's metadata, use \code{get_item()} to retrieve the item object, then call its \code{update()} method.

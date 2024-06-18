@@ -3,38 +3,48 @@ Title: Interface to the 'Microsoft 365' Suite of Cloud Services
 Version: 2.4.0.9000
 Authors@R: c(
     person("Hong", "Ooi", , "hongooi73@gmail.com", role = c("aut", "cre")),
-    person("Roman", "Zenka", role="ctb"),
-    person("Robert", "Ashton", role="ctb"),
-    person("Philip", "Zheng", role="ctb"),
-    person("Microsoft", role="cph")
-    )
-Description: An interface to the 'Microsoft 365' (formerly known as 'Office 365') suite of cloud services, building on the framework supplied by the 'AzureGraph' package. Enables access from R to data stored in 'Teams', 'SharePoint Online' and 'OneDrive', including the ability to list drive folder contents, upload and download files, send messages, and retrieve data lists. Also provides a full-featured 'Outlook' email client, with the ability to send emails and manage emails and mail folders.
-URL: https://github.com/Azure/Microsoft365R https://github.com/Azure/AzureR
-BugReports: https://github.com/Azure/Microsoft365R/issues
+    person("Roman", "Zenka", role = "ctb"),
+    person("Robert", "Ashton", role = "ctb"),
+    person("Philip", "Zheng", role = "ctb"),
+    person("Microsoft", role = "cph")
+  )
+Description: An interface to the 'Microsoft 365' (formerly known as
+    'Office 365') suite of cloud services, building on the framework
+    supplied by the 'AzureGraph' package. Enables access from R to data
+    stored in 'Teams', 'SharePoint Online' and 'OneDrive', including the
+    ability to list drive folder contents, upload and download files, send
+    messages, and retrieve data lists. Also provides a full-featured
+    'Outlook' email client, with the ability to send emails and manage
+    emails and mail folders.
 License: MIT + file LICENSE
-VignetteBuilder: knitr
+URL: https://github.com/Azure/Microsoft365R
+    https://github.com/Azure/AzureR
+BugReports: https://github.com/Azure/Microsoft365R/issues
 Depends: 
     R (>= 3.3)
 Imports:
     AzureAuth,
     AzureGraph (>= 1.3.1),
-    utils,
-    parallel,
-    tools,
     curl,
     httr,
     jsonlite,
+    mime,
+    parallel,
     R6,
-    vctrs,
-    mime
+    tools,
+    utils,
+    vctrs
 Suggests:
-    openssl,
-    knitr,
-    rmarkdown,
-    testthat,
     blastula,
     emayili,
+    knitr,
+    openssl,
     readr,
-    readxl
+    readxl,
+    rmarkdown,
+    testthat
+VignetteBuilder: 
+    knitr
+Encoding: UTF-8
 Roxygen: list(markdown=TRUE, r6=FALSE)
 RoxygenNote: 7.2.1

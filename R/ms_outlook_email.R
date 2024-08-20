@@ -527,27 +527,26 @@ format_email_date <- function(datestr)
 }
 
 
-#' @export
-#' @keywords internal
+#' @noRd
 make_reply_comment <- function(comment)
 {
     UseMethod("make_reply_comment")
 }
 
 
-#' @exportS3Method
+#' @noRd
 make_reply_comment.default <- function(comment)
 {
     as.character(comment)
 }
 
-#' @exportS3Method
+#' @noRd
 make_reply_comment.blastula_message <- function(comment)
 {
     comment$html_str
 }
 
-#' @exportS3Method
+#' @noRd
 make_reply_comment.envelope <- function(comment)
 {
     parts <- comment$parts

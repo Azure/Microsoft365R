@@ -1,11 +1,10 @@
-#' @keywords internal
-#' @export
+#' @noRd
 normalize_src <- function(src)
 {
     UseMethod("normalize_src")
 }
 
-#' @exportS3Method
+#' @noRd
 normalize_src.character <- function(src)
 {
     con <- file(src, open="rb")
@@ -13,7 +12,7 @@ normalize_src.character <- function(src)
     list(con=con, size=size)
 }
 
-#' @exportS3Method
+#' @noRd
 normalize_src.textConnection <- function(src)
 {
     # convert to raw connection
@@ -23,7 +22,7 @@ normalize_src.textConnection <- function(src)
     list(con=con, size=size)
 }
 
-#' @exportS3Method
+#' @noRd
 normalize_src.rawConnection <- function(src)
 {
     # need to read the data to get object size (!)

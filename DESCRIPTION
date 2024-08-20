@@ -6,6 +6,8 @@ Authors@R: c(
     person("Roman", "Zenka", role = "ctb"),
     person("Robert", "Ashton", role = "ctb"),
     person("Philip", "Zheng", role = "ctb"),
+    person("Eli", "Pousson", , "eli.pousson@gmail.com", role = "ctb",
+               comment = c(ORCID = "0000-0001-8280-1706")),
     person("Microsoft", role = "cph")
   )
 Description: An interface to the 'Microsoft 365' (formerly known as
@@ -47,4 +49,4 @@ VignetteBuilder:
     knitr
 Encoding: UTF-8
 Roxygen: list(markdown=TRUE, r6=FALSE)
-RoxygenNote: 7.2.1
+RoxygenNote: 7.3.2

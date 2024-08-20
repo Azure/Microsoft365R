@@ -44,6 +44,7 @@
 #' }
 #' @format An R6 object of class `ms_site`, inheriting from `ms_object`.
 #' @export
+#' @importFrom curl curl_escape
 ms_site <- R6::R6Class("ms_site", inherit=ms_object,
 
 public=list(

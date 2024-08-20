@@ -158,6 +158,8 @@
 #' }
 #' @format An R6 object of class `ms_drive_item`, inheriting from `ms_object`.
 #' @export
+#' @importFrom parallel makeCluster stopCluster parLapply
+#' @importFrom tools file_ext
 ms_drive_item <- R6::R6Class("ms_drive_item", inherit=ms_object,
 
 public=list(

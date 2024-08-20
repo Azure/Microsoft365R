@@ -160,6 +160,7 @@
 #' }
 #' @format An R6 object of class `ms_drive`, inheriting from `ms_object`.
 #' @export
+#' @importFrom curl curl_escape
 ms_drive <- R6::R6Class("ms_drive", inherit=ms_object,
 
 public=list(

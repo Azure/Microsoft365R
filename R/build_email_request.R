@@ -1,11 +1,13 @@
 # methods for different email formats: default, blastula, emayili
 
+#' @export
+#' @keywords internal
 build_email_request <- function(body, ...)
 {
     UseMethod("build_email_request")
 }
 
-
+#' @exportS3Method
 build_email_request.character <- function(body, content_type,
     subject=NULL, to=NA, cc=NA, bcc=NA, reply_to=NA, token=NULL, user_id=NULL, ...)
 {
@@ -21,7 +23,7 @@ build_email_request.character <- function(body, content_type,
     utils::modifyList(req, build_email_recipients(to, cc, bcc, reply_to))
 }
 
-
+#' @exportS3Method
 build_email_request.blastula_message <- function(body, content_type,
     subject=NULL, to=NA, cc=NA, bcc=NA, reply_to=NA, token=NULL, user_id=NULL, ...)
 {
@@ -37,7 +39,7 @@ build_email_request.blastula_message <- function(body, content_type,
     utils::modifyList(req, build_email_recipients(to, cc, bcc, reply_to))
 }
 
-
+#' @exportS3Method
 build_email_request.envelope <- function(body, token=NULL, user_id=NULL, ...)
 {
     require_emayili_0.6()

@@ -41,11 +41,11 @@
 #'
 #' `open` opens this file or folder in your browser. If the file has an unrecognised type, most browsers will attempt to download it.
 #'
-#' `list_items(path, info, full_names, filter, n, pagesize)` lists the items under the specified path. It is the analogue of base R's `dir`/`list.files`. Its arguments are
+#' `list_items(path, info, full_names, filter, select, n, pagesize)` lists the items under the specified path. It is the analogue of base R's `dir`/`list.files`. Its arguments are
 #' - `path`: The path.
-#' - `info`: The information to return: either "partial", "name" or "all". If "partial", a data frame is returned containing the name, size, ID and whether the item is a file or folder. If "name", a vector of file/folder names is returned. If "all", a data frame is returned containing _all_ the properties for each item (this can be large).
+#' - `info`: The information to return: either "partial", "name" or "all". If "partial", a data frame is returned containing the name, size, ID and whether the item is a file or folder. If "name", a vector of file/folder names is returned (and any value passed to `select` is ignored). If "all", a data frame is returned containing _all_ the properties for each item (this can be large). Supply `select` (if info is "partial" pr "all") to specify which columns to include in the returned data frame.
 #' - `full_names`: Whether to prefix the folder path to the names of the items.
-#' - `filter, n`: See 'List methods' below.
+#' - `filter, select, n`: See 'List methods' below.
 #' - `pagesize`: The number of results to return for each call to the REST endpoint. You can try reducing this argument below the default of 1000 if you are experiencing timeouts.
 #'
 #' `list_files` is a synonym for `list_items`.
@@ -256,7 +256,7 @@ public=list(
         else res$link$webUrl
     },
 
-    list_items=function(path="", info=c("partial", "name", "all"), full_names=FALSE, filter=NULL, n=Inf, pagesize=1000)
+    list_items=function(path="", info=c("partial", "name", "all"), full_names=FALSE, filter=NULL, select=NULL, n=Inf, pagesize=1000)
     {
         private$assert_is_folder()
         if(path == "/")
@@ -267,6 +267,10 @@ public=list(
             name=list(`$select`="name", `$top`=pagesize),
             list(`$top`=pagesize)
         )
+
+        if (!is.null(select) && info != "name")
+          opts$`$select` <- paste0(select, collapse = ",")
+
         if(!is.null(filter))
             opts$`filter` <- filter
 

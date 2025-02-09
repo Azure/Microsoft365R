@@ -3,7 +3,7 @@ title: "Using Microsoft365R in an unattended script"
 author: Hong Ooi
 output: rmarkdown::html_vignette
 vignette: >
-    %\VignetteIndexEntry{Microsoft365R in an unattended script}
+    %\VignetteIndexEntry{Using Microsoft365R in an unattended script}
     %\VignetteEngine{knitr::rmarkdown}
     %\VignetteEncoding{utf8}
 ---

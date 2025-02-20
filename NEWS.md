@@ -10,6 +10,11 @@
 
 - Fix a bug in the `ms_plan$get_details()` method.
 
+## Other
+
+- Remove references to the Microsoft365 CLI, as this no longer has a multi-tenant app registration and hence cannot be used for authentication. This means you'll have to either allow the Microsoft365R app ID within your tenant or create your own app registration (both of which will require Azure admin access). (#215)
+
+
 # Microsoft365R 2.4.0
 
 ## OneDrive/SharePoint

@@ -9,9 +9,6 @@
 ## Teams
 
 - Enable deleting of chat messages, now that this functionality is exposed in the underlying Graph API (#166).
-
-## Teams
-
 - Add the ability to create shared channels (#174).
 
 ## Planner

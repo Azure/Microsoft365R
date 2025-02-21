@@ -74,7 +74,7 @@
 #' }
 #' @format An R6 object of class `ms_chat`, inheriting from `ms_object`.
 #' @export
-ms_chat <- R6::R6Class("ms_chat", inherit=ms_object,
+ms_chat <- R6::R6Class("ms_chat", inherit=ms_teams_object,
 
 public=list(
 

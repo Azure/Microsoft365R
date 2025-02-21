@@ -6,6 +6,10 @@
 - Add the ability to load Excel files (with extension .xls or .xlsx) to the `ms_drive_item$load_dataframe()` method. This requires the readxl package to be installed.
 - Fix a bug in downloading shared files in business SharePoint/OneDrive (#189)
 
+## Teams
+
+- Enable deleting of chat messages, now that this functionality is exposed in the underlying Graph API (#166).
+
 ## Planner
 
 - Fix a bug in the `ms_plan$get_details()` method.

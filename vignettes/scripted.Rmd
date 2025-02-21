@@ -134,7 +134,6 @@ tenant <- "your-tenant-here"
 
 # the application/client ID of the app registration to use
 app <- "your-app-id-here"
-app_secret <- "your-app-secret-here"
 
 # get the service account username and password
 user <- Sys.getenv("EXAMPLE_MS365R_SERVICE_USER")
@@ -145,7 +144,7 @@ target_drive <- Sys.getenv("EXAMPLE_MS365R_TARGET_DRIVE")
 target_path <- Sys.getenv("EXAMPLE_MS365R_TARGET_PATH")
 
 drv <- get_business_onedrive(tenant=tenant, app=app, username=user, password=pwd,
-    token_args = list(client_secret = app_secret), auth_type="resource_owner")
+    auth_type="resource_owner")
 
 # search for the desired item in the list of shared items
 shared <- drv$list_shared_files(info="items")

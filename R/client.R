@@ -276,11 +276,7 @@ do_login <- function(tenant, app, scopes, token, ...)
 choose_app <- function(app)
 {
     if(is.null(app) || app == "")
-    {
-        if(!is.null(getOption("microsoft365r_use_cli_app_id")))
-            .cli_microsoft365_app_id
-        else .microsoft365r_app_id
-    }
+        .microsoft365r_app_id
     else app
 }
 

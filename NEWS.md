@@ -13,6 +13,11 @@
 - Add `ms_site$get_analytics()`, `ms_site$list_permissions()`, and `ms_site$list_content_types()` methods. (#209)
 - Add `ms_drive$list_activities()` (#209)
 
+## Teams
+
+- Enable deleting of chat messages, now that this functionality is exposed in the underlying Graph API (#166).
+- Add the ability to create shared channels (#174).
+
 ## Planner
 
 - Fix a bug in the `ms_plan$get_details()` method.
@@ -20,6 +25,8 @@
 ## Other
 
 - Add Eli Pousson to contributors.
+- Remove references to the Microsoft365 CLI, as this no longer has a multi-tenant app registration and hence cannot be used for authentication. This means you'll have to either allow the Microsoft365R app ID within your tenant or create your own app registration (both of which will require Azure admin access). (#215)
+
 
 # Microsoft365R 2.4.0
 

@@ -116,11 +116,11 @@ public=list(
       self$do_operation("analytics")
     },
 
-    get_pages=function(type = c("sitePage", "page"))
+    get_pages=function(type=c("sitePage", "page"))
     {
       type <- match.arg(type)
 
-      op <- switch (type,
+      op <- switch(type,
         page = "pages",
         sitePage = "pages/microsoft.graph.sitePage"
       )

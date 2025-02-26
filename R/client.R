@@ -276,7 +276,11 @@ do_login <- function(tenant, app, scopes, token, ...)
 choose_app <- function(app)
 {
     if(is.null(app) || app == "")
-        .microsoft365r_app_id
+    {
+        if(!is.null(getOption("microsoft365r_use_cli_app_id")))
+            stop("Using the Microsoft 365 CLI is no longer supported; please register Microsoft365R as an app in your directory", call.=FALSE)
+        else .microsoft365r_app_id
+    }
     else app
 }
 
@@ -292,7 +296,7 @@ assert_one_arg <- function(..., msg=NULL)
 
 set_default_scopes <- function(scopes, app)
 {
-    if(app %in% c(.cli_microsoft365_app_id, get(".az_cli_app_id", getNamespace("AzureGraph"))))
+    if(app == get(".az_cli_app_id", getNamespace("AzureGraph")))
         scopes <- ".default"
     scopes
 }

@@ -43,7 +43,7 @@ Class representing a team in Microsoft Teams.
 
 \section{Initialization}{
 
-Creating new objects of this class should be done via the \code{get_team} and \code{list_teams} methods of the \code{\link{ms_graph}}, \code{\link{az_user}} or \code{\link{az_group}} classes. Calling the \code{new()} method for this class only constructs the R object; it does not call the Microsoft Graph API to retrieve or create the actual team.
+Creating new objects of this class should be done via the \code{get_team} and \code{list_teams} methods of the \code{\link[AzureGraph:ms_graph]{AzureGraph::ms_graph}}, \code{\link[AzureGraph:az_user]{AzureGraph::az_user}} or \code{\link[AzureGraph:az_group]{AzureGraph::az_group}} classes. Calling the \code{new()} method for this class only constructs the R object; it does not call the Microsoft Graph API to retrieve or create the actual team.
 }
 
 \section{List methods}{
@@ -72,7 +72,7 @@ myteam$get_member(email="billg@mycompany.com")
 }
 }
 \seealso{
-\code{\link{ms_graph}}, \code{\link{az_group}}, \code{\link{ms_channel}}, \code{\link{ms_site}}, \code{\link{ms_drive}}
+\code{\link[AzureGraph:ms_graph]{AzureGraph::ms_graph}}, \code{\link[AzureGraph:az_group]{AzureGraph::az_group}}, \code{\link{ms_channel}}, \code{\link{ms_site}}, \code{\link{ms_drive}}
 
 \href{https://learn.microsoft.com/en-us/graph/overview}{Microsoft Graph overview},
 \href{https://learn.microsoft.com/en-us/graph/api/resources/teams-api-overview?view=graph-rest-1.0}{Microsoft Teams API reference}

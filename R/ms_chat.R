@@ -29,7 +29,7 @@
 #' - `content_type`: Either "text" (the default) or "html".
 #' - `attachments`: Optional vector of filenames.
 #' - `inline`: Optional vector of image filenames that will be inserted into the body of the message. The images must be PNG or JPEG, and the `content_type` argument must be "html" to include inline content.
-#' - `mentions`: Optional vector of @mentions that will be inserted into the body of the message. This should be either an object of one of the following classes, or a list of the same: [`az_user`], [`ms_team`], [`ms_channel`], [`ms_team_member`]. The `content_type` argument must be "html" to include mentions.
+#' - `mentions`: Optional vector of @mentions that will be inserted into the body of the message. This should be either an object of one of the following classes, or a list of the same: [`AzureGraph::az_user`], [`ms_team`], [`ms_channel`], [`ms_team_member`]. The `content_type` argument must be "html" to include mentions.
 #'
 #' Message attachments are uploaded to your OneDrive for Business, in the folder "Microsoft Teams Chat Files". This is the same method as used by the regular Teams app. Unlike the Teams app, no localisation is performed, so the folder is always the same regardless of your language settings. As with channels, support for attachments is still somewhat experimental so please report any bugs found.
 #'

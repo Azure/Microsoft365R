@@ -56,7 +56,7 @@ item$delete()
 }
 }
 \seealso{
-\code{\link{ms_graph}}, \code{\link{ms_site}}, \code{\link{ms_list}}
+\code{\link[AzureGraph:ms_graph]{AzureGraph::ms_graph}}, \code{\link{ms_site}}, \code{\link{ms_list}}
 
 \href{https://learn.microsoft.com/en-us/graph/overview}{Microsoft Graph overview},
 \href{https://learn.microsoft.com/en-us/graph/api/resources/sharepoint?view=graph-rest-1.0}{SharePoint sites API reference}

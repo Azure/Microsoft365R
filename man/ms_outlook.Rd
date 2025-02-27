@@ -39,7 +39,7 @@ Class representing a user's Outlook email account.
 
 \section{Initialization}{
 
-Creating new objects of this class should be done via the \code{get_personal_outlook()} or \code{get_business_outlook()} functions, or the \code{get_outlook} method of the \code{\link{az_user}} class. Calling the \code{new()} method for this class only constructs the R object; it does not call the Microsoft Graph API to retrieve the account information.
+Creating new objects of this class should be done via the \code{get_personal_outlook()} or \code{get_business_outlook()} functions, or the \code{get_outlook} method of the \code{\link[AzureGraph:az_user]{AzureGraph::az_user}} class. Calling the \code{new()} method for this class only constructs the R object; it does not call the Microsoft Graph API to retrieve the account information.
 }
 
 \section{Creating and sending emails}{

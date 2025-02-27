@@ -19,7 +19,7 @@
 #' Creating new objects of this class should be done via the `get_item` method of the [`ms_list`] class. Calling the `new()` method for this class only constructs the R object; it does not call the Microsoft Graph API to retrieve or create the actual item.
 #'
 #' @seealso
-#' [`ms_graph`], [`ms_site`], [`ms_list`]
+#' [`AzureGraph::ms_graph`], [`ms_site`], [`ms_list`]
 #'
 #' [Microsoft Graph overview](https://learn.microsoft.com/en-us/graph/overview),
 #' [SharePoint sites API reference](https://learn.microsoft.com/en-us/graph/api/resources/sharepoint?view=graph-rest-1.0)

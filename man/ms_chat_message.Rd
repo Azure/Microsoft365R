@@ -24,7 +24,7 @@ Class representing a message in a Teams channel. Currently Microsoft365R only su
 
 \itemize{
 \item \code{new(...)}: Initialize a new object. Do not call this directly; see 'Initialization' below.
-\item \code{delete(confirm=TRUE)}: Delete this message. Currently the Graph API does not support deleting Teams messages, so this method is disabled.
+\item \code{delete(confirm=TRUE)}: Delete this message.
 \item \code{update(...)}: Update the message's properties (metadata) in Microsoft Graph.
 \item \code{do_operation(...)}: Carry out an arbitrary operation on the message.
 \item \code{sync_fields()}: Synchronise the R object with the message metadata in Microsoft Graph.
@@ -48,7 +48,7 @@ To reply to a message, use the \code{send_reply()} method. This has arguments:
 \item \code{content_type}: Either "text" (the default) or "html".
 \item \code{attachments}: Optional vector of filenames.
 \item \code{inline}: Optional vector of image filenames that will be inserted into the body of the message. The images must be PNG or JPEG, and the \code{content_type} argument must be "html" to include inline content.
-\item \code{mentions}: Optional vector of @mentions that will be inserted into the body of the message. This should be either an object of one of the following classes, or a list of the same: \code{\link{az_user}}, \code{\link{ms_team}}, \code{\link{ms_channel}}, \code{\link{ms_team_member}}. The \code{content_type} argument must be "html" to include mentions.
+\item \code{mentions}: Optional vector of @mentions that will be inserted into the body of the message. This should be either an object of one of the following classes, or a list of the same: \code{\link[AzureGraph:az_user]{AzureGraph::az_user}}, \code{\link{ms_team}}, \code{\link{ms_channel}}, \code{\link{ms_team_member}}. The \code{content_type} argument must be "html" to include mentions.
 }
 
 Teams channels don't support nested replies, so any methods dealing with replies will fail if the message object is itself a reply.

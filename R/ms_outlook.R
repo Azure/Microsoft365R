@@ -22,7 +22,7 @@
 #' - `delete_folder(folder_name, folder_id, confirm=TRUE)`: Delete a folder. By default, ask for confirmation first. Note that special folders cannot be deleted.
 #'
 #' @section Initialization:
-#' Creating new objects of this class should be done via the `get_personal_outlook()` or `get_business_outlook()` functions, or the `get_outlook` method of the [`az_user`] class. Calling the `new()` method for this class only constructs the R object; it does not call the Microsoft Graph API to retrieve the account information.
+#' Creating new objects of this class should be done via the `get_personal_outlook()` or `get_business_outlook()` functions, or the `get_outlook` method of the [`AzureGraph::az_user`] class. Calling the `new()` method for this class only constructs the R object; it does not call the Microsoft Graph API to retrieve the account information.
 #'
 #' @section Creating and sending emails:
 #' To create a new email, call the `create_email()` method. The default behaviour is to create a new draft email in the Drafts folder, which can then be edited further to add attachments, recipients etc; or the email can be sent immediately.

@@ -93,7 +93,7 @@
 #'
 #' Support in the underlying Graph API for OData queries is patchy. Not all endpoints that return lists of objects support filtering, and if they do, they may not allow all of the defined operators. If your filtering expression results in an error, you can carry out the operation without filtering and then filter the results on the client side.
 #' @seealso
-#' [`ms_graph`], [`ms_site`], [`ms_drive`]
+#' [`AzureGraph::ms_graph`], [`ms_site`], [`ms_drive`]
 #'
 #' [Microsoft Graph overview](https://learn.microsoft.com/en-us/graph/overview),
 #' [OneDrive API reference](https://learn.microsoft.com/en-us/graph/api/resources/onedrive?view=graph-rest-1.0)

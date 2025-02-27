@@ -22,7 +22,7 @@
 #' - `get_details()`: Get the plan details.
 #'
 #' @section Initialization:
-#' Creating new objects of this class should be done via the `list_plans` methods of the [`az_group`] class.
+#' Creating new objects of this class should be done via the `list_plans` methods of the [`AzureGraph::az_group`] class.
 #' Calling the `new()` method for this class only constructs the R object; it does not call the Microsoft Graph API to retrieve or create the actual plan.
 #'
 #' @section Planner operations:

@@ -180,7 +180,7 @@ identical(iris, iris3)  # TRUE
 }
 }
 \seealso{
-\code{\link{ms_graph}}, \code{\link{ms_site}}, \code{\link{ms_drive}}
+\code{\link[AzureGraph:ms_graph]{AzureGraph::ms_graph}}, \code{\link{ms_site}}, \code{\link{ms_drive}}
 
 \href{https://learn.microsoft.com/en-us/graph/overview}{Microsoft Graph overview},
 \href{https://learn.microsoft.com/en-us/graph/api/resources/onedrive?view=graph-rest-1.0}{OneDrive API reference}

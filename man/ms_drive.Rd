@@ -54,7 +54,7 @@ Class representing a personal OneDrive or SharePoint document library.
 
 \section{Initialization}{
 
-Creating new objects of this class should be done via the \code{get_drive} methods of the \code{\link{ms_graph}}, \code{\link{az_user}} or \code{\link{ms_site}} classes. Calling the \code{new()} method for this class only constructs the R object; it does not call the Microsoft Graph API to retrieve or create the actual drive.
+Creating new objects of this class should be done via the \code{get_drive} methods of the \code{\link[AzureGraph:ms_graph]{AzureGraph::ms_graph}}, \code{\link[AzureGraph:az_user]{AzureGraph::az_user}} or \code{\link{ms_site}} classes. Calling the \code{new()} method for this class only constructs the R object; it does not call the Microsoft Graph API to retrieve or create the actual drive.
 }
 
 \section{File and folder operations}{

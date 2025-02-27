@@ -55,7 +55,7 @@ To send a message to a channel, use the \code{send_message()} method. This has a
 \item \code{content_type}: Either "text" (the default) or "html".
 \item \code{attachments}: Optional vector of filenames.
 \item \code{inline}: Optional vector of image filenames that will be inserted into the body of the message. The images must be PNG or JPEG, and the \code{content_type} argument must be "html" to include inline content.
-\item \code{mentions}: Optional vector of @mentions that will be inserted into the body of the message. This should be either an object of one of the following classes, or a list of the same: \code{\link{az_user}}, \code{\link{ms_team}}, \code{\link{ms_channel}}, \code{\link{ms_team_member}}. The \code{content_type} argument must be "html" to include mentions.
+\item \code{mentions}: Optional vector of @mentions that will be inserted into the body of the message. This should be either an object of one of the following classes, or a list of the same: \code{\link[AzureGraph:az_user]{AzureGraph::az_user}}, \code{\link{ms_team}}, \code{\link{ms_channel}}, \code{\link{ms_team_member}}. The \code{content_type} argument must be "html" to include mentions.
 }
 
 Note that message attachments are actually uploaded to the channel's file listing (a directory in the team's primary shared document folder). Support for attachments is somewhat experimental, so if you want to be sure that it works, upload the file separately using the \code{upload_file()} method.

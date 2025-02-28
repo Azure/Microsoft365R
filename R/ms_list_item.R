@@ -14,6 +14,7 @@
 #' - `update(...)`: Update the item's properties (metadata) in Microsoft Graph. To update the list _data_, update the `fields` property. See the examples below.
 #' - `do_operation(...)`: Carry out an arbitrary operation on the item.
 #' - `sync_fields()`: Synchronise the R object with the item data and metadata in Microsoft Graph.
+#' - `create_link()`: Create a shared link to a list item.
 #'
 #' @section Initialization:
 #' Creating new objects of this class should be done via the `get_item` method of the [`ms_list`] class. Calling the `new()` method for this class only constructs the R object; it does not call the Microsoft Graph API to retrieve or create the actual item.
@@ -61,6 +62,15 @@ public=list(
         private$api_type <- file.path("sites", self$site_id, "lists", self$list_id, "items")
         super$initialize(token, tenant, properties)
     },
+
+    # https://learn.microsoft.com/en-us/graph/api/listitem-createlink
+    create_link = function() {
+      self$do_operation("createLink", http_verb = "POST")
+    },
+
+    # delete = function() {
+    #   self$do_operation(http_verb = "DELETE")
+    # },
 
     print=function(...)
     {

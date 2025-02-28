@@ -82,6 +82,8 @@ For copying and moving, the destination folder must exist beforehand. When copyi
 
 \code{list_files} is a synonym for \code{list_items}.
 
+\code{list_activities} returns a list of activities for a drive.
+
 \code{download_file} and \code{upload_file} transfer files between the local machine and the drive. For \code{download_file}, the default destination folder is the current (working) directory of your R session. For \code{upload_file}, there is no default destination folder; make sure you specify the destination explicitly.
 
 \code{download_folder} and \code{upload_folder} transfer all the files in a folder. If \code{recursive} is TRUE, all subfolders will also be transferred recursively. The \code{parallel} argument can have the following values:

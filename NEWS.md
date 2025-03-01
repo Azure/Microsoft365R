@@ -1,10 +1,10 @@
-# Microsoft365R 2.4.0.9000
+# Microsoft365R 2.4.1
 
 ## OneDrive/SharePoint
 
 - In the `ms_drive_item$load_dataframe()` method, pass the `...` argument to `read_delim`.
 - Add the ability to load Excel files (with extension .xls or .xlsx) to the `ms_drive_item$load_dataframe()` method. This requires the readxl package to be installed.
-- Fix a bug in downloading shared files in business SharePoint/OneDrive (#189)
+- Fix a bug in downloading shared files in business SharePoint/OneDrive (#189, #206)
 
 ## Teams
 

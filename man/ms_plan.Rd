@@ -40,7 +40,7 @@ The plans belong to a group.
 
 \section{Initialization}{
 
-Creating new objects of this class should be done via the \code{list_plans} methods of the \code{\link{az_group}} class.
+Creating new objects of this class should be done via the \code{list_plans} methods of the \code{\link[AzureGraph:az_group]{AzureGraph::az_group}} class.
 Calling the \code{new()} method for this class only constructs the R object; it does not call the Microsoft Graph API to retrieve or create the actual plan.
 }
 

@@ -87,7 +87,7 @@
 #'
 #' For `get_chat`, an object of class `ms_chat`. For `list_chats`, a list of `ms_chat` objects.
 #' @seealso
-#' [`ms_site`], [`ms_drive`], [`ms_plan`], [`ms_team`], [`ms_chat`], [`az_user`], [`az_group`]
+#' [`ms_site`], [`ms_drive`], [`ms_plan`], [`ms_team`], [`ms_chat`], [`AzureGraph::az_user`], [`AzureGraph::az_group`]
 #' @examples
 #' \dontrun{
 #'

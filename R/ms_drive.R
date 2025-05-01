@@ -37,7 +37,7 @@
 #' - `save_rdata(..., file)`: Save the specified objects to a .RData file.
 #'
 #' @section Initialization:
-#' Creating new objects of this class should be done via the `get_drive` methods of the [`ms_graph`], [`az_user`] or [`ms_site`] classes. Calling the `new()` method for this class only constructs the R object; it does not call the Microsoft Graph API to retrieve or create the actual drive.
+#' Creating new objects of this class should be done via the `get_drive` methods of the [`AzureGraph::ms_graph`], [`AzureGraph::az_user`] or [`ms_site`] classes. Calling the `new()` method for this class only constructs the R object; it does not call the Microsoft Graph API to retrieve or create the actual drive.
 #'
 #' @section File and folder operations:
 #' This class exposes methods for carrying out common operations on files and folders. They call down to the corresponding methods for the [`ms_drive_item`] class. In most cases an item can be specified either by path or ID. The former is more user-friendly but subject to change if the file is moved or renamed; the latter is an opaque string but is immutable regardless of file operations.

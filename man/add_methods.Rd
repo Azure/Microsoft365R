@@ -128,5 +128,5 @@ grp$get_drive()
 }
 }
 \seealso{
-\code{\link{ms_site}}, \code{\link{ms_drive}}, \code{\link{ms_plan}}, \code{\link{ms_team}}, \code{\link{ms_chat}}, \code{\link{az_user}}, \code{\link{az_group}}
+\code{\link{ms_site}}, \code{\link{ms_drive}}, \code{\link{ms_plan}}, \code{\link{ms_team}}, \code{\link{ms_chat}}, \code{\link[AzureGraph:az_user]{AzureGraph::az_user}}, \code{\link[AzureGraph:az_group]{AzureGraph::az_group}}
 }

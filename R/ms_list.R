@@ -16,7 +16,7 @@
 #' - `sync_fields()`: Synchronise the R object with the list metadata in Microsoft Graph.
 #' - `list_items(filter, select, all_metadata, as_data_frame, pagesize)`: Queries the list and returns items as a data frame. See 'List querying' below.
 #' - `get_column_info(simplify=TRUE)`: Return a list or data frame containing metadata on the columns (fields) in the list.
-#' - `create_column(definition)`: Create a new column in the list.
+#' - `create_column(...)`: Create a new column in the list.
 #' - `get_item(id)`: Get an individual list item.
 #' - `create_item(...)`: Create a new list item, using the named arguments as fields.
 #' - `update_item(id, ...)`: Update the _data_ fields in the given item, using the named arguments. To update the item's metadata, use `get_item()` to retrieve the item object, then call its `update()` method.
@@ -141,10 +141,9 @@ public=list(
         res$columns
     },
 
-    create_column=function(definition)
+    create_column=function(...)
     {
-      stopifnot(is.list(definition))
-      res <- self$do_operation(options=list(expand="columns"), encode="json", body=definition, http_verb="POST")
+      res <- self$do_operation("columns", encode="json", body=list(...), http_verb="POST")
       res
     },
 

@@ -342,6 +342,23 @@ public=list(
         self$sync_fields()
     },
 
+    send_deferred=function(when, tz = Sys.timezone())
+    {
+        if (!inherits(when, "POSIXct")) {
+            when <- tryCatch(
+                as.POSIXct(when, tz = tz),
+                error = function(e) NA
+            )
+        }
+        if (is.na(when)) {
+            stop("Invalid date/time for deferred send", call.=FALSE)
+        }
+        utc_time <- format(when, tz = "UTC", format = "%Y-%m-%dT%H:%M:%S")
+        prop <- list(list(id="SystemTime 0x3FEF", value=utc_time))
+        self$update(singleValueExtendedProperties=prop)
+        self$send()
+    },
+
     create_reply=function(comment="", send_now=FALSE)
     {
         op <- "createReply"

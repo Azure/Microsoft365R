@@ -111,3 +111,7 @@ get_confirmation <- get("get_confirmation", getNamespace("AzureGraph"))
 # to combine paged results into a single data frame: individual pages can have
 # different structures, which will break base::rbind
 vctrs::vec_rbind
+
+
+#' @importFrom R6 R6Class
+

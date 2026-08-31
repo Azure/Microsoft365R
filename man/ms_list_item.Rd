@@ -28,6 +28,7 @@ Class representing an item in a SharePoint list.
 \item \code{update(...)}: Update the item's properties (metadata) in Microsoft Graph. To update the list \emph{data}, update the \code{fields} property. See the examples below.
 \item \code{do_operation(...)}: Carry out an arbitrary operation on the item.
 \item \code{sync_fields()}: Synchronise the R object with the item data and metadata in Microsoft Graph.
+\item \code{create_link()}: Create a shared link to a list item.
 }
 }
 

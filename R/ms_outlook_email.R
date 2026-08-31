@@ -527,24 +527,26 @@ format_email_date <- function(datestr)
 }
 
 
+#' @noRd
 make_reply_comment <- function(comment)
 {
     UseMethod("make_reply_comment")
 }
 
 
+#' @noRd
 make_reply_comment.default <- function(comment)
 {
     as.character(comment)
 }
 
-
+#' @noRd
 make_reply_comment.blastula_message <- function(comment)
 {
     comment$html_str
 }
 
-
+#' @noRd
 make_reply_comment.envelope <- function(comment)
 {
     parts <- comment$parts

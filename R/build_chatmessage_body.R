@@ -72,13 +72,13 @@ build_chatmessage_body <- function(channel, body, content_type, attachments, inl
     call_body
 }
 
-
+#' @noRd
 make_mention <- function(object, i)
 {
     UseMethod("make_mention")
 }
 
-
+#' @noRd
 make_mention.az_user <- function(object, i)
 {
     name <- if(!is.null(object$properties$displayName))
@@ -99,7 +99,7 @@ make_mention.az_user <- function(object, i)
     )
 }
 
-
+#' @noRd
 make_mention.ms_team <- function(object, i)
 {
     list(
@@ -115,7 +115,7 @@ make_mention.ms_team <- function(object, i)
     )
 }
 
-
+#' @noRd
 make_mention.ms_channel <- function(object, i)
 {
     list(
@@ -131,7 +131,7 @@ make_mention.ms_channel <- function(object, i)
     )
 }
 
-
+#' @noRd
 make_mention.ms_team_member <- function(object, i)
 {
     make_mention(object$get_aaduser(), i)

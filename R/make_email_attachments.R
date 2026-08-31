@@ -1,9 +1,10 @@
+#' @noRd
 add_external_attachments <- function(object, email)
 {
     UseMethod("add_external_attachments")
 }
 
-
+#' @noRd
 add_external_attachments.blastula_message <- function(object, email)
 {
     for(a in object$attachments)
@@ -28,7 +29,7 @@ add_external_attachments.blastula_message <- function(object, email)
     }
 }
 
-
+#' @noRd
 add_external_attachments.envelope <- function(object, email)
 {
     require_emayili_0.6()
@@ -60,7 +61,7 @@ add_external_attachments.envelope <- function(object, email)
     }
 }
 
-
+#' @noRd
 add_external_attachments.default <- function(object, email)
 {
     # do nothing if message object is not a recognised class (from blastula or emayili)

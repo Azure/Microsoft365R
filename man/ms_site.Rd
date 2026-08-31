@@ -31,6 +31,7 @@ Class representing a SharePoint site.
 \item \code{list_drives(filter=NULL, n=Inf)}: List the drives (shared document libraries) associated with this site.
 \item \code{get_drive(drive_name, drive_id)}: Retrieve a shared document library for this site. If the name and ID are not specified, this returns the default document library.
 \item \code{list_subsites(filter=NULL, n=Inf)}: List the subsites of this site.
+\item \code{get_pages(type = c("sitePage", "page"))}: Returns SharePoint pages for this site.
 \item \code{get_lists(filter=NULL, n=Inf)}: Returns the lists that are part of this site.
 \item \code{get_list(list_name, list_id)}: Returns a specific list, either by name or ID.
 \item \code{get_group()}: Retrieve the Microsoft 365 group associated with the site, if it exists. A site that backs a private Teams channel will not have a group associated with it.

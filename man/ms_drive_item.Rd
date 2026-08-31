@@ -60,16 +60,22 @@ This class exposes methods for carrying out common operations on files and folde
 
 \code{open} opens this file or folder in your browser. If the file has an unrecognised type, most browsers will attempt to download it.
 
-\code{list_items(path, info, full_names, filter, n, pagesize)} lists the items under the specified path. It is the analogue of base R's \code{dir}/\code{list.files}. Its arguments are
+\code{list_items(path, info, full_names, filter, select, n, pagesize)} lists the items under the specified path. It is the analogue of base R's \code{dir}/\code{list.files}. Its arguments are
 \itemize{
 \item \code{path}: The path.
-\item \code{info}: The information to return: either "partial", "name" or "all". If "partial", a data frame is returned containing the name, size, ID and whether the item is a file or folder. If "name", a vector of file/folder names is returned. If "all", a data frame is returned containing \emph{all} the properties for each item (this can be large).
+\item \code{info}: The information to return: either "partial", "name" or "all". If "partial", a data frame is returned containing the name, size, ID and whether the item is a file or folder. If "name", a vector of file/folder names is returned (and any value passed to \code{select} is ignored). If "all", a data frame is returned containing \emph{all} the properties for each item (this can be large). If \code{select} is supplied and \code{info} is "partial" or "all", only the specified columns are included in the returned data frame.
 \item \code{full_names}: Whether to prefix the folder path to the names of the items.
-\item \verb{filter, n}: See 'List methods' below.
+\item \verb{filter, select, n}: See 'List methods' below.
 \item \code{pagesize}: The number of results to return for each call to the REST endpoint. You can try reducing this argument below the default of 1000 if you are experiencing timeouts.
 }
 
 \code{list_files} is a synonym for \code{list_items}.
+
+\code{list_permissions} returns a list of permissions for a drive item.
+
+\code{list_versions} returns a list of drive item versions.
+
+\code{list_activities} returns a list of activities for a drive item.
 
 \code{download} downloads the item to the local machine. If this is a file, it is downloaded; in this case, the \code{dest} argument can be the path to the destination file, or NULL to return the downloaded content in a raw vector. If the item is a folder, all its files are downloaded, including subfolders if the \code{recursive} argument is TRUE.
 
@@ -85,8 +91,9 @@ Uploading and downloading folders can be done in parallel, which can result in s
 \item FALSE: The transfer is done serially
 }
 
-\code{get_item} retrieves the file or folder with the given path, as another object of class \code{ms_drive_item}.
+\code{get_item(expand)} retrieves the file or folder with the given path, as another object of class \code{ms_drive_item}.
 \itemize{
+\item \code{expand}: If \code{expand="fields"} include custom column values associated with the item.
 \item \code{copy} and \code{move} can take the destination location as either a full pathname (in the \code{dest} argument), or a name plus a drive item object (in the \code{dest_folder_item} argument). If the latter is supplied, any path in \code{dest} is ignored with a warning. Note that copying is an \emph{asynchronous} operation, meaning the method returns before the copy is complete.
 }
 

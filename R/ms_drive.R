@@ -62,6 +62,8 @@
 #'
 #' `list_files` is a synonym for `list_items`.
 #'
+#' `list_activities` returns a list of activities for a drive.
+#'
 #' `download_file` and `upload_file` transfer files between the local machine and the drive. For `download_file`, the default destination folder is the current (working) directory of your R session. For `upload_file`, there is no default destination folder; make sure you specify the destination explicitly.
 #'
 #' `download_folder` and `upload_folder` transfer all the files in a folder. If `recursive` is TRUE, all subfolders will also be transferred recursively. The `parallel` argument can have the following values:
@@ -158,6 +160,7 @@
 #' }
 #' @format An R6 object of class `ms_drive`, inheriting from `ms_object`.
 #' @export
+#' @importFrom curl curl_escape
 ms_drive <- R6::R6Class("ms_drive", inherit=ms_object,
 
 public=list(
@@ -172,6 +175,10 @@ public=list(
     list_items=function(path="/", ...)
     {
         private$get_root()$list_items(path, ...)
+    },
+
+    list_activites=function() {
+      self$do_operation("activities")
     },
 
     upload_file=function(src, dest, blocksize=32768000)

@@ -1,3 +1,13 @@
+# Microsoft365R development
+
+- Expose `select` argument for `ms_drive$list_items()` method (ignored when `info="name"`).
+- Expose `simplify` argument for `ms_list$get_column_info()` method.
+- Add `ms_list$create_link()` method for creating a shared link to a list item.
+- Add `ms_list$create_column()` method.
+- Add `ms_site$get_pages()` method (#190)
+- Add `ms_site$get_analytics()`, `ms_site$list_permissions()`, and `ms_site$list_content_types()` methods. (#209)
+- Add `ms_drive$list_activities()` (#209)
+
 # Microsoft365R 2.4.1
 
 ## OneDrive/SharePoint
@@ -17,6 +27,7 @@
 
 ## Other
 
+- Add Eli Pousson to contributors.
 - Remove references to the Microsoft365 CLI, as this no longer has a multi-tenant app registration and hence cannot be used for authentication. This means you'll have to either allow the Microsoft365R app ID within your tenant or create your own app registration (both of which will require Azure admin access). (#215)
 
 

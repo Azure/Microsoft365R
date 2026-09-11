@@ -27,6 +27,7 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0  # required for mirroring, see https://stackoverflow.com/a/64272409/474349
+          persist-credentials: false
 
       - name: Copy to Cloudyr
         if: github.repository_owner == 'Azure' && runner.os == 'Linux' && github.ref == 'refs/heads/master'
@@ -35,8 +36,6 @@ jobs:
         # git config hack required, see https://stackoverflow.com/q/64270867/474349
         run: |
           export CLOUDYR_REPO=$(echo $GITHUB_REPOSITORY | sed "s/Azure/cloudyr/")
-          git config -l | grep 'http\..*\.extraheader' | cut -d= -f1 | \
-            xargs -L1 git config --unset-all
           git push --prune https://token:$token@github.com/${CLOUDYR_REPO}.git +refs/remotes/origin/*:refs/heads/* +refs/tags/*:refs/tags/*
 
       - uses: r-lib/actions/setup-r@465b7d8e732ca3921382b1674c59bada9cbf3399 # v2.13.0

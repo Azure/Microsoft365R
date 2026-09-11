@@ -40,6 +40,7 @@ Class representing an Outlook mail message. The one class represents both sent a
 \item \code{remove_attachment(attachment_name=NULL, attachment_id=NULL, confirm=TRUE)}: Removes an attachment from the email. By default, ask for confirmation first.
 \item \code{download_attachment(attachment_name=NULL, attachment_id=NULL, ...)}: Downloads an attachment. This is only supported for file attachments (not URLs).
 \item \code{send()}: Sends an email.  See 'Sending, replying and forwarding'.
+\item \code{send_deferred(when, tz=Sys.timezone())}: Sends an email at a later time. The \code{when} argument can be a POSIXct object or a character string that can be coerced to one. The \code{tz} argument is only used if \code{when} is not a POSIXct object.
 \item \code{create_reply(comment="", send_now=FALSE)}: Replies to the sender of an email.
 \item \code{create_reply_all(comment="", send_now=FALSE)}: Replies to the sender and all recipients of an email.
 \item \code{create_forward(comment="", to=NULL, cc=NULL, bcc=NULL, send_now=FALSE)}: Forwards the email to other recipients.

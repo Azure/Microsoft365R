@@ -26,6 +26,7 @@
 #' - `remove_attachment(attachment_name=NULL, attachment_id=NULL, confirm=TRUE)`: Removes an attachment from the email. By default, ask for confirmation first.
 #' - `download_attachment(attachment_name=NULL, attachment_id=NULL, ...)`: Downloads an attachment. This is only supported for file attachments (not URLs).
 #' - `send()`: Sends an email.  See 'Sending, replying and forwarding'.
+#' - `send_deferred(when, tz=Sys.timezone())`: Sends an email at a later time. The `when` argument can be a POSIXct object or a character string that can be coerced to one. The `tz` argument is only used if `when` is not a POSIXct object.
 #' - `create_reply(comment="", send_now=FALSE)`: Replies to the sender of an email.
 #' - `create_reply_all(comment="", send_now=FALSE)`: Replies to the sender and all recipients of an email.
 #' - `create_forward(comment="", to=NULL, cc=NULL, bcc=NULL, send_now=FALSE)`: Forwards the email to other recipients.
@@ -340,6 +341,24 @@ public=list(
     {
         self$do_operation("send", http_verb="POST")
         self$sync_fields()
+    },
+
+    send_deferred=function(when, tz=Sys.timezone())
+    {
+        if(!inherits(when, "POSIXct"))
+        {
+            when <- tryCatch(
+                as.POSIXct(when, tz=tz),
+                error=function(e) NA
+            )
+        }
+        if(is.na(when))
+            stop("Invalid date/time for deferred send", call.=FALSE)
+
+        utc_time <- format(when, tz="UTC", format="%Y-%m-%dT%H:%M:%S")
+        prop <- list(list(id="SystemTime 0x3FEF", value=utc_time))
+        self$update(singleValueExtendedProperties=prop)
+        self$send()
     },
 
     create_reply=function(comment="", send_now=FALSE)

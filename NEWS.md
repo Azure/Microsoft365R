@@ -6,6 +6,10 @@
 - Allow downloading SPSS, SAS and Stata files to a data frame in the `ms_drive_item$load_dataframe()` method. This requires the haven package to be installed. Thanks to @sofisinozich for the PR.
 - Fix a bug when downloading files recursively with `parallel=TRUE` (#228)
 
+## Outlook
+
+- Add the ability to send emails with deferred delivery using the `send_deferred()` method of `ms_outlook_email`. Thanks to Kristof Meers (@kmeers-kuleuven) for the PR.
+
 
 # Microsoft365R 2.4.1
 

@@ -157,7 +157,7 @@ See the examples below, and also the vignette "Using Microsoft365R in a Shiny ap
 
 \subsection{Clearing the cache}{
 
-Deleting your cached credentials is a way of rebooting the authentication process, if you are repeatedly encountering errors. To do this, call \code{\link[AzureAuth:get_azure_token]{AzureAuth::clean_token_directory}}, then try logging in again. You may also need to clear your browser's cookies, if you are authenticating interactively.
+Deleting your cached credentials is a way of rebooting the authentication process, if you are repeatedly encountering errors. To do this, call \code{\link[AzureAuth:clean_token_directory]{AzureAuth::clean_token_directory}}, then try logging in again. You may also need to clear your browser's cookies, if you are authenticating interactively.
 }
 }
 \examples{

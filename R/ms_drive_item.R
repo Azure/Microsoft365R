@@ -401,7 +401,7 @@ public=list(
 
                 # recursive call is done serially
                 if(recursive) for(d in dirs)
-                    self$get_item(d)$download(file.path(dest, d), overwrite=overwrite,
+                    self$get_item(d)$download(file.path(dest, d), overwrite=overwrite, recursive=recursive,
                                               parallel=parallel)
             }
             else if(isFALSE(parallel))

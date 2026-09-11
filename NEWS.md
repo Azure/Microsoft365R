@@ -1,3 +1,9 @@
+# Microsoft365R 2.5.0
+
+## SharePoint
+
+- Add the `ms_list_item$update_fields()` method for updating the list _data_ (column values) for a list item in Microsoft Graph.
+
 # Microsoft365R 2.4.1
 
 ## OneDrive/SharePoint

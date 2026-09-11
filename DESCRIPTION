@@ -35,6 +35,7 @@ Suggests:
     blastula,
     emayili,
     readr,
-    readxl
+    readxl,
+    haven
 Roxygen: list(markdown=TRUE, r6=FALSE)
-RoxygenNote: 7.2.1
+RoxygenNote: 7.3.3

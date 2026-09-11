@@ -11,7 +11,8 @@
 #' @section Methods:
 #' - `new(...)`: Initialize a new object. Do not call this directly; see 'Initialization' below.
 #' - `delete(confirm=TRUE)`: Delete this item. By default, ask for confirmation first.
-#' - `update(...)`: Update the item's properties (metadata) in Microsoft Graph. To update the list _data_, update the `fields` property. See the examples below.
+#' - `update(...)`: Update the item's properties (metadata) in Microsoft Graph.
+#' - `update_fields(...)`: Update the list _data_ (column values) for this item in Microsoft Graph.
 #' - `do_operation(...)`: Carry out an arbitrary operation on the item.
 #' - `sync_fields()`: Synchronise the R object with the item data and metadata in Microsoft Graph.
 #'
@@ -34,10 +35,10 @@
 #'
 #' item <- lst_items[[1]]
 #'
-#' item$update(fields=list(firstname="Mary"))
+#' item$update_fields(firstname="Mary")
 #'
 #' # item data (plus some metadata mixed in)
-#' item$properties$fields
+#' item$properties
 #'
 #' item$delete()
 #'
@@ -50,6 +51,12 @@ public=list(
 
     site_id=NULL,
     list_id=NULL,
+
+    update_fields=function(...)
+    {
+        self$do_operation("fields", body=..., http_verb="PATCH")
+        self$sync_fields()
+    },
 
     initialize=function(token, tenant=NULL, properties=NULL, site_id=NULL, list_id=NULL)
     {

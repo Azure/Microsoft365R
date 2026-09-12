@@ -183,7 +183,16 @@ add_user_methods <- function()
     {
         lst <- private$make_basic_list("followedSites", filter, n)
         if(!is.null(n))
-            lapply(lst, function(site) site$sync_fields())  # result from endpoint is incomplete
+            lapply(lst, function(site)
+            {
+                # result from endpoint is incomplete, so get full site properties
+                # must use server URL to avoid stale URLs (#217), rather than calling
+                # do_operation() method on the site object, which uses the site ID
+                parsed_url <- httr::parse_url(site$properties$webUrl)
+                op <- sprintf("%s/%s:/%s", private$api_type, parsed_url$hostname, parsed_url$path)
+                site$properties <- call_graph_endpoint(self$token, op)
+                site
+            })
         else lst
     })
 

@@ -5,6 +5,7 @@
 - Add the `ms_list_item$update_fields()` method for updating the list _data_ (column values) for a list item in Microsoft Graph.
 - Allow downloading SPSS, SAS and Stata files to a data frame in the `ms_drive_item$load_dataframe()` method. This requires the haven package to be installed. Thanks to @sofisinozich for the PR.
 - Fix a bug when downloading files recursively with `parallel=TRUE` (#228)
+- Fix a bug when listing SharePoint sites with stale side IDs (#217)
 
 ## Outlook
 
